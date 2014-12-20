@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Machine>GOD</Machine>
+    <WindowsUser>James Martin</WindowsUser>
+    <TargetPlatformIdentifier>WindowsPhoneApp</TargetPlatformIdentifier>
+    <SolutionConfiguration>Debug|x86</SolutionConfiguration>
+    <PackageArchitecture>x86</PackageArchitecture>
+    <PackageIdentityName>acb8011a-53b4-4ac1-8831-a9df3d1157b7</PackageIdentityName>
+    <IntermediateOutputPath>C:\personalwork\WPTelnet\wptdSVS\HostApp\obj\x86\Debug\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppXManifest Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\AppxManifest.xml">
+      <PackagePath>AppxManifest.xml</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppXManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\HostApp.exe">
+      <PackagePath>HostApp.exe</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\Assets\Logo.scale-240.png">
+      <PackagePath>Assets\Logo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\Assets\SmallLogo.scale-240.png">
+      <PackagePath>Assets\SmallLogo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\Assets\SplashScreen.scale-240.png">
+      <PackagePath>Assets\SplashScreen.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\Assets\Square71x71Logo.scale-240.png">
+      <PackagePath>Assets\Square71x71Logo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\Assets\StoreLogo.scale-240.png">
+      <PackagePath>Assets\StoreLogo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\Assets\WideLogo.scale-240.png">
+      <PackagePath>Assets\WideLogo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\StoreManifest.xml">
+      <PackagePath>StoreManifest.xml</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\App.xbf">
+      <PackagePath>App.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\ChooseDestination.xbf">
+      <PackagePath>ChooseDestination.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\ChooseSourceApp.xbf">
+      <PackagePath>ChooseSourceApp.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\CleanupDestination.xbf">
+      <PackagePath>CleanupDestination.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\DoneScreen.xbf">
+      <PackagePath>DoneScreen.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\MainPage.xbf">
+      <PackagePath>MainPage.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\ShowManifest.xbf">
+      <PackagePath>ShowManifest.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\Welcome.xbf">
+      <PackagePath>Welcome.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\HostApp.xr.xml">
+      <PackagePath>HostApp.xr.xml</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\personalwork\WPTelnet\wptdSVS\HostApp\bin\x86\Debug\resources.pri">
+      <PackagePath>resources.pri</PackagePath>
+    </AppxPackagedFile>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+</Project>

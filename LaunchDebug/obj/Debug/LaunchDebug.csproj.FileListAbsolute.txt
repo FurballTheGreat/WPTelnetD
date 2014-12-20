@@ -1,0 +1,7 @@
+C:\personalwork\WPTelnet\wptdSVS\LaunchDebug\bin\Debug\LaunchDebug.exe.config
+C:\personalwork\WPTelnet\wptdSVS\LaunchDebug\bin\Debug\wptd.exe
+C:\personalwork\WPTelnet\wptdSVS\LaunchDebug\bin\Debug\LaunchDebug.exe
+C:\personalwork\WPTelnet\wptdSVS\LaunchDebug\bin\Debug\LaunchDebug.pdb
+C:\personalwork\WPTelnet\wptdSVS\LaunchDebug\obj\Debug\LaunchDebug.csprojResolveAssemblyReference.cache
+C:\personalwork\WPTelnet\wptdSVS\LaunchDebug\obj\Debug\LaunchDebug.exe
+C:\personalwork\WPTelnet\wptdSVS\LaunchDebug\obj\Debug\LaunchDebug.pdb

@@ -1,0 +1,1 @@
+C:\personalwork\WPTelnet\wptdSVS\HostApp\HostApp.csproj;x86

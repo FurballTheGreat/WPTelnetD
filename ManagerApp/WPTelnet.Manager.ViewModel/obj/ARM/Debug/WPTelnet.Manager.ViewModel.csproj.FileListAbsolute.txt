@@ -1,0 +1,11 @@
+C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\WPTelnet.Manager.ViewModel.dll
+C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\WPTelnet.Manager.ViewModel.pdb
+C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\CSDDiagRT.winmd
+C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\DevProgram.winmd
+C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\DiagDebugLogWinPRT.winmd
+C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\RegistryUtils.winmd
+C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\RegistryWPRT.winmd
+C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\CSDDiagRT.pdb
+C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\obj\ARM\Debug\WPTelnet.Manager.ViewModel.csprojResolveAssemblyReference.cache
+C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\obj\ARM\Debug\WPTelnet.Manager.ViewModel.dll
+C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\obj\ARM\Debug\WPTelnet.Manager.ViewModel.pdb

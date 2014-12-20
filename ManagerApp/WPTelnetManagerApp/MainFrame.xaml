@@ -1,0 +1,128 @@
+﻿<UserControl x:Class="WPTelnetManager.MainFrame"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:phoneDirect3DXamlAppInterop="clr-namespace:WPTelnetManager"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    mc:Ignorable="d"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    d:DesignHeight="480" d:DesignWidth="480">
+
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+        <!--Pivot Control-->
+        <phone:Pivot Title="WP TelnetD Launch App">
+            <!--Pivot item one-->
+            <phone:PivotItem Header="Standalone">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource PhoneTextNormalStyle}" TextWrapping="Wrap">
+                           This screen lets you launch a standalone instance (wptd.exe) of the Telnet daemon. It will launch 
+                            as a process within the chamber in which this app runs. This instance will listen on port
+                            27249.
+                            <LineBreak/>
+                          
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource PhoneTextNormalStyle}" TextWrapping="Wrap">
+                        If this chamber does not have the nessecary rights to listen on a port for connections then
+                            the call to CreateProcess will succeed but you will not be able to connect.
+                             <LineBreak/>
+                           
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource PhoneTextNormalStyle}" TextWrapping="Wrap">
+                             You are currently listening on the following IP addresses:
+                            <LineBreak/>
+                        </TextBlock>
+                        <ItemsControl ItemsSource="{Binding IpAddresses}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Style="{StaticResource PhoneTextAccentStyle}" Text="{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Style="{StaticResource PhoneTextNormalStyle}" TextWrapping="Wrap">
+                             <LineBreak/>
+                            Result from calling CreateProcess:-
+                            <LineBreak/>
+                        </TextBlock>
+
+                        <TextBlock Style="{StaticResource  PhoneTextAccentStyle}" TextWrapping="Wrap" Text="{Binding Status}">
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                        <Button Width="150" Command="{Binding LaunchCommand}">Launch</Button>
+                    </StackPanel>
+                </Grid>
+                
+            </phone:PivotItem>
+
+            <!--Pivot item two-->
+            <phone:PivotItem Header="Inprocess">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource PhoneTextNormalStyle}" TextWrapping="Wrap">
+                            This screen lets you launch an instance of the TelnetD running within this apps process.
+                            You will have the rights that this app has but will also loose your connection when this app
+                            is closed.
+                            <LineBreak/>
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center">Port:</TextBlock>
+                            <TextBox Text="{Binding Port,Mode=TwoWay}"
+                                     HorizontalAlignment="Left"
+                                     Width="150"/>
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource PhoneTextNormalStyle}" TextWrapping="Wrap">
+                             <LineBreak/>
+                            Current Status:-
+                            <LineBreak/>
+                        </TextBlock>
+
+                        <TextBlock Style="{StaticResource  PhoneTextAccentStyle}" TextWrapping="Wrap" Text="{Binding InProcessStatus}">
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                        <Button Width="150" Command="{Binding LaunchListenInProcess}">Launch</Button>
+                    </StackPanel>
+                </Grid>
+            </phone:PivotItem>
+            <phone:PivotItem Header="Installations">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource PhoneTextNormalStyle}" TextWrapping="Wrap">
+                            This screen shows your installed apps if you have the appropriate rights.<LineBreak/>
+                        </TextBlock>
+                        <Button Command="{Binding Installations.InstallCommand}"></Button>
+                        <TextBlock Style="{StaticResource PhoneTextNormalStyle}" TextWrapping="Wrap">
+                             <LineBreak/>
+                            Current Status:-
+                            <LineBreak/>
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource  PhoneTextAccentStyle}" TextWrapping="Wrap" Text="{Binding Installations.Status}">
+                        </TextBlock>
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding Installations}" Grid.Row="1">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource  PhoneTextAccentStyle}" TextWrapping="Wrap" Text="{Binding Name}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource  PhoneTextNormalStyle}" TextWrapping="Wrap" Text="{Binding InstallDate}"/>
+                                        <TextBlock Style="{StaticResource  PhoneTextNormalStyle}" TextWrapping="Wrap" Text="{Binding Path}"/>
+
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </phone:PivotItem>
+        </phone:Pivot>
+    </Grid>  
+</UserControl>

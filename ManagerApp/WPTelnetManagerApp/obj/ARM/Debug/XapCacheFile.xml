@@ -1,0 +1,26 @@
+﻿<xapCache source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\Bin\ARM\Debug\WPTelnetD.xap" wasSigned="False" wasTritonized="False" certificateThumbprint="" TimeStampUrl="" signKeyFile="" signKeyPassword="" lastWriteTime="20/12/2014 21:55:03">
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\obj\ARM\Debug\WPTelnetManagerApp.dll" archivePath="WPTelnetManagerApp.dll" lastWriteTime="20/12/2014 21:54:58" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\SplashScreenImage.jpg" archivePath="SplashScreenImage.jpg" lastWriteTime="19/12/2014 23:47:29" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\Assets\AlignmentGrid.png" archivePath="Assets\AlignmentGrid.png" lastWriteTime="19/12/2014 23:47:29" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\Assets\Tiles\FlipCycleTileLarge.png" archivePath="Assets\Tiles\FlipCycleTileLarge.png" lastWriteTime="19/12/2014 23:47:29" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\Assets\Tiles\FlipCycleTileSmall.png" archivePath="Assets\Tiles\FlipCycleTileSmall.png" lastWriteTime="19/12/2014 23:47:29" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\Assets\Tiles\IconicTileMediumLarge.png" archivePath="Assets\Tiles\IconicTileMediumLarge.png" lastWriteTime="19/12/2014 23:47:29" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\Assets\Tiles\IconicTileSmall.png" archivePath="Assets\Tiles\IconicTileSmall.png" lastWriteTime="19/12/2014 23:47:29" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\wptd.exe" archivePath="wptd.exe" lastWriteTime="20/12/2014 14:31:09" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\Bin\ARM\Debug\AppManifest.xaml" archivePath="AppManifest.xaml" lastWriteTime="20/12/2014 14:31:21" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\Bin\ARM\Debug\Assets\ApplicationIcon.png" archivePath="Assets\ApplicationIcon.png" lastWriteTime="19/12/2014 23:47:29" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\Bin\ARM\Debug\Assets\Tiles\FlipCycleTileMedium.png" archivePath="Assets\Tiles\FlipCycleTileMedium.png" lastWriteTime="19/12/2014 23:47:29" />
+  <file source="C:\Program Files (x86)\Microsoft SDKs\Windows Phone\v8.0\Libraries\Microsoft.Phone.Controls.dll" archivePath="Microsoft.Phone.Controls.dll" lastWriteTime="01/01/2013 18:57:00" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\WPTelnet.Manager.ViewModel.dll" archivePath="WPTelnet.Manager.ViewModel.dll" lastWriteTime="20/12/2014 21:54:57" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\DevProgram.winmd" archivePath="DevProgram.winmd" lastWriteTime="20/12/2014 21:53:22" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\RegistryUtils.winmd" archivePath="RegistryUtils.winmd" lastWriteTime="20/12/2014 21:53:22" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\RegistryWPRT.winmd" archivePath="RegistryWPRT.winmd" lastWriteTime="20/12/2014 21:53:22" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\DiagDebugLogWinPRT.winmd" archivePath="DiagDebugLogWinPRT.winmd" lastWriteTime="20/12/2014 21:53:22" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnet.Manager.ViewModel\Bin\ARM\Debug\CSDDiagRT.winmd" archivePath="CSDDiagRT.winmd" lastWriteTime="20/12/2014 21:54:57" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ARM\Debug\CSDDiagRT\CSDDiagRT.dll" archivePath="CSDDiagRT.dll" lastWriteTime="20/12/2014 21:54:57" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ARM\Debug\DevProgram\DevProgram.dll" archivePath="DevProgram.dll" lastWriteTime="20/12/2014 21:53:22" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ARM\Debug\DiagDebugLogWinPRT\DiagDebugLogWinPRT.dll" archivePath="DiagDebugLogWinPRT.dll" lastWriteTime="20/12/2014 21:53:22" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ARM\Debug\RegistryUtils\RegistryUtils.dll" archivePath="RegistryUtils.dll" lastWriteTime="20/12/2014 21:53:22" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ARM\Debug\RegistryWPRT\RegistryWPRT.dll" archivePath="RegistryWPRT.dll" lastWriteTime="20/12/2014 21:53:22" />
+  <file source="C:\personalwork\WPTelnet\wptdSVS\ManagerApp\WPTelnetManagerApp\Bin\ARM\Debug\Properties\WMAppManifest.xml" archivePath="WMAppManifest.xml" lastWriteTime="20/12/2014 14:31:25" />
+</xapCache>

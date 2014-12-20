@@ -1,0 +1,12 @@
+﻿Build started 20/12/2014 21:54:56.
+     1>Project "C:\personalwork\WPTelnet\wptdSVS\ManagerApp\CSDDiagRT\CSDDiagRT.vcxproj" on node 2 (Build target(s)).
+     1>Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\link.exe /ERRORREPORT:PROMPT /OUT:"C:\personalwork\WPTelnet\wptdSVS\ARM\Debug\CSDDiagRT\CSDDiagRT.dll" /INCREMENTAL /NOLOGO WS2_32.lib iphlpapi.lib wininet.lib Kernel32Legacy.lib kernelbase.lib WindowsPhoneCore.lib RuntimeObject.lib PhoneAppModelHost.lib minuser.lib rpcrt4.lib advapi32Legacy.lib ShellChromeAPI.LIB crypt32.lib DMProcessConfigXMLFiltered.lib CommsAPIs.lib WindowsPhoneCore.lib RuntimeObject.lib PhoneAppModelHost.lib /NODEFAULTLIB:ole32.lib /MANIFEST:NO /DEBUG /PDB:"C:\personalwork\WPTelnet\wptdSVS\ARM\Debug\CSDDiagRT\CSDDiagRT.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /WINMD /WINMDFILE:"C:\personalwork\WPTelnet\wptdSVS\ARM\Debug\CSDDiagRT\CSDDiagRT.winmd" /DYNAMICBASE /NXCOMPAT /MACHINE:ARM /DLL ARM\Debug\pch.obj
+         ARM\Debug\SystemAPIs.obj
+         C:\personalwork\WPTelnet\wptdSVS\ARM\Debug\WPTelnetDLib\WPTelnetDLib.lib
+         CSDDiagRT.vcxproj -> C:\personalwork\WPTelnet\wptdSVS\ARM\Debug\CSDDiagRT\CSDDiagRT.dll
+     1>Done Building Project "C:\personalwork\WPTelnet\wptdSVS\ManagerApp\CSDDiagRT\CSDDiagRT.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.22
