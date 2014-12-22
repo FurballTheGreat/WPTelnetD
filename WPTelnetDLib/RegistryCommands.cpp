@@ -90,12 +90,13 @@ void RegCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmd
 	commands.push_back((BaseCommand*)new RegRootCommand(context));
 	commands.push_back((BaseCommand*)new FindRegCommand(context));
 	commands.push_back((BaseCommand*)new FindRegWriteableCommand(context));
-	commands.push_back((BaseCommand*)new RegStrCommand(context));
-	commands.push_back((BaseCommand*)new RegDwordCommand(context));
+	commands.push_back((BaseCommand*)new RegSetCommand(context));
 	commands.push_back((BaseCommand*)new RegDelValCommand(context));
 	commands.push_back((BaseCommand*)new RegDeleteKeyCommand(context));
 	commands.push_back((BaseCommand*)new RegCreateKeyCommand(context));
 	commands.push_back((BaseCommand*)new RegDeleteTreeCommand(context));
+	commands.push_back((BaseCommand*)new RegExportCommand(context));
+	commands.push_back((BaseCommand*)new RegImportCommand(context));
 	RegProcessHost host(context);
 	pConnection->WriteLine("Registry Editor - Type HELP for assistance.");
 	CommandProcessor processor = CommandProcessor(commands,&host);
@@ -139,20 +140,21 @@ void PrintRegValueLine(Connection* pConnection, string pValueName,DWORD pValType
 		pConnection->Write(" link '%s'", Temp);
 		break;
 	case REG_MULTI_SZ:
-		pConnection->Write(" multiple strings: ");
+		pConnection->Write(" multi");
 
 
 		while (strlen(valPtr) > 0) {
-			pConnection->Write("  %d: %s", i++, valPtr);
+			pConnection->Write("  \"%s\"", valPtr);
 			valPtr += strlen((const char*)valPtr);
+			valPtr++;
 		}
-		pConnection->Write(" end of strings");
+		
 		break;
 	case REG_QWORD:
-		pConnection->Write(" dword %llx", *(long long*)pValBuf);
+		pConnection->Write(" qword %llx", *(long long*)pValBuf);
 		break;
 	case REG_SZ:
-		pConnection->Write(" str '%s'", pValBuf);
+		pConnection->Write(" string '%s'", pValBuf);
 		break;
 	}
 	pConnection->WriteLine("");
@@ -511,59 +513,154 @@ string FindRegWriteableCommand::GetName() {
 	return "writeable";
 }
 
-
-RegDwordCommand::RegDwordCommand(RegContext *pContext) {
+RegSetCommand::RegSetCommand(RegContext *pContext) {
 	_context = pContext;
 }
 
-void RegDwordCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
-	if (pCmdLine->GetArgs().size() < 3)
+typedef struct {
+	string name;
+	DWORD type;
+} RegValueType;
+
+void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+
+	if (pCmdLine->GetArgs().size() < 4)
 	{
-		pConnection->WriteLine("SYNTAX: dword name numvalue");
+		pConnection->WriteLine("SYNTAX: set <value name> <value type> <value>");
+		pConnection->WriteLine("The following are the value types supported by this command.");
+		pConnection->WriteLine("");
+		pConnection->WriteLine("dword   - A hex or decimal dword value");
+		pConnection->WriteLine("   Example: set testvalue dword  1");
+		pConnection->WriteLine("			set testvalue dword 0xFFAA3311");
+		pConnection->WriteLine("");
+		pConnection->WriteLine("qword   - A hex or decimal qword value");
+		pConnection->WriteLine("   Example: set testvalue qword  1");
+		pConnection->WriteLine("			set testvalue qword 0x12345678FFAA3311");
+		pConnection->WriteLine("");
+		pConnection->WriteLine("string  - A string");
+		pConnection->WriteLine("   Example: set teststr string  \"Hello\"");
+		pConnection->WriteLine("");
+		pConnection->WriteLine("expand  - A string");
+		pConnection->WriteLine("   Example: set testexp expand  \"%%PATH%%;c:\\test\"");
+		pConnection->WriteLine("");
+		pConnection->WriteLine("multi   - One or more string values");
+		pConnection->WriteLine("   Example: set testmulti multi  \"str1\" \"str2\" \"str3\" \"str4\"");
+		pConnection->WriteLine("");
+		pConnection->WriteLine("binary  - The value parameter is a hex or decimal dword value");
+		pConnection->WriteLine("   Example: set testbin binary \"0F A4 5F 12 0A\"");
+		pConnection->WriteLine("");		
 		return;
 	}
+
+	RegValueType type[] = { 
+			{ "dword", REG_DWORD }, 
+			{ "qword", REG_QWORD }, 
+			{ "string", REG_SZ }, 
+			{ "expand", REG_EXPAND_SZ }, 
+			{ "multi", REG_MULTI_SZ },
+			{ "binary", REG_BINARY } };
 	
-	int index = 0;
-	char Temp[1024];
-	DWORD value = atoi(pCmdLine->GetArgs().at(2).c_str());
-	DWORD valSize = sizeof(DWORD);
-	DWORD error = RegSetValueExA(_context->currentKey, pCmdLine->GetArgs().at(1).c_str(), 0, REG_DWORD, (BYTE*)&value, valSize);
-	if (error != ERROR_SUCCESS){
-		pConnection->WriteLine("Failed to write to registry %d", error);
-		return;
-	}
-}
 
-string RegDwordCommand::GetName() {
-	return "dword";
-}
-
-
-RegStrCommand::RegStrCommand(RegContext *pContext) {
-	_context = pContext;
-}
-
-void RegStrCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
-	if (pCmdLine->GetArgs().size() < 3)
+	string valueName = pCmdLine->GetArgs().at(1);
+	string valueType = pCmdLine->GetArgs().at(2);
+	string value = pCmdLine->GetArgs().at(3);
+	DWORD valueTypeCode = -1;
+	for (int i = 0; i < 6;i++)
+		if (type[i].name == valueType)
+		{
+			valueTypeCode = type[i].type;
+			break;
+		}
+	if (valueTypeCode == -1)
 	{
-		pConnection->WriteLine("SYNTAX: string name numvalue");
+		pConnection->WriteLine("Invalid Value Type");
 		return;
 	}
+	DWORD error = ERROR_SUCCESS;
+	DWORD valSize = 0;
+	DWORD dwordValue;
+	LONGLONG qwordValue;
+	char *src;
+	char *mbuffer;
+	char *curPtr;
+	BYTE *buffer;
+	switch (valueTypeCode) {
+		case REG_DWORD:			
+			dwordValue = strtol(value.c_str(), NULL, 0);
+			valSize = sizeof(DWORD);
+			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_DWORD, (BYTE*)&dwordValue, valSize);
+			break;
+		case REG_QWORD:
+			qwordValue = _strtoi64(value.c_str(), NULL, 0);
+			valSize = sizeof(LONGLONG);
+			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_QWORD, (BYTE*)&qwordValue, valSize);
+			break;
+		case REG_SZ :			
+			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_SZ, (const BYTE*)value.c_str(), (DWORD)value.length() + 1);
+			break;
+		case REG_EXPAND_SZ:
+			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_EXPAND_SZ, (const BYTE*)value.c_str(), (DWORD)value.length() + 1);
+			break;
+		case REG_MULTI_SZ:
+			for (int i = 3; i < pCmdLine->GetArgs().size(); i++)
+				valSize += (DWORD)pCmdLine->GetArgs().at(i).length() + 1;
 
-	DWORD error;
-
-	int index = 0;
-	char Temp[1024];
-	char *val = strdup(pCmdLine->GetArgs().at(2).c_str());
-	error = RegSetValueExA(_context->currentKey, pCmdLine->GetArgs().at(1).c_str(), 0, REG_SZ, (const BYTE*)val, strlen(val) + 1);
+			valSize++;
+			mbuffer = (char*)malloc(valSize);
+			curPtr = mbuffer;
+			for (int i = 3; i < pCmdLine->GetArgs().size(); i++)
+			{
+				string arg = pCmdLine->GetArgs().at(i);
+				memcpy(curPtr, arg.c_str(), arg.length());
+				curPtr += (DWORD)arg.length();
+				*curPtr = 0;
+				curPtr++;
+			}
+			*curPtr = 0;
+			curPtr++;
+			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_MULTI_SZ, (const BYTE*)mbuffer, valSize);
+			free(mbuffer);
+			break;
+		case REG_BINARY:
+			src = strdup(value.c_str());
+			
+			for (int i = 0; i < (DWORD)value.length(); i++) {
+				switch (i % 3) {
+					case 2:
+						if (src[i] != ' '){
+							pConnection->WriteLine("Incorrect value format");
+							return;
+						}
+						src[i] = 0;
+						break;
+					case 1:
+						valSize++;
+					case 0:
+						if (!((src[i] >= '0' && src[i] <= '9') || (src[i] >= 'A' && src[i] <= 'F') || (src[i] >= 'a' && src[i] <= 'f'))){
+							pConnection->WriteLine("Incorrect value format");
+							return;
+						}
+						break;
+				}
+			}
+			buffer = (BYTE*)malloc(valSize);
+			for (int i = 0; i < (DWORD)value.length(); i += 3){
+				DWORD val = strtol(&src[i], NULL, 16);
+				buffer[i / 3] = (BYTE)val;
+			}
+			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_BINARY, (const BYTE*)buffer, valSize);
+			free(buffer);
+			free(src);
+	}	
+	
 	if (error != ERROR_SUCCESS){
 		pConnection->WriteLine("Failed to write to registry %d", error);
 		return;
 	}
 }
 
-string RegStrCommand::GetName() {
-	return "string";
+string RegSetCommand::GetName() {
+	return "set";
 }
 
 RegDelValCommand::RegDelValCommand(RegContext *pContext) {
@@ -641,6 +738,8 @@ string RegDeleteKeyCommand::GetName() {
 }
 
 
+
+
 RegDeleteTreeCommand::RegDeleteTreeCommand(RegContext *pContext) {
 	_context = pContext;
 }
@@ -666,6 +765,57 @@ string RegDeleteTreeCommand::GetName() {
 	return "deltree";
 }
 
+RegImportCommand::RegImportCommand(RegContext *pContext) {
+	_context = pContext;
+}
+
+void RegImportCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+	if (pCmdLine->GetArgs().size() < 2)
+	{
+		pConnection->WriteLine("SYNTAX: import <file.reg>");
+		return;
+	}
+	string keyName = pCmdLine->GetArgs().at(1);
+	wstring wideName = wstring(keyName.begin(), keyName.end());
+	HKEY resultKey;
+	DWORD error = RegDeleteKeyExW(_context->currentKey, wideName.c_str(), 0, NULL);
+	RegCloseKey(resultKey);
+	if (error != ERROR_SUCCESS){
+		pConnection->WriteLine("Failed to delete key: %d", error);
+		return;
+	}
+}
+
+string RegImportCommand::GetName() {
+	return "import";
+}
+
+RegExportCommand::RegExportCommand(RegContext *pContext) {
+	_context = pContext;
+}
+
+void RegExportCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+	if (pCmdLine->GetArgs().size() < 2)
+	{
+		pConnection->WriteLine("SYNTAX: export <file.reg>");
+		return;
+	}
+	string keyName = pCmdLine->GetArgs().at(1);
+	wstring wideName = wstring(keyName.begin(), keyName.end());
+	HKEY resultKey;
+	DWORD error = RegSaveKeyW(_context->currentKey, wideName.c_str(), NULL);
+	RegCloseKey(resultKey);
+	if (error != ERROR_SUCCESS){
+		pConnection->WriteLine("Failed to export key: %d", error);
+		return;
+	}
+}
+
+string RegExportCommand::GetName() {
+	return "export";
+}
+
+
 
 
 RegHelpCommand::RegHelpCommand(RegContext *pContext) {
@@ -681,8 +831,7 @@ void RegHelpCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 	pConnection->WriteLine("root HKLM|HKCU|HKU|HKCR|HKCC|HKPD - Sets the root key");
 	pConnection->WriteLine("find [str] - Finds a string in the current key and subkeys");
 	pConnection->WriteLine("writeable - Lists all writable entries in current key and subkeys");
-	pConnection->WriteLine("dword [valuename] [decimalvalue] - Sets a dword values");
-	pConnection->WriteLine("string [valuename] [string] - Sets a string");
+	pConnection->WriteLine("set [valuename] [valueType] [value] - Set a value");	
 	pConnection->WriteLine("delval [valuename] - Deletes a value");
 	pConnection->WriteLine("delkey [subkey] - Deletes a subkey");
 	pConnection->WriteLine("deltree [subkey] - Deletes a subkey and all its children");

@@ -87,18 +87,10 @@ private:
 
 
 
-class RegDwordCommand : BaseCommand {
-public:
-	RegDwordCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
-private:
-	RegContext *_context;
-};
 
-class RegStrCommand : BaseCommand {
+class RegSetCommand : BaseCommand {
 public:
-	RegStrCommand(RegContext *pContext);
+	RegSetCommand(RegContext *pContext);
 	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
 	string GetName();
 private:
@@ -126,6 +118,24 @@ private:
 class RegDeleteTreeCommand : BaseCommand {
 public:
 	RegDeleteTreeCommand(RegContext *pContext);
+	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
+	string GetName();
+private:
+	RegContext *_context;
+};
+
+class RegImportCommand : BaseCommand {
+public:
+	RegImportCommand(RegContext *pContext);
+	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
+	string GetName();
+private:
+	RegContext *_context;
+};
+
+class RegExportCommand : BaseCommand {
+public:
+	RegExportCommand(RegContext *pContext);
 	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
 	string GetName();
 private:

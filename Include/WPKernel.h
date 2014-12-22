@@ -472,6 +472,15 @@ _Reserved_ DWORD Reserved
 );
 
 extern "C" WINADVAPI
+LSTATUS
+APIENTRY
+RegSaveKeyW(
+_In_ HKEY hKey,
+_In_ LPCWSTR lpFile,
+_In_opt_ CONST LPSECURITY_ATTRIBUTES lpSecurityAttributes
+);
+
+extern "C" WINADVAPI
 WINADVAPI
 LSTATUS
 APIENTRY
