@@ -68,6 +68,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LibraryPath>C:\personalwork\WPTelnet\WPTelnetManagerApp\WPTelnetManagerApp\NativeLib\ARM;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <IncludePath>$(SolutionDir)WPTelnetDLib;$(SolutionDir)Include;$(IncludePath)</IncludePath>
