@@ -106,6 +106,10 @@
       <Project>{42bbd833-3425-482f-b292-bd081afed647}</Project>
       <Name>DiagDebugLogWinPRT</Name>
     </ProjectReference>
+    <ProjectReference Include="..\HTCDebugLogWinPRT\HTCDebugLogWinPRT.vcxproj">
+      <Project>{7b0d4736-de34-436b-be09-953cd7930784}</Project>
+      <Name>HTCDebugLogWinPRT</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RegistryUtils\RegistryUtils.vcxproj">
       <Project>{782d5b6c-3ccb-40be-87f5-543d2c0e0ab1}</Project>
       <Name>RegistryUtils</Name>

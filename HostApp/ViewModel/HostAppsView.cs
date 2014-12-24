@@ -53,6 +53,11 @@ namespace HostApp.ViewModel
                 Name = "DiagnosticTool_Sprint", 
                 Guid = new Guid("e69a2877-59b8-43ed-898d-554fbc4b8b2b")
             },
+            new HostableApp
+            {
+                Name = "HTC Connection Setup", 
+                Guid = new Guid("5edbdbbc-2ab2-df11-8a2f-00237de2db9e")
+            },
         };
 
         public static string GetAppName(Guid pApp)

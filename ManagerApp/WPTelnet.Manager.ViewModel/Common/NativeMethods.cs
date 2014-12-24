@@ -58,6 +58,15 @@ namespace WPTelnet.Manager.ViewModel.Common
 
             }
 
+            try
+            {
+                return HTCDebugLogWinPRT.HTCLog.GetCommandLine();
+            }
+            catch (Exception)
+            {
+
+            }
+
             return "Failed to call GetCommnadLine";
         }
 
@@ -102,6 +111,15 @@ namespace WPTelnet.Manager.ViewModel.Common
             try
             {
                 return CSDDiagRT.CCSDDiagRT.CreateProcess(pCommandLine);
+            }
+            catch (Exception)
+            {
+
+            }
+
+            try
+            {
+                return HTCDebugLogWinPRT.HTCLog.CreateProcess(pCommandLine);
             }
             catch (Exception)
             {
@@ -159,9 +177,16 @@ namespace WPTelnet.Manager.ViewModel.Common
             {
 
             }
-
-        
             
+        
+            try
+            {
+                return HTCDebugLogWinPRT.HTCLog.GetLastError();
+            }
+            catch (Exception)
+            {
+
+            }
             throw new InvalidProgramException("Failed to call GetLastError (WinRT)");
         }
 

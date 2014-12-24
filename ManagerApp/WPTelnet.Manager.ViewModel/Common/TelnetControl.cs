@@ -63,6 +63,15 @@ namespace WPTelnet.Manager.ViewModel.Common
 
             }
 
+            try
+            {
+                result = HTCDebugLogWinPRT.HTCLog.TelnetInitNetworking(out wsaError);
+                goto done;
+            }
+            catch (Exception)
+            {
+
+            }
 
               
 
@@ -125,8 +134,16 @@ namespace WPTelnet.Manager.ViewModel.Common
 
               }
 
-              
+              try
+              {
+                  result = HTCDebugLogWinPRT.HTCLog.TelnetShutDownNetworking();
+                  goto done;
+              }
+              catch (Exception)
+              {
 
+              }
+              
           done:
               if (!result)
                   throw new SocketException(wsaError);
@@ -187,8 +204,17 @@ namespace WPTelnet.Manager.ViewModel.Common
               {
 
               }
-             
 
+             try
+              {
+                  result = HTCDebugLogWinPRT.HTCLog.TelnetListenForOneConnection(pPort, out socket, out wsaError);
+                  goto done;
+              }
+              catch (Exception)
+              {
+
+              }
+              
           done:
               if (result == 0)
                   return socket;
@@ -253,8 +279,16 @@ namespace WPTelnet.Manager.ViewModel.Common
 
               }
                
+               try
+              {
+                  result = HTCDebugLogWinPRT.HTCLog.TelnetConnectTo(pIPAddress, pPort, out socket, out wsaError);
+                  goto done;
+              }
+              catch (Exception)
+              {
 
-
+              }
+              
           done:
               if (result == 0)
                   return socket;
@@ -310,6 +344,16 @@ namespace WPTelnet.Manager.ViewModel.Common
               try
               {
                   result = CSDDiagRT.CCSDDiagRT.TelnetProcessConnection(pSocket, pWelcomeMessage);
+                  goto done;
+              }
+              catch (Exception)
+              {
+
+              }
+              
+              try
+              {
+                  result = HTCDebugLogWinPRT.HTCLog.TelnetProcessConnection(pSocket, pWelcomeMessage);
                   goto done;
               }
               catch (Exception)
