@@ -1,34 +1,8 @@
-﻿Build started 24/12/2014 11:43:52.
-     1>Project "C:\personalwork\WPTelnet\gitsvs\WPTelnetD\WPTelnetDLib\WPTelnetDLib.vcxproj" on node 2 (Rebuild target(s)).
+﻿Build started 30/12/2014 12:24:57.
+     1>Project "C:\personalwork\WPTelnet\gitsvs\WPTelnetD\WPTelnetDLib\WPTelnetDLib.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\CL.exe /c /AI"C:\Program Files (x86)\Windows Phone Kits\8.0\Windows Metadata" /Zi /nologo /W1 /WX- /Od /Oy- /D _LIB /D PHONE /D WINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"pch.h" /Fp"ARM\Debug\WPTelnetDLib.pch" /Fo"ARM\Debug\\" /Fd"ARM\Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt CertCommands.cpp CommandProcessor.cpp Commands.cpp DirectoryCommands.cpp dllmain.cpp FileCommands.cpp GuiCommands.cpp NetworkCommands.cpp Networking.cpp pch.cpp ProcessCommands.cpp ProcessHost.cpp RegistryCommands.cpp ExperimentalCommands.cpp TcpConnectionTable.cpp TelnetD.cpp UpdConnectionTable.cpp
-         UpdConnectionTable.cpp
-     1>C:\personalwork\WPTelnet\gitsvs\WPTelnetD\Include\WPKernel.h(464): warning C4141: 'dllimport' : used more than once
-     1>C:\personalwork\WPTelnet\gitsvs\WPTelnetD\Include\WPKernel.h(484): warning C4141: 'dllimport' : used more than once
-         TelnetD.cpp
-         TcpConnectionTable.cpp
-         ExperimentalCommands.cpp
-         RegistryCommands.cpp
-     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\registrycommands.cpp(729): warning C4700: uninitialized local variable 'resultKey' used
-     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\registrycommands.cpp(757): warning C4700: uninitialized local variable 'resultKey' used
-     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\registrycommands.cpp(782): warning C4700: uninitialized local variable 'resultKey' used
-     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\registrycommands.cpp(807): warning C4700: uninitialized local variable 'resultKey' used
-         ProcessHost.cpp
-     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\processhost.cpp(62): warning C4715: 'ProcessHost::CreateChildProcess' : not all control paths return a value
-         ProcessCommands.cpp
-         pch.cpp
-         Networking.cpp
-     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\networking.cpp(51): warning C4715: 'Connection::WaitForEnter' : not all control paths return a value
-     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\networking.cpp(126): warning C4715: 'Connection::WriteLastError' : not all control paths return a value
-     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\networking.cpp(162): warning C4715: 'ListenSocket::Start' : not all control paths return a value
-         NetworkCommands.cpp
-         GuiCommands.cpp
-         FileCommands.cpp
-         dllmain.cpp
-         DirectoryCommands.cpp
-         Commands.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\CL.exe /c /AI"C:\Program Files (x86)\Windows Phone Kits\8.0\Windows Metadata" /Zi /nologo /W1 /WX- /Od /Oy- /D _LIB /D PHONE /D WINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"pch.h" /Fp"ARM\Debug\WPTelnetDLib.pch" /Fo"ARM\Debug\\" /Fd"ARM\Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt CommandProcessor.cpp
          CommandProcessor.cpp
-         CertCommands.cpp
        Lib:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\Lib.exe /OUT:"C:\personalwork\WPTelnet\gitsvs\WPTelnetD\ARM\Debug\WPTelnetDLib\WPTelnetDLib.lib" /NOLOGO /MACHINE:ARM ARM\Debug\CertCommands.obj
          ARM\Debug\CommandProcessor.obj
@@ -49,8 +23,8 @@
          ARM\Debug\UpdConnectionTable.obj
      1>pch.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
          WPTelnetDLib.vcxproj -> C:\personalwork\WPTelnet\gitsvs\WPTelnetD\ARM\Debug\WPTelnetDLib\WPTelnetDLib.lib
-     1>Done Building Project "C:\personalwork\WPTelnet\gitsvs\WPTelnetD\WPTelnetDLib\WPTelnetDLib.vcxproj" (Rebuild target(s)).
+     1>Done Building Project "C:\personalwork\WPTelnet\gitsvs\WPTelnetD\WPTelnetDLib\WPTelnetDLib.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:03.71
+Time Elapsed 00:00:00.60

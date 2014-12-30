@@ -98,18 +98,25 @@ void RegCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmd
 	commands.push_back((BaseCommand*)new RegExportCommand(context));
 	commands.push_back((BaseCommand*)new RegImportCommand(context));
 	RegProcessHost host(context);
-	pConnection->WriteLine("Registry Editor - Type HELP for assistance.");
-	CommandProcessor processor = CommandProcessor(commands,&host);
-	
-	processor.PrintPrompt(pConnection);
-	const char* line = pConnection->ReadLine();
+	CommandProcessor processor = CommandProcessor(commands, &host);
+	if (pCmdLine->GetArgs().size() == 1) {
+		pConnection->WriteLine("Registry Editor - Type HELP for assistance.");
+		
 
-	while (line != NULL) {
-		if (processor.ProcessData(pConnection, line)) {
-			
-			break;
+		processor.PrintPrompt(pConnection);
+		const char* line = pConnection->ReadLine();
+
+		while (line != NULL) {
+			if (processor.ProcessData(pConnection, line)) {
+
+				break;
+			}
+			line = pConnection->ReadLine();
 		}
-		line = pConnection->ReadLine();
+	}
+	else {
+		ParsedCommandLine line = pCmdLine->GetParametersAsLine();
+		processor.ProcessCommandLine(pConnection, &line);
 	}
 }
 

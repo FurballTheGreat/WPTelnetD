@@ -5,22 +5,18 @@
 #include<vector>
 using namespace std;
 
-
-
-
 ParsedCommandLine::ParsedCommandLine(string pCommandLine) {		
 	int pos = 0;
 	_arguments = vector<string>();
+	_originalLine = pCommandLine;
 	for (;;) {	
 		bool skip = false;
 		while(pCommandLine[pos]==' ')
 			pos++;
 		if(pCommandLine[pos] == '"') {
-
 			if(pCommandLine[pos+1]=='"') 
 			{
 				pos++;
-
 			} 
 			else {
 				int nextq =  pCommandLine.find('"', pos+1);
@@ -39,7 +35,6 @@ ParsedCommandLine::ParsedCommandLine(string pCommandLine) {
 				}			
 				skip = true;
 			}				
-
 		} 
 
 		if (!skip){
@@ -65,6 +60,18 @@ ParsedCommandLine::ParsedCommandLine(string pCommandLine) {
 string ParsedCommandLine::GetName() {
 	return _command;
 }
+
+string ParsedCommandLine::GetRaw() {
+	return _originalLine;
+}
+
+ParsedCommandLine ParsedCommandLine::GetParametersAsLine(){
+	if (_arguments.size() <= 1)
+		return ParsedCommandLine(_originalLine);
+
+	return ParsedCommandLine(_originalLine.substr(_command.length() + 1, string::npos));
+}
+
 vector<string> ParsedCommandLine::GetArgs() {
 	return _arguments;
 }		         
@@ -81,22 +88,24 @@ void CommandProcessor::PrintPrompt(Connection *pConnection) {
 	_host->PrintPrompt(pConnection);
 }
 
+bool CommandProcessor::ProcessData(Connection *pConnection, const char *pLine) {
+	ParsedCommandLine cmdLine = ParsedCommandLine(string(pLine));
+	return ProcessCommandLine(pConnection,&cmdLine);
+}
 
-bool CommandProcessor::ProcessData(Connection *pConnection,const char *pLine) {
-	
-	ParsedCommandLine cmdLine=ParsedCommandLine(string(pLine));
-	string cmd = cmdLine.GetName();
+bool CommandProcessor::ProcessCommandLine(Connection *pConnection, ParsedCommandLine *pLine) {
+	string cmd = pLine->GetName();
 	if (cmd == string("exit"))
 		return true;
 	bool done = false;
 	for (std::vector<BaseCommand *>::iterator it = _commands.begin() ; it != _commands.end(); ++it)
 		if((*it)->GetName() == cmd) {
-			(*it)->ProcessCommand(pConnection,&cmdLine);
+			(*it)->ProcessCommand(pConnection,pLine);
 			done = true;
 			break;
 		}				  
 	if(!done) 
-		_host->UnhandledLine(pConnection, string(pLine));
+		_host->UnhandledLine(pConnection, pLine->GetRaw());
 	
 	PrintPrompt(pConnection);
 	return false;

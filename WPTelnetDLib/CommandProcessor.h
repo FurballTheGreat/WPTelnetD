@@ -14,11 +14,15 @@ class ParsedCommandLine
 private:
 	vector<string> _arguments ;
 	string _command;
+	string _originalLine;
 public:
 	ParsedCommandLine(string pCommandLine) ;
 
 	string GetName();
+	string GetRaw();
 	vector<string> GetArgs();
+
+	ParsedCommandLine GetParametersAsLine();
 };
 
 class ICommandProcessorHost 
@@ -48,4 +52,5 @@ public:
 
 
 	bool ProcessData(Connection *pConnection,const char *pLine);
+	bool ProcessCommandLine(Connection *pConnection, ParsedCommandLine *pLine);
 };
