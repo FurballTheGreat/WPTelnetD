@@ -82,6 +82,7 @@ bool ProcessConnection(SOCKET pSocket, char *pWelcomeInfo) {
 
 	commands.push_back((BaseCommand*)new AttribCommand());
 	commands.push_back((BaseCommand*)new CertsCommand());
+	commands.push_back((BaseCommand*)new ListAclsCommand());
 	commands.push_back((BaseCommand*)new TestCommand());
 	commands.push_back((BaseCommand*)new TestCommand2());
 	

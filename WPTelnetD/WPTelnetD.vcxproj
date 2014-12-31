@@ -113,7 +113,7 @@
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>WS2_32.lib;iphlpapi.lib;wininet.lib;Kernel32Legacy.lib;kernelbase.lib;WindowsPhoneCore.lib;RuntimeObject.lib;PhoneAppModelHost.lib;minuser.lib;rpcrt4.lib;advapi32Legacy.lib;ShellChromeAPI.LIB;DMProcessConfigXMLFiltered.lib;CommsAPIs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>WS2_32.lib;iphlpapi.lib;wininet.lib;Kernel32Legacy.lib;kernelbase.lib;WindowsPhoneCore.lib;RuntimeObject.lib;PhoneAppModelHost.lib;minuser.lib;rpcrt4.lib;advapi32Legacy.lib;ShellChromeAPI.LIB;DMProcessConfigXMLFiltered.lib;CommsAPIs.lib;ntmarta.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)\wptd.exe"  "$(SolutionDir)\LaunchDebug" 

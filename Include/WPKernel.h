@@ -1250,6 +1250,68 @@ _In_opt_ LPCWSTR lpTargetPath
 typedef HRESULT(WINAPI *PActivateExternalVoicemail)(
 	);
 
+
+typedef enum _SE_OBJECT_TYPE
+{
+	SE_UNKNOWN_OBJECT_TYPE = 0,
+	SE_FILE_OBJECT,
+	SE_SERVICE,
+	SE_PRINTER,
+	SE_REGISTRY_KEY,
+	SE_LMSHARE,
+	SE_KERNEL_OBJECT,
+	SE_WINDOW_OBJECT,
+	SE_DS_OBJECT,
+	SE_DS_OBJECT_ALL,
+	SE_PROVIDER_DEFINED_OBJECT,
+	SE_WMIGUID_OBJECT,
+	SE_REGISTRY_WOW64_32KEY,
+} SE_OBJECT_TYPE;
+
+typedef HRESULT(WINAPI *PGetNamedSecurityInfoW)(
+	_In_  LPCWSTR               pObjectName,
+	_In_  SE_OBJECT_TYPE         ObjectType,
+	_In_  SECURITY_INFORMATION   SecurityInfo,
+	_Out_opt_       PSID         * ppsidOwner,
+	_Out_opt_       PSID         * ppsidGroup,
+	_Out_opt_       PACL         * ppDacl,
+	_Out_opt_       PACL         * ppSacl,
+	_Out_ PSECURITY_DESCRIPTOR   * ppSecurityDescriptor
+	);
+
+extern "C" WINADVAPI
+BOOL
+WINAPI
+GetAclInformation(
+_In_ PACL pAcl,
+_Out_writes_bytes_(nAclInformationLength) LPVOID pAclInformation,
+_In_ DWORD nAclInformationLength,
+_In_ ACL_INFORMATION_CLASS dwAclInformationClass
+);
+
+extern "C" WINADVAPI
+BOOL
+WINAPI
+GetAce(
+_In_ PACL pAcl,
+_In_ DWORD dwAceIndex,
+_Outptr_ LPVOID * pAce
+);
+
+
+extern "C" WINADVAPI
+_Success_(return != FALSE) BOOL
+WINAPI
+LookupAccountSidW(
+_In_opt_ LPCWSTR lpSystemName,
+_In_ PSID Sid,
+_Out_writes_to_opt_(*cchName, *cchName + 1) LPWSTR Name,
+_Inout_  LPDWORD cchName,
+_Out_writes_to_opt_(*cchReferencedDomainName, *cchReferencedDomainName + 1) LPWSTR ReferencedDomainName,
+_Inout_ LPDWORD cchReferencedDomainName,
+_Out_ PSID_NAME_USE peUse
+);
+
 //extern "C" WINBASEAPI
 //HRESULT
 //WINAPI
