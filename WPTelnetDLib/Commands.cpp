@@ -8,26 +8,28 @@
 using namespace std;
 
 void HelpCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
-	pConnection->WriteLine("help - Shows this screen");
-	pConnection->WriteLine("ps - Shows a list of processes");
-	pConnection->WriteLine("kill - Kills a process");
+	pConnection->WriteLine("help - Shows this screen.");
+	pConnection->WriteLine("ps - Shows a list of processes.");
+	pConnection->WriteLine("kill - Kills a process.");
 	pConnection->WriteLine("exit - Exits THIS process");
-	pConnection->WriteLine("netstat - Shows a list ip connections");
-	pConnection->WriteLine("env - Shows a list of environment variables");
-	pConnection->WriteLine("down <url> <saveasfile> - Downloads a file");
-	pConnection->WriteLine("cd <path> - Change directory/drive");
-	pConnection->WriteLine("attrib <path> <attributes> - Change directory/file attributes");
-	pConnection->WriteLine("type <path> - Prints contents of file to console");
-	pConnection->WriteLine("del <path> - Deletes a file");
-	pConnection->WriteLine("move <oldname> <newname> - Move/rename a file");
-	pConnection->WriteLine("copy <oldname> <newname> - Rename a file");
-	pConnection->WriteLine("mkdir <path>");
-	pConnection->WriteLine("rmdir <path>");
-	pConnection->WriteLine("dir [filter] - List Directory");
-	pConnection->WriteLine("ewin - Enumerates windows visible to this process");
-	pConnection->WriteLine("postmessage - Posts a message using PostMessageW");
+	pConnection->WriteLine("whoami - Displays who this process is running as.");
+	pConnection->WriteLine("netstat - Shows a list ip connections.");
+	pConnection->WriteLine("env - Shows a list of environment variables.");
+	pConnection->WriteLine("down <url> <saveasfile> - Downloads a file.");
+	pConnection->WriteLine("cd <path> - Change directory/drive.");
+	pConnection->WriteLine("attrib <path> <attributes> - Change directory/file attributes.");
+	pConnection->WriteLine("type <path> - Prints contents of file to console.");
+	pConnection->WriteLine("lacl <file> - Prints the access control list for a path/file.");
+	pConnection->WriteLine("del <path> - Deletes a file.");
+	pConnection->WriteLine("move <oldname> <newname> - Move/rename a file.");
+	pConnection->WriteLine("copy <oldname> <newname> - Rename a file.");
+	pConnection->WriteLine("mkdir <path> - Create a directory.");
+	pConnection->WriteLine("rmdir <path> - Remove a directory.");
+	pConnection->WriteLine("dir [filter] - List Directory.");
+	pConnection->WriteLine("ewin - Enumerates windows visible to this process.");
+	pConnection->WriteLine("postmessage - Posts a message using PostMessageW.");
 	pConnection->WriteLine("listprivs - Posts a message using PostMessageW");
-	pConnection->WriteLine("reg - Open the WPTD registry editor");
+	pConnection->WriteLine("reg - Open the WPTD registry editor.");
 	
 }
 

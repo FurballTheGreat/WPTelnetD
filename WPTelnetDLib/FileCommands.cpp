@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "FileCommands.h"
+#include "AclHelpers.h"
 
 void TypeCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
 
@@ -247,11 +248,17 @@ void ListAclsCommand::ProcessFile(Connection *pConnection, WIN32_FIND_DATAA pFil
 
 	PGetNamedSecurityInfoW GetNamedSecurityInfoW = (PGetNamedSecurityInfoW)GetProcAddress(lib, "GetNamedSecurityInfoW");
 	//setup security code
-	PSECURITY_DESCRIPTOR pSD;
+	PSECURITY_DESCRIPTOR securityDescriptor, ownerDescriptor;
 	PACL dacl;
 	wstring filename = wstring(pFileName.begin(), pFileName.end());
 	HRESULT result = GetNamedSecurityInfoW(filename.c_str(), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL,
-		&dacl, NULL, &pSD);
+		&dacl, NULL, &securityDescriptor);
+
+	HRESULT ownerresult = GetNamedSecurityInfoW(filename.c_str(), SE_FILE_OBJECT, OWNER_SECURITY_INFORMATION, NULL, NULL,
+		&dacl, NULL, &ownerDescriptor);
+
+	if (ownerresult == ERROR_SUCCESS)
+		PrintOwnerInformation(pConnection, ownerDescriptor);
 
 	if (result == 2) {
 		pConnection->WriteLine("Not found");
@@ -261,97 +268,7 @@ void ListAclsCommand::ProcessFile(Connection *pConnection, WIN32_FIND_DATAA pFil
 		pConnection->WriteLine("Error occured %d", result);
 		return; 
 	}
-	if (result == ERROR_SUCCESS){
-		ACL_SIZE_INFORMATION aclSize = { 0 };
-		if (dacl != NULL){
-			if (!GetAclInformation(dacl, &aclSize, sizeof(aclSize),
-				AclSizeInformation)){
-				return;
-			}
-		}
-		for (ULONG acl_index = 0; acl_index < aclSize.AceCount; acl_index++){
-			ACCESS_ALLOWED_ACE* ace;
-
-			if (GetAce(dacl, acl_index, (PVOID*)&ace))
-			{
-				wchar_t username[1024] = L"";
-				wchar_t domain[1024] = L"";
-
-				ULONG len_username = sizeof(username);
-				ULONG len_domain = sizeof(domain);
-				PSID pSID = (PSID)(&(ace->SidStart));
-				SID_NAME_USE sid_name_use;
-				wstring result = L"unknown";
-				if (LookupAccountSidW(NULL, pSID,
-					username, &len_username, domain, &len_domain, &sid_name_use)) {
-					result = domain + wstring(L"\\") + username;					
-				}
-
-				string resultA = string(result.begin(), result.end());
-				string accessRight = "";
-				if (ace->Mask == 2032127)
-					accessRight = "Full Control (All)";
-				else if (ace->Mask == 1179817)
-					accessRight = "Read(RX)";
-				else if (ace->Mask == 1180086)
-					accessRight = "Add";
-				else if (ace->Mask == 1180095)
-					accessRight = "Add & Read";
-				else if (ace->Mask == 1245631)
-					accessRight = "Change";
-				else{ 
-					
-					if (ace->Mask & 1)
-						accessRight += "ACCESS_READ " ;
-					if (ace->Mask & 2)
-						accessRight += "ACCESS_WRITE ";
-					if (ace->Mask & 4)
-						accessRight += "ACCESS_CREATE ";
-					if (ace->Mask & 8)
-						accessRight += "ACCESS_EXEC ";
-					if (ace->Mask & 16)
-						accessRight += "ACCESS_DELETE ";
-					if (ace->Mask & 32)
-						accessRight += "ACCESS_ATTRIB ";
-					if (ace->Mask & 0x40)
-						accessRight += "ACCESS_PERM ";
-					if (ace->Mask & 0x8000)
-						accessRight += "ACCESS_GROUP ";
-					if (ace->Mask & 0x10000)
-						accessRight += "DELETE ";
-					if (ace->Mask & 0x20000)
-						accessRight += "READ_CONTRO L";
-
-					if (ace->Mask & 0x00040000)
-						accessRight += "WRITE_DAC ";
-					if (ace->Mask & 0x00080000)
-						accessRight += "WRITE_OWNER ";
-					if (ace->Mask & 0x00100000)
-						accessRight += "SYNCHRONIZE ";
-					if (ace->Mask & 0x01000000)
-						accessRight += "ACCESS_SYSTEM_SECURITY ";
-
-					if (ace->Mask & 0x02000000)
-						accessRight += "MAXIMUM_ALLOWED ";
-					if (ace->Mask & GENERIC_ALL)
-						accessRight += "GENERIC_ALL ";
-					if (ace->Mask & GENERIC_EXECUTE)
-						accessRight += "GENERIC_EXECUTE ";
-					if (ace->Mask & GENERIC_WRITE)
-						accessRight += "GENERIC_WRITE ";
-
-					if (ace->Mask & SPECIFIC_RIGHTS_ALL)
-						accessRight += "SPECIFIC_RIGHTS_ALL ";
-					if (ace->Mask & STANDARD_RIGHTS_REQUIRED)
-						accessRight += "STANDARD_RIGHTS_REQUIRED ";
-					if (ace->Mask & STANDARD_RIGHTS_ALL)
-						accessRight += "STANDARD_RIGHTS_ALL ";
-				}
-				
-				pConnection->WriteLine("%25s %s", resultA.c_str(), accessRight.c_str());
-			}
-		}
-	}
+	PrintAclInformation(pConnection, &securityDescriptor, dacl);
 }
 
 bool ListAclsCommand::ProcessCommandLine(Connection *pConnection, ParsedCommandLine *pCmdLine) {

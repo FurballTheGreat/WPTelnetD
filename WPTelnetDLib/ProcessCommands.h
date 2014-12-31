@@ -17,3 +17,9 @@ public:
 	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
 	string GetName();
 };
+
+class WhoAmICommand : BaseCommand {
+public:
+	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
+	string GetName();
+};

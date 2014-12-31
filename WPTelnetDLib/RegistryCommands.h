@@ -29,6 +29,15 @@ public:
 	string GetName();
 };
 
+class RegAclCommand : BaseCommand {
+private:
+	RegContext *_context;
+public:
+	RegAclCommand(RegContext *pContext);
+	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
+	string GetName();
+};
+
 class RegOpenCommand : BaseCommand {
 private:
 	RegContext *_context;

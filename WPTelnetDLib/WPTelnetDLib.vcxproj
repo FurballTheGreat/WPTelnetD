@@ -117,6 +117,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AclHelpers.cpp" />
     <ClCompile Include="CertCommands.cpp" />
     <ClCompile Include="CommandProcessor.cpp" />
     <ClCompile Include="Commands.cpp" />
@@ -133,10 +134,12 @@
     <ClCompile Include="ExperimentalCommands.cpp" />
     <ClCompile Include="TcpConnectionTable.cpp" />
     <ClCompile Include="TelnetD.cpp" />
+    <ClCompile Include="TerminalHelper.cpp" />
     <ClCompile Include="UpdConnectionTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\WPTelnetD\targetver.h" />
+    <ClInclude Include="AclHelpers.h" />
     <ClInclude Include="CertCommands.h" />
     <ClInclude Include="CommandProcessor.h" />
     <ClInclude Include="Commands.h" />
@@ -153,6 +156,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TcpConnectionTable.h" />
     <ClInclude Include="TelnetD.h" />
+    <ClInclude Include="TerminalHelper.h" />
     <ClInclude Include="UdpConnectionTable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

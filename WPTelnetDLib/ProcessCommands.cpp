@@ -69,3 +69,39 @@ void PsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdL
 string PsCommand::GetName() {
 	return "ps";
 }
+
+
+void WhoAmICommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+
+	if (pCmdLine->GetArgs().size()<1)
+		pConnection->WriteLine("SYNTAX: whoami");
+	else {
+		HMODULE lib = LoadLibraryA("SSPICLI.dll");
+		if (lib == NULL){
+			pConnection->WriteLine("Failed Load Lib");
+			pConnection->WriteLastError();
+			return;
+		}
+
+		PGetUserNameExA GetUserNameExA = (PGetUserNameExA)GetProcAddress(lib, "GetUserNameExA");
+		if (GetUserNameExA == NULL)
+		{
+			pConnection->WriteLine("Failed to locate GetUserNameExA");
+			return;
+		}
+
+		char buf[1024];
+		ULONG size = sizeof(buf);
+		if (!GetUserNameExA(NameSamCompatible, buf, &size)) {
+			pConnection->WriteLastError();
+		}
+		else
+			pConnection->WriteLine("You are '%s'", buf);
+
+
+	}
+}
+
+string WhoAmICommand::GetName() {
+	return "whoami";
+}

@@ -1279,6 +1279,58 @@ typedef HRESULT(WINAPI *PGetNamedSecurityInfoW)(
 	_Out_ PSECURITY_DESCRIPTOR   * ppSecurityDescriptor
 	);
 
+typedef HRESULT(WINAPI *PGetSecurityInfo)(
+	_In_  HANDLE                 handle,
+	_In_  SE_OBJECT_TYPE         ObjectType,
+	_In_  SECURITY_INFORMATION   SecurityInfo,
+	_Out_opt_ PSID                 * ppsidOwner,
+	_Out_opt_ PSID                 * ppsidGroup,
+	_Out_opt_ PACL                 * ppDacl,
+	_Out_opt_ PACL                 * ppSacl,
+	_Out_opt_ PSECURITY_DESCRIPTOR * ppSecurityDescriptor
+	);
+
+
+extern "C" WINADVAPI
+BOOL
+WINAPI
+GetSecurityDescriptorDacl(
+_In_ PSECURITY_DESCRIPTOR pSecurityDescriptor,
+_Out_ LPBOOL lpbDaclPresent,
+_Outptr_ PACL * pDacl,
+_Out_ LPBOOL lpbDaclDefaulted
+);
+
+extern "C" WINADVAPI
+BOOL
+WINAPI
+GetSecurityDescriptorGroup(
+_In_ PSECURITY_DESCRIPTOR pSecurityDescriptor,
+_Outptr_ PSID * pGroup,
+_Out_ LPBOOL lpbGroupDefaulted
+);
+
+
+extern "C" WINADVAPI
+BOOL
+WINAPI
+GetSecurityDescriptorOwner(
+_In_ PSECURITY_DESCRIPTOR pSecurityDescriptor,
+_Outptr_ PSID * pOwner,
+_Out_ LPBOOL lpbOwnerDefaulted
+);
+
+
+extern "C" WINADVAPI
+LSTATUS
+APIENTRY
+RegGetKeySecurity(
+_In_ HKEY hKey,
+_In_ SECURITY_INFORMATION SecurityInformation,
+_Out_writes_bytes_opt_(*lpcbSecurityDescriptor) PSECURITY_DESCRIPTOR pSecurityDescriptor,
+_Inout_ LPDWORD lpcbSecurityDescriptor
+);
+
 extern "C" WINADVAPI
 BOOL
 WINAPI
@@ -1316,3 +1368,40 @@ _Out_ PSID_NAME_USE peUse
 //HRESULT
 //WINAPI
 //ActivateExternalVoicemail();
+
+typedef enum
+{
+	NameUnknown = 0,
+	NameFullyQualifiedDN = 1,
+	NameSamCompatible = 2,
+	NameDisplay = 3,
+	NameUniqueId = 6,
+	NameCanonical = 7,
+	NameUserPrincipal = 8,
+	NameCanonicalEx = 9,
+	NameServicePrincipal = 10,
+	NameDnsDomain = 12,
+	NameGivenName = 13,
+	NameSurname = 14
+} EXTENDED_NAME_FORMAT, *PEXTENDED_NAME_FORMAT;
+
+typedef BOOLEAN(WINAPI *PGetUserNameExA)(
+	_In_ EXTENDED_NAME_FORMAT  NameFormat,
+	_Out_writes_to_opt_(*nSize, *nSize) LPSTR lpNameBuffer,
+	_Inout_ PULONG nSize
+	);
+
+
+extern "C" BOOL
+WINAPI
+ConvertSidToStringSidA(
+_In_ PSID Sid,
+_Outptr_ LPSTR * StringSid
+);
+
+extern "C" WINBASEAPI
+HLOCAL
+WINAPI
+LocalFree(
+    _Pre_opt_valid_ HLOCAL hMem
+    );

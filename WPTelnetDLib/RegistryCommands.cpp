@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "RegistryCommands.h"
+#include "AclHelpers.h"
 
 
 RegCommand::RegCommand() {
@@ -97,6 +98,7 @@ void RegCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmd
 	commands.push_back((BaseCommand*)new RegDeleteTreeCommand(context));
 	commands.push_back((BaseCommand*)new RegExportCommand(context));
 	commands.push_back((BaseCommand*)new RegImportCommand(context));
+	commands.push_back((BaseCommand*)new RegAclCommand(context));
 	RegProcessHost host(context);
 	CommandProcessor processor = CommandProcessor(commands, &host);
 	if (pCmdLine->GetArgs().size() == 1) {
@@ -820,6 +822,58 @@ void RegExportCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 
 string RegExportCommand::GetName() {
 	return "export";
+}
+
+RegAclCommand::RegAclCommand(RegContext *pContext) {
+	_context = pContext;
+}
+void RegAclCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+	if (pCmdLine->GetArgs().size() < 1)
+	{
+		pConnection->WriteLine("SYNTAX: acl");
+		return;
+	}
+	PSECURITY_DESCRIPTOR securityDescriptor=NULL;
+	PSECURITY_DESCRIPTOR ownerSecurityDescriptor = NULL;
+	DWORD descriptorSize = 0;
+	HRESULT error = RegGetKeySecurity(_context->currentKey, DACL_SECURITY_INFORMATION,securityDescriptor, &descriptorSize);
+	securityDescriptor = malloc(descriptorSize);
+	error = RegGetKeySecurity(_context->currentKey, DACL_SECURITY_INFORMATION, securityDescriptor, &descriptorSize);
+	if (error != ERROR_SUCCESS){
+		pConnection->WriteLine("Failed to get security descriptor: %d", error);
+		return;
+	}
+	descriptorSize = 0;
+	error = RegGetKeySecurity(_context->currentKey, OWNER_SECURITY_INFORMATION, ownerSecurityDescriptor, &descriptorSize);
+	ownerSecurityDescriptor = malloc(descriptorSize);
+	error = RegGetKeySecurity(_context->currentKey, OWNER_SECURITY_INFORMATION, ownerSecurityDescriptor, &descriptorSize);
+	if (error != ERROR_SUCCESS){
+		pConnection->WriteLine("Failed to get owner descriptor: %d", error);
+		return;
+	}
+	BOOL daclPresent;
+	BOOL daclDefaulted;
+	PACL acl;
+	if (!GetSecurityDescriptorDacl(securityDescriptor, &daclPresent, &acl, &daclDefaulted)) {
+		pConnection->WriteLastError();
+		return;
+	}
+	if (!daclPresent) {
+		pConnection->WriteLine("No ACL present");
+		return;
+	}
+
+	if (daclDefaulted)
+		pConnection->WriteLine("ACL is a default");
+
+	PrintOwnerInformation(pConnection, ownerSecurityDescriptor);
+	PrintAclInformation(pConnection, securityDescriptor, acl);
+	free(securityDescriptor);
+	free(ownerSecurityDescriptor);
+}
+
+string RegAclCommand::GetName() {
+	return "acl";
 }
 
 

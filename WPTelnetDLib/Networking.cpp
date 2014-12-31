@@ -61,9 +61,9 @@ bool Connection::WriteLine(std::wstring pString)
 
 bool Connection::WriteLine(std::string pString) 
 {
-	const char *str  = (pString+"\n\r").c_str();
-	int length = strlen(str);
-	return send(_socket,str,length,0) != SOCKET_ERROR;
+	std::string str = pString + "\n\r";
+	
+	return send(_socket,str.c_str(),str.length(),0) != SOCKET_ERROR;
 }
 
 bool Connection::Write(char pChar)

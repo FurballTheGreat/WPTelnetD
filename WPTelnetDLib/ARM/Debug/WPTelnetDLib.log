@@ -1,10 +1,12 @@
-﻿Build started 31/12/2014 00:21:45.
+﻿Build started 31/12/2014 20:01:44.
      1>Project "C:\personalwork\WPTelnet\gitsvs\WPTelnetD\WPTelnetDLib\WPTelnetDLib.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\CL.exe /c /AI"C:\Program Files (x86)\Windows Phone Kits\8.0\Windows Metadata" /Zi /nologo /W1 /WX- /Od /Oy- /D _LIB /D PHONE /D WINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"pch.h" /Fp"ARM\Debug\WPTelnetDLib.pch" /Fo"ARM\Debug\\" /Fd"ARM\Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt FileCommands.cpp
-         FileCommands.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\CL.exe /c /AI"C:\Program Files (x86)\Windows Phone Kits\8.0\Windows Metadata" /Zi /nologo /W1 /WX- /Od /Oy- /D _LIB /D PHONE /D WINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"pch.h" /Fp"ARM\Debug\WPTelnetDLib.pch" /Fo"ARM\Debug\\" /Fd"ARM\Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt AclHelpers.cpp
+         AclHelpers.cpp
+     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\aclhelpers.cpp(87): warning C4715: 'GetAceTypeName' : not all control paths return a value
        Lib:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\Lib.exe /OUT:"C:\personalwork\WPTelnet\gitsvs\WPTelnetD\ARM\Debug\WPTelnetDLib\WPTelnetDLib.lib" /NOLOGO /MACHINE:ARM ARM\Debug\CertCommands.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\Lib.exe /OUT:"C:\personalwork\WPTelnet\gitsvs\WPTelnetD\ARM\Debug\WPTelnetDLib\WPTelnetDLib.lib" /NOLOGO /MACHINE:ARM ARM\Debug\AclHelpers.obj
+         ARM\Debug\CertCommands.obj
          ARM\Debug\CommandProcessor.obj
          ARM\Debug\Commands.obj
          ARM\Debug\DirectoryCommands.obj
@@ -20,6 +22,7 @@
          ARM\Debug\ExperimentalCommands.obj
          ARM\Debug\TcpConnectionTable.obj
          ARM\Debug\TelnetD.obj
+         ARM\Debug\TerminalHelper.obj
          ARM\Debug\UpdConnectionTable.obj
      1>pch.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
          WPTelnetDLib.vcxproj -> C:\personalwork\WPTelnet\gitsvs\WPTelnetD\ARM\Debug\WPTelnetDLib\WPTelnetDLib.lib
@@ -27,4 +30,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.75
+Time Elapsed 00:00:00.94
