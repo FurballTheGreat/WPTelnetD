@@ -595,12 +595,12 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 	BYTE *buffer;
 	switch (valueTypeCode) {
 		case REG_DWORD:			
-			dwordValue = strtol(value.c_str(), NULL, 0);
+			dwordValue = strtoul(value.c_str(), NULL, 0);
 			valSize = sizeof(DWORD);
 			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_DWORD, (BYTE*)&dwordValue, valSize);
 			break;
 		case REG_QWORD:
-			qwordValue = _strtoi64(value.c_str(), NULL, 0);
+			qwordValue = _strtoui64(value.c_str(), NULL, 0);
 			valSize = sizeof(LONGLONG);
 			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_QWORD, (BYTE*)&qwordValue, valSize);
 			break;
