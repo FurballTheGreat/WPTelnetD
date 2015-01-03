@@ -7,11 +7,28 @@ RegCommand::RegCommand() {
 
 }
 
+HKEY ParseKey(const char *pStrKey) {
+	if (!strcmpi(pStrKey, "HKLM")) return HKEY_LOCAL_MACHINE;
+	if (!strcmpi(pStrKey, "HKEY_LOCAL_MACHINE")) return HKEY_LOCAL_MACHINE;
+	if (!strcmpi(pStrKey, "HKCR")) return HKEY_CLASSES_ROOT;
+	if (!strcmpi(pStrKey, "HKEY_CLASSES_ROOT")) return HKEY_CLASSES_ROOT;
+	if (!strcmpi(pStrKey, "HKCU")) return HKEY_CURRENT_USER;
+	if (!strcmpi(pStrKey, "HKEY_CURRENT_USER")) return HKEY_CURRENT_USER;
+	if (!strcmpi(pStrKey, "HKU")) return HKEY_USERS;
+	if (!strcmpi(pStrKey, "HKEY_USERS")) return HKEY_USERS;
+	if (!strcmpi(pStrKey, "HKCC")) return HKEY_CURRENT_CONFIG;
+	if (!strcmpi(pStrKey, "HKEY_CURRENT_CONFIG")) return HKEY_CURRENT_CONFIG;
+	if (!strcmpi(pStrKey, "HKPD")) return HKEY_PERFORMANCE_DATA;
+	if (!strcmpi(pStrKey, "HKEY_PERFORMANCE_DATA")) return HKEY_PERFORMANCE_DATA;
+	return NULL;
+}
 
 void ProcessChangeRegPath(RegContext* pContext, Connection *pConnection,string pPath){
 	HKEY key = NULL;
 	DWORD error = ERROR_SUCCESS;
 	string newPath = "";
+	if (pPath == "")
+		return;
 	if (pPath == "\\") {
 		key = pContext->rootKey;
 	}else
@@ -59,12 +76,14 @@ class RegProcessHost : public ICommandProcessorHost
 {
 private:
 	RegContext *_context;
+	bool _noPrompt;
 public:
-	RegProcessHost(RegContext*pContext) {
+	RegProcessHost(RegContext*pContext, bool pNoPrompt) {
 		_context = pContext;
+		_noPrompt = pNoPrompt;
 	}
 	virtual void PrintPrompt(Connection *pConnection) {
-		
+		if (_noPrompt)return;
 		if (_context->rootKey == HKEY_LOCAL_MACHINE) pConnection->Write("HKLM\\");
 		else if (_context->rootKey == HKEY_CLASSES_ROOT) pConnection->Write("HKCR\\");
 		else if (_context->rootKey == HKEY_CURRENT_USER) pConnection->Write("HKCU\\");
@@ -99,9 +118,10 @@ void RegCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmd
 	commands.push_back((BaseCommand*)new RegExportCommand(context));
 	commands.push_back((BaseCommand*)new RegImportCommand(context));
 	commands.push_back((BaseCommand*)new RegAclCommand(context));
-	RegProcessHost host(context);
-	CommandProcessor processor = CommandProcessor(commands, &host);
+	
 	if (pCmdLine->GetArgs().size() == 1) {
+		RegProcessHost host(context,false);
+		CommandProcessor processor = CommandProcessor(commands, &host);
 		pConnection->WriteLine("Registry Editor - Type HELP for assistance.");
 		
 
@@ -117,6 +137,8 @@ void RegCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmd
 		}
 	}
 	else {
+		RegProcessHost host(context,true);
+		CommandProcessor processor = CommandProcessor(commands, &host);
 		ParsedCommandLine line = pCmdLine->GetParametersAsLine();
 		processor.ProcessCommandLine(pConnection, &line);
 	}
@@ -252,15 +274,7 @@ string RegOpenCommand::GetName() {
 }
 
 
-HKEY ParseKey(const char *pStrKey) {
-	if (!strcmpi(pStrKey, "HKLM")) return HKEY_LOCAL_MACHINE;
-	if (!strcmpi(pStrKey, "HKCR")) return HKEY_CLASSES_ROOT;
-	if (!strcmpi(pStrKey, "HKCU")) return HKEY_CURRENT_USER;
-	if (!strcmpi(pStrKey, "HKU")) return HKEY_USERS;
-	if (!strcmpi(pStrKey, "HKCC")) return HKEY_CURRENT_CONFIG;
-	if (!strcmpi(pStrKey, "HKPD")) return HKEY_PERFORMANCE_DATA;
-	return NULL;
-}
+
 
 RegRootCommand::RegRootCommand(RegContext *pContext) {
 	_context = pContext;
@@ -531,6 +545,33 @@ typedef struct {
 	DWORD type;
 } RegValueType;
 
+typedef struct {
+	HKEY root;
+	string keyPath;
+	string valueName;
+} RegValueId;
+
+
+RegValueId GetValueId(string pValue) {
+	
+	if (pValue.find_first_of('\\') == std::string::npos) {
+		RegValueId result = { NULL, "", pValue };
+		return result;
+	}
+
+	string rootName = pValue.substr(0, pValue.find_first_of('\\'));
+	HKEY root = ParseKey(rootName.c_str());
+	pValue = pValue.substr(pValue.find_first_of('\\')+1, string::npos);
+	if (pValue.find_last_of('\\') == std::string::npos || root == NULL) {
+		RegValueId result = { NULL, "", pValue };
+		return result;
+	}
+	string path = pValue.substr(0, pValue.find_last_of('\\'));
+	string value = pValue.substr(pValue.find_last_of('\\')+1, string::npos);
+	RegValueId finalResult = { root, path, value };
+	return finalResult;
+}
+
 void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size() < 4)
@@ -571,6 +612,23 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 	
 
 	string valueName = pCmdLine->GetArgs().at(1);
+
+	RegValueId valueId = GetValueId(valueName);
+	HKEY key;
+	bool closeKey = false;
+	if (valueId.root == NULL)
+		key = _context->currentKey;
+	else {
+		DWORD error = RegOpenKeyExA(valueId.root, valueId.keyPath.c_str(), NULL, KEY_WRITE | KEY_READ, &key);
+		if (error == ERROR_SUCCESS) {
+			closeKey = true;
+		}
+		else{
+			pConnection->WriteLine("Error opening key %d", error);
+			return;
+		}
+	}
+
 	string valueType = pCmdLine->GetArgs().at(2);
 	string value = pCmdLine->GetArgs().at(3);
 	DWORD valueTypeCode = -1;
@@ -597,18 +655,18 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 		case REG_DWORD:			
 			dwordValue = strtoul(value.c_str(), NULL, 0);
 			valSize = sizeof(DWORD);
-			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_DWORD, (BYTE*)&dwordValue, valSize);
+			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_DWORD, (BYTE*)&dwordValue, valSize);
 			break;
 		case REG_QWORD:
 			qwordValue = _strtoui64(value.c_str(), NULL, 0);
 			valSize = sizeof(LONGLONG);
-			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_QWORD, (BYTE*)&qwordValue, valSize);
+			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_QWORD, (BYTE*)&qwordValue, valSize);
 			break;
 		case REG_SZ :			
-			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_SZ, (const BYTE*)value.c_str(), (DWORD)value.length() + 1);
+			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_SZ, (const BYTE*)value.c_str(), (DWORD)value.length() + 1);
 			break;
 		case REG_EXPAND_SZ:
-			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_EXPAND_SZ, (const BYTE*)value.c_str(), (DWORD)value.length() + 1);
+			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_EXPAND_SZ, (const BYTE*)value.c_str(), (DWORD)value.length() + 1);
 			break;
 		case REG_MULTI_SZ:
 			for (int i = 3; i < pCmdLine->GetArgs().size(); i++)
@@ -627,7 +685,7 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 			}
 			*curPtr = 0;
 			curPtr++;
-			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_MULTI_SZ, (const BYTE*)mbuffer, valSize);
+			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_MULTI_SZ, (const BYTE*)mbuffer, valSize);
 			free(mbuffer);
 			break;
 		case REG_BINARY:
@@ -657,11 +715,13 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 				DWORD val = strtol(&src[i], NULL, 16);
 				buffer[i / 3] = (BYTE)val;
 			}
-			error = RegSetValueExA(_context->currentKey, valueName.c_str(), 0, REG_BINARY, (const BYTE*)buffer, valSize);
+			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_BINARY, (const BYTE*)buffer, valSize);
 			free(buffer);
 			free(src);
 	}	
-	
+	if (closeKey){
+		RegCloseKey(key);
+	}
 	if (error != ERROR_SUCCESS){
 		pConnection->WriteLine("Failed to write to registry %d", error);
 		return;
