@@ -1405,3 +1405,24 @@ WINAPI
 LocalFree(
     _Pre_opt_valid_ HLOCAL hMem
     );
+
+
+
+typedef struct _MEMORYSTATUSEX {
+	DWORD dwLength;
+	DWORD dwMemoryLoad;
+	DWORDLONG ullTotalPhys;
+	DWORDLONG ullAvailPhys;
+	DWORDLONG ullTotalPageFile;
+	DWORDLONG ullAvailPageFile;
+	DWORDLONG ullTotalVirtual;
+	DWORDLONG ullAvailVirtual;
+	DWORDLONG ullAvailExtendedVirtual;
+} MEMORYSTATUSEX, *LPMEMORYSTATUSEX;
+
+extern "C" WINBASEAPI
+BOOL
+WINAPI
+GlobalMemoryStatusEx(
+_Out_ LPMEMORYSTATUSEX lpBuffer
+);

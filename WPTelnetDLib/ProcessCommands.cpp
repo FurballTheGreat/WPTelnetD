@@ -38,11 +38,25 @@ void PsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdL
 		_process.dwSize = sizeof(_process);
 		DWORD old = _process.dwSize;
 		bool result = Process32FirstW(_handle, &_process);
+		
+		MEMORYSTATUSEX memStatus = { sizeof(MEMORYSTATUSEX) };
+		
+		if (GlobalMemoryStatusEx(&memStatus)){
+			pConnection->WriteLine("Physical memory available %dmb out of %dmb (%d%% load).", (DWORD)(memStatus.ullAvailPhys / (1024 * 1024)), (DWORD)(memStatus.ullTotalPhys / (1024 * 1024)), memStatus.dwMemoryLoad);
+			pConnection->WriteLine("Virtual memory available %dmb out of %dmb.", (DWORD)(memStatus.ullAvailVirtual / (1024 * 1024)), (DWORD)(memStatus.ullTotalVirtual / (1024 * 1024)));
+			pConnection->WriteLine("Pagefile available %dmb out of %dmb.", (DWORD)(memStatus.ullAvailPageFile / (1024 * 1024)), (DWORD)(memStatus.ullTotalPageFile / (1024 * 1024)));
+			pConnection->WriteLine("");
+				
+		}
+		else
+			pConnection->WriteLastError();
 
 		if (!result) {
 			pConnection->WriteLine("ERROR: Got false from Process32First: %d %d %d %d %d", GetLastError(), _handle, sizeof(_process), _process.dwSize, old);
 		}
 		else {
+
+
 			pConnection->WriteLine("************");
 			pConnection->WriteLine("Process List");
 			pConnection->WriteLine("************");

@@ -1,9 +1,12 @@
-﻿Build started 31/12/2014 20:01:44.
+﻿Build started 04/01/2015 16:17:58.
      1>Project "C:\personalwork\WPTelnet\gitsvs\WPTelnetD\WPTelnetDLib\WPTelnetDLib.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\CL.exe /c /AI"C:\Program Files (x86)\Windows Phone Kits\8.0\Windows Metadata" /Zi /nologo /W1 /WX- /Od /Oy- /D _LIB /D PHONE /D WINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"pch.h" /Fp"ARM\Debug\WPTelnetDLib.pch" /Fo"ARM\Debug\\" /Fd"ARM\Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt AclHelpers.cpp
-         AclHelpers.cpp
-     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\aclhelpers.cpp(87): warning C4715: 'GetAceTypeName' : not all control paths return a value
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\CL.exe /c /AI"C:\Program Files (x86)\Windows Phone Kits\8.0\Windows Metadata" /Zi /nologo /W1 /WX- /Od /Oy- /D _LIB /D PHONE /D WINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"pch.h" /Fp"ARM\Debug\WPTelnetDLib.pch" /Fo"ARM\Debug\\" /Fd"ARM\Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt RegistryCommands.cpp
+         RegistryCommands.cpp
+     1>RegistryCommands.cpp(103): warning C4129: 'P' : unrecognized character escape sequence
+     1>RegistryCommands.cpp(103): warning C4129: 'V' : unrecognized character escape sequence
+     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\registrycommands.cpp(967): warning C4700: uninitialized local variable 'resultKey' used
+     1>c:\personalwork\wptelnet\gitsvs\wptelnetd\wptelnetdlib\registrycommands.cpp(992): warning C4700: uninitialized local variable 'resultKey' used
        Lib:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\Lib.exe /OUT:"C:\personalwork\WPTelnet\gitsvs\WPTelnetD\ARM\Debug\WPTelnetDLib\WPTelnetDLib.lib" /NOLOGO /MACHINE:ARM ARM\Debug\AclHelpers.obj
          ARM\Debug\CertCommands.obj

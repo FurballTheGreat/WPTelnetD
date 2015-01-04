@@ -8,17 +8,17 @@ RegCommand::RegCommand() {
 }
 
 HKEY ParseKey(const char *pStrKey) {
-	if (!strcmpi(pStrKey, "HKLM")) return HKEY_LOCAL_MACHINE;
-	if (!strcmpi(pStrKey, "HKEY_LOCAL_MACHINE")) return HKEY_LOCAL_MACHINE;
-	if (!strcmpi(pStrKey, "HKCR")) return HKEY_CLASSES_ROOT;
-	if (!strcmpi(pStrKey, "HKEY_CLASSES_ROOT")) return HKEY_CLASSES_ROOT;
-	if (!strcmpi(pStrKey, "HKCU")) return HKEY_CURRENT_USER;
-	if (!strcmpi(pStrKey, "HKEY_CURRENT_USER")) return HKEY_CURRENT_USER;
-	if (!strcmpi(pStrKey, "HKU")) return HKEY_USERS;
-	if (!strcmpi(pStrKey, "HKEY_USERS")) return HKEY_USERS;
-	if (!strcmpi(pStrKey, "HKCC")) return HKEY_CURRENT_CONFIG;
-	if (!strcmpi(pStrKey, "HKEY_CURRENT_CONFIG")) return HKEY_CURRENT_CONFIG;
-	if (!strcmpi(pStrKey, "HKPD")) return HKEY_PERFORMANCE_DATA;
+	if (!strcmpi(pStrKey, "HKLM"))				    return HKEY_LOCAL_MACHINE;
+	if (!strcmpi(pStrKey, "HKEY_LOCAL_MACHINE"))    return HKEY_LOCAL_MACHINE;
+	if (!strcmpi(pStrKey, "HKCR"))				    return HKEY_CLASSES_ROOT;
+	if (!strcmpi(pStrKey, "HKEY_CLASSES_ROOT"))     return HKEY_CLASSES_ROOT;
+	if (!strcmpi(pStrKey, "HKCU"))			        return HKEY_CURRENT_USER;
+	if (!strcmpi(pStrKey, "HKEY_CURRENT_USER"))     return HKEY_CURRENT_USER;
+	if (!strcmpi(pStrKey, "HKU"))				    return HKEY_USERS;
+	if (!strcmpi(pStrKey, "HKEY_USERS"))		    return HKEY_USERS;
+	if (!strcmpi(pStrKey, "HKCC"))				    return HKEY_CURRENT_CONFIG;
+	if (!strcmpi(pStrKey, "HKEY_CURRENT_CONFIG"))   return HKEY_CURRENT_CONFIG;
+	if (!strcmpi(pStrKey, "HKPD"))                  return HKEY_PERFORMANCE_DATA;
 	if (!strcmpi(pStrKey, "HKEY_PERFORMANCE_DATA")) return HKEY_PERFORMANCE_DATA;
 	return NULL;
 }
@@ -71,6 +71,145 @@ void ProcessChangeRegPath(RegContext* pContext, Connection *pConnection,string p
 	pContext->regPath = newPath;
 	pContext->currentKey = key;
 }
+
+
+class RegPathParam
+{
+private:
+	RegContext *_context;
+	HKEY _root;
+	string _valueName;
+	bool _closeKey;
+public:
+	RegPathParam(RegContext*pContext, string pValue, bool pIncludeValue) {
+		_context = pContext;
+		_closeKey = false;
+		if (pValue.find_first_of('\\') == std::string::npos) {
+
+			_root = _context->currentKey;
+			_valueName = pValue;
+			return;
+		}
+
+		string rootName = pValue.substr(0, pValue.find_first_of('\\'));
+		HKEY root = ParseKey(rootName.c_str());
+		pValue = pValue.substr(pValue.find_first_of('\\') + 1, string::npos);
+		if (root == NULL) {
+			throw invalid_argument(rootName + " is not a valid root");
+		}
+		string path;
+		if (pIncludeValue){
+			if (pValue.find_last_of('\\') == std::string::npos) {
+				throw invalid_argument("A full value path is in the form HKLM\PATH\ValueName");
+			}
+			path = pValue.substr(0, pValue.find_last_of('\\'));
+			_valueName = pValue.substr(pValue.find_last_of('\\') + 1, string::npos);
+		}
+		else
+			path = pValue;
+
+		DWORD error = RegOpenKeyExA(root, path.c_str(), NULL, KEY_WRITE | KEY_READ, &_root);
+		if (error == ERROR_SUCCESS){
+			_closeKey = true;
+			return;
+		}
+		error = RegOpenKeyExA(root, path.c_str(), NULL,  KEY_READ, &_root);
+		if (error != ERROR_SUCCESS) {
+			throw invalid_argument(string("Error opening key ") + to_string(error));
+		}
+		_closeKey = true;
+	}
+
+	~RegPathParam() {
+		if (_closeKey){
+			RegCloseKey(_root);
+		}
+	}
+
+	void SetValue(
+		_In_ DWORD dwType,
+		_In_reads_bytes_opt_(cbData) CONST BYTE * lpData,
+		_In_ DWORD cbData
+		){
+		LSTATUS result = RegSetValueExA(_root, _valueName.c_str(), NULL, dwType, lpData, cbData);
+		if (result != ERROR_SUCCESS)
+			throw invalid_argument("Error calling RegSetValueExA " + to_string(result));
+	}
+
+	void DeleteValue() {
+		LSTATUS result = RegDeleteValueA(_root, _valueName.c_str());
+		if (result != ERROR_SUCCESS)
+			throw invalid_argument("Error calling RegDeleteValueA " + to_string(result));
+	}
+
+	void CreateKey() {
+		HKEY resultKey;
+		DWORD result = RegCreateKeyExA(_root, _valueName.c_str(), 0, NULL, 0, NULL, NULL, &resultKey, NULL);
+		RegCloseKey(resultKey);
+		if (result != ERROR_SUCCESS)
+			throw invalid_argument("Error calling RegCreateKeyExA " + to_string(result));
+	}
+
+	void DeleteKey() {
+		string keyName = _valueName;
+		wstring wideName = wstring(keyName.begin(), keyName.end());
+		
+		DWORD result= RegDeleteKeyExW(_root, wideName.c_str(), 0, NULL);
+	
+		if (result != ERROR_SUCCESS)
+			throw invalid_argument("Error calling RegDeleteKeyExW " + to_string(result));
+	}
+
+	void DeleteTree() {
+		string keyName = _valueName;
+		wstring wideName = wstring(keyName.begin(), keyName.end());
+		DWORD result = RegDeleteTreeW(_context->currentKey, wideName.c_str());
+		if (result != ERROR_SUCCESS)
+			throw invalid_argument("Error calling RegDeleteTreeW " + to_string(result));
+	}
+
+	void GetKeySecurity(
+		_In_ SECURITY_INFORMATION SecurityInformation,
+		_Out_writes_bytes_opt_(*lpcbSecurityDescriptor) PSECURITY_DESCRIPTOR pSecurityDescriptor,
+		_Inout_ LPDWORD lpcbSecurityDescriptor
+		) {
+		bool sizeCheck = *lpcbSecurityDescriptor;
+		LSTATUS result = RegGetKeySecurity(_root, SecurityInformation, pSecurityDescriptor, lpcbSecurityDescriptor);
+		if (result != ERROR_SUCCESS && sizeCheck)
+			throw invalid_argument("Error calling RegGetKeySecurity " + to_string(result));
+	}
+
+	bool EnumKey(
+		_In_ DWORD dwIndex,
+		_Out_writes_to_opt_(*lpcchName, *lpcchName + 1) LPSTR lpName,
+		_Inout_ LPDWORD lpcchName
+		) {
+		LSTATUS result = RegEnumKeyExA(_root, dwIndex, lpName, lpcchName, 0, NULL, NULL, NULL);
+		if (result == ERROR_NO_MORE_ITEMS)
+			return false;
+		if (result == ERROR_SUCCESS)
+			return true;
+		throw invalid_argument("Error calling RegEnumKeyExA " + to_string(result));
+	}
+
+	bool EnumValue(
+		_In_ DWORD dwIndex,
+		_Out_writes_to_opt_(*lpcchValueName, *lpcchValueName + 1) LPSTR lpValueName,
+		_Inout_ LPDWORD lpcchValueName,
+
+		_Out_opt_ LPDWORD lpType,
+		_Out_writes_bytes_to_opt_(*lpcbData, *lpcbData) __out_data_source(REGISTRY) LPBYTE lpData,
+		_Inout_opt_ LPDWORD lpcbData
+		) {
+		LSTATUS result = RegEnumValueA(_root,dwIndex,lpValueName, lpcchValueName, 0,lpType,lpData, lpcbData);
+		if (result == ERROR_NO_MORE_ITEMS)
+			return false;
+		if (result == ERROR_SUCCESS)
+			return true;
+		throw invalid_argument("Error calling RegEnumValueA " + to_string(result));
+	}
+};
+
 
 class RegProcessHost : public ICommandProcessorHost
 {
@@ -199,51 +338,51 @@ RegListCommand::RegListCommand(RegContext *pContext) {
 }
 
 void RegListCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
-	int index = 0;
-	char Temp[1024];
-	DWORD TMP;
-	DWORD RC = 0;
-	bool firstSubKey = true;
-
-	while (RC != ERROR_NO_MORE_ITEMS) {
-
-		RC = RegEnumKeyExA(_context->currentKey, index, Temp, &TMP, 0, NULL, NULL, NULL);
+	try {
+		RegPathParam path(_context, pCmdLine->GetArgs().size() == 1 ? "" : pCmdLine->GetArgs().at(1), false);
+		int index = 0;
+		char Temp[1024];
+		DWORD TMP;
+		DWORD RC = 0;
+		bool firstSubKey = true;
 		TMP = sizeof(Temp);
-		if (RC == ERROR_SUCCESS) {
+		while (path.EnumKey(index, Temp, &TMP)) {	
+			TMP = sizeof(Temp);
 			if (firstSubKey){
 				pConnection->WriteLine("Subkeys");
 				firstSubKey = false;
 			}
 			pConnection->WriteLine("  %s", Temp);
-
+			index++;
 		}
-		index++;
-	}
 
-	bool firstValue = true;
-	DWORD valType;
-	DWORD valSize;
-	DWORD valSizeP = 1024 * 1024 * 3;
-	if (valBuf == NULL)
-		valBuf = (BYTE*)malloc(valSizeP);
-	RC = 0;
-	index = 0;
-	while (RC != ERROR_NO_MORE_ITEMS) {
+		bool firstValue = true;
+		DWORD valType;
+		DWORD valSize;
+		DWORD valSizeP = 1024 * 1024 * 3;
+		if (valBuf == NULL)
+			valBuf = (BYTE*)malloc(valSizeP);
+		RC = 0;
+		index = 0;
 		valSize = valSizeP;
-		RC = RegEnumValueA(_context->currentKey, index, Temp, &TMP, 0, &valType, valBuf, &valSize);
-		TMP = sizeof(Temp);
-		if (RC == ERROR_SUCCESS) {
+		while (path.EnumValue(index, Temp, &TMP,  &valType, valBuf, &valSize)) {
+				
+			TMP = sizeof(Temp);
+			
 			if (firstValue) {
 				pConnection->WriteLine("");
 				pConnection->WriteLine("Values");
 				firstValue = false;
 			}
 			PrintRegValueLine(pConnection, Temp, valType, valBuf, valSize);
-			
-			
+			valSize = valSizeP;
+			index++;
 		}
-		index++;
 	}
+	catch (invalid_argument pE) {
+		pConnection->WriteLine(string("ERROR: ") + pE.what());
+	}
+	
 }
 
 string RegListCommand::GetName() {
@@ -540,37 +679,14 @@ RegSetCommand::RegSetCommand(RegContext *pContext) {
 	_context = pContext;
 }
 
+
+
+
 typedef struct {
 	string name;
 	DWORD type;
 } RegValueType;
 
-typedef struct {
-	HKEY root;
-	string keyPath;
-	string valueName;
-} RegValueId;
-
-
-RegValueId GetValueId(string pValue) {
-	
-	if (pValue.find_first_of('\\') == std::string::npos) {
-		RegValueId result = { NULL, "", pValue };
-		return result;
-	}
-
-	string rootName = pValue.substr(0, pValue.find_first_of('\\'));
-	HKEY root = ParseKey(rootName.c_str());
-	pValue = pValue.substr(pValue.find_first_of('\\')+1, string::npos);
-	if (pValue.find_last_of('\\') == std::string::npos || root == NULL) {
-		RegValueId result = { NULL, "", pValue };
-		return result;
-	}
-	string path = pValue.substr(0, pValue.find_last_of('\\'));
-	string value = pValue.substr(pValue.find_last_of('\\')+1, string::npos);
-	RegValueId finalResult = { root, path, value };
-	return finalResult;
-}
 
 void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
 
@@ -612,21 +728,13 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 	
 
 	string valueName = pCmdLine->GetArgs().at(1);
-
-	RegValueId valueId = GetValueId(valueName);
-	HKEY key;
-	bool closeKey = false;
-	if (valueId.root == NULL)
-		key = _context->currentKey;
-	else {
-		DWORD error = RegOpenKeyExA(valueId.root, valueId.keyPath.c_str(), NULL, KEY_WRITE | KEY_READ, &key);
-		if (error == ERROR_SUCCESS) {
-			closeKey = true;
-		}
-		else{
-			pConnection->WriteLine("Error opening key %d", error);
-			return;
-		}
+	RegPathParam *path;
+	try {
+		path = new RegPathParam(_context, valueName, true);
+	}
+	catch (invalid_argument pE){
+		pConnection->WriteLine(string("ERROR: ") + pE.what());
+		return;
 	}
 
 	string valueType = pCmdLine->GetArgs().at(2);
@@ -643,7 +751,7 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 		pConnection->WriteLine("Invalid Value Type");
 		return;
 	}
-	DWORD error = ERROR_SUCCESS;
+	
 	DWORD valSize = 0;
 	DWORD dwordValue;
 	LONGLONG qwordValue;
@@ -651,22 +759,24 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 	char *mbuffer;
 	char *curPtr;
 	BYTE *buffer;
-	switch (valueTypeCode) {
-		case REG_DWORD:			
+
+	try {
+		switch (valueTypeCode) {
+		case REG_DWORD:
 			dwordValue = strtoul(value.c_str(), NULL, 0);
 			valSize = sizeof(DWORD);
-			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_DWORD, (BYTE*)&dwordValue, valSize);
+			path->SetValue(REG_DWORD, (BYTE*)&dwordValue, valSize);
 			break;
 		case REG_QWORD:
 			qwordValue = _strtoui64(value.c_str(), NULL, 0);
 			valSize = sizeof(LONGLONG);
-			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_QWORD, (BYTE*)&qwordValue, valSize);
+			path->SetValue(REG_QWORD, (BYTE*)&qwordValue, valSize);
 			break;
-		case REG_SZ :			
-			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_SZ, (const BYTE*)value.c_str(), (DWORD)value.length() + 1);
+		case REG_SZ:
+			path->SetValue(REG_SZ, (const BYTE*)value.c_str(), (DWORD)value.length() + 1);
 			break;
 		case REG_EXPAND_SZ:
-			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_EXPAND_SZ, (const BYTE*)value.c_str(), (DWORD)value.length() + 1);
+			path->SetValue(REG_EXPAND_SZ, (const BYTE*)value.c_str(), (DWORD)value.length() + 1);
 			break;
 		case REG_MULTI_SZ:
 			for (int i = 3; i < pCmdLine->GetArgs().size(); i++)
@@ -685,29 +795,29 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 			}
 			*curPtr = 0;
 			curPtr++;
-			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_MULTI_SZ, (const BYTE*)mbuffer, valSize);
+			path->SetValue(REG_MULTI_SZ, (const BYTE*)mbuffer, valSize);
 			free(mbuffer);
 			break;
 		case REG_BINARY:
 			src = strdup(value.c_str());
-			
+
 			for (int i = 0; i < (DWORD)value.length(); i++) {
 				switch (i % 3) {
-					case 2:
-						if (src[i] != ' '){
-							pConnection->WriteLine("Incorrect value format");
-							return;
-						}
-						src[i] = 0;
-						break;
-					case 1:
-						valSize++;
-					case 0:
-						if (!((src[i] >= '0' && src[i] <= '9') || (src[i] >= 'A' && src[i] <= 'F') || (src[i] >= 'a' && src[i] <= 'f'))){
-							pConnection->WriteLine("Incorrect value format");
-							return;
-						}
-						break;
+				case 2:
+					if (src[i] != ' '){
+						pConnection->WriteLine("Incorrect value format");
+						return;
+					}
+					src[i] = 0;
+					break;
+				case 1:
+					valSize++;
+				case 0:
+					if (!((src[i] >= '0' && src[i] <= '9') || (src[i] >= 'A' && src[i] <= 'F') || (src[i] >= 'a' && src[i] <= 'f'))){
+						pConnection->WriteLine("Incorrect value format");
+						return;
+					}
+					break;
 				}
 			}
 			buffer = (BYTE*)malloc(valSize);
@@ -715,17 +825,16 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 				DWORD val = strtol(&src[i], NULL, 16);
 				buffer[i / 3] = (BYTE)val;
 			}
-			error = RegSetValueExA(key, valueId.valueName.c_str(), 0, REG_BINARY, (const BYTE*)buffer, valSize);
+			path->SetValue(REG_BINARY, (const BYTE*)buffer, valSize);
 			free(buffer);
 			free(src);
-	}	
-	if (closeKey){
-		RegCloseKey(key);
+		}
 	}
-	if (error != ERROR_SUCCESS){
-		pConnection->WriteLine("Failed to write to registry %d", error);
-		return;
+	catch (invalid_argument pE){
+		pConnection->WriteLine(string("ERROR: ") + pE.what());
 	}
+
+	delete path;
 }
 
 string RegSetCommand::GetName() {
@@ -743,11 +852,15 @@ void RegDelValCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 		return;
 	}
 
+	
 
-	DWORD error = RegDeleteValueA(_context->currentKey, pCmdLine->GetArgs().at(1).c_str());
-	if (error != ERROR_SUCCESS){
-		pConnection->WriteLine("Failed to delete value: %d", error);
-		return;
+	try {
+		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true);
+		
+		path.DeleteValue();
+	}
+	catch (invalid_argument pE) {
+		pConnection->WriteLine(string("ERROR")+pE.what());
 	}
 }
 
@@ -767,13 +880,15 @@ void RegCreateKeyCommand::ProcessCommand(Connection *pConnection, ParsedCommandL
 		return;
 	}
 
-	HKEY resultKey;
-	DWORD error = RegCreateKeyExA(_context->currentKey, pCmdLine->GetArgs().at(1).c_str(),0,NULL, 0, NULL,NULL,&resultKey, NULL);
-	RegCloseKey(resultKey);
-	if (error != ERROR_SUCCESS){
-		pConnection->WriteLine("Failed to create key: %d", error);
-		return;
+	try {
+		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true);
+
+		path.CreateKey();
 	}
+	catch (invalid_argument pE) {
+		pConnection->WriteLine(string("ERROR") + pE.what());
+	}
+	
 }
 
 string RegCreateKeyCommand::GetName() {
@@ -791,15 +906,15 @@ void RegDeleteKeyCommand::ProcessCommand(Connection *pConnection, ParsedCommandL
 		pConnection->WriteLine("SYNTAX: delkey <subkey>");
 		return;
 	}
-	string keyName = pCmdLine->GetArgs().at(1);
-	wstring wideName = wstring(keyName.begin(), keyName.end());
-	HKEY resultKey;
-	DWORD error = RegDeleteKeyExW(_context->currentKey, wideName.c_str(), 0, NULL);
-	RegCloseKey(resultKey);
-	if (error != ERROR_SUCCESS){
-		pConnection->WriteLine("Failed to delete key: %d", error);
-		return;
+	try {
+		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true);
+
+		path.DeleteKey();
 	}
+	catch (invalid_argument pE) {
+		pConnection->WriteLine(string("ERROR: ") + pE.what());
+	}
+	
 }
 
 string RegDeleteKeyCommand::GetName() {
@@ -819,15 +934,16 @@ void RegDeleteTreeCommand::ProcessCommand(Connection *pConnection, ParsedCommand
 		pConnection->WriteLine("SYNTAX: deltree <subkey>");
 		return;
 	}
-	string keyName = pCmdLine->GetArgs().at(1);
-	wstring wideName = wstring(keyName.begin(), keyName.end());
-	HKEY resultKey;
-	DWORD error = RegDeleteTreeW(_context->currentKey, wideName.c_str());
-	RegCloseKey(resultKey);
-	if (error != ERROR_SUCCESS){
-		pConnection->WriteLine("Failed to delete tree: %d", error);
-		return;
+
+	try {
+		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true);
+
+		path.DeleteTree();
 	}
+	catch (invalid_argument pE) {
+		pConnection->WriteLine(string("ERROR: ") + pE.what());
+	}
+
 }
 
 string RegDeleteTreeCommand::GetName() {
@@ -890,46 +1006,48 @@ RegAclCommand::RegAclCommand(RegContext *pContext) {
 void RegAclCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 1)
 	{
-		pConnection->WriteLine("SYNTAX: acl");
-		return;
-	}
-	PSECURITY_DESCRIPTOR securityDescriptor=NULL;
-	PSECURITY_DESCRIPTOR ownerSecurityDescriptor = NULL;
-	DWORD descriptorSize = 0;
-	HRESULT error = RegGetKeySecurity(_context->currentKey, DACL_SECURITY_INFORMATION,securityDescriptor, &descriptorSize);
-	securityDescriptor = malloc(descriptorSize);
-	error = RegGetKeySecurity(_context->currentKey, DACL_SECURITY_INFORMATION, securityDescriptor, &descriptorSize);
-	if (error != ERROR_SUCCESS){
-		pConnection->WriteLine("Failed to get security descriptor: %d", error);
-		return;
-	}
-	descriptorSize = 0;
-	error = RegGetKeySecurity(_context->currentKey, OWNER_SECURITY_INFORMATION, ownerSecurityDescriptor, &descriptorSize);
-	ownerSecurityDescriptor = malloc(descriptorSize);
-	error = RegGetKeySecurity(_context->currentKey, OWNER_SECURITY_INFORMATION, ownerSecurityDescriptor, &descriptorSize);
-	if (error != ERROR_SUCCESS){
-		pConnection->WriteLine("Failed to get owner descriptor: %d", error);
-		return;
-	}
-	BOOL daclPresent;
-	BOOL daclDefaulted;
-	PACL acl;
-	if (!GetSecurityDescriptorDacl(securityDescriptor, &daclPresent, &acl, &daclDefaulted)) {
-		pConnection->WriteLastError();
-		return;
-	}
-	if (!daclPresent) {
-		pConnection->WriteLine("No ACL present");
+		pConnection->WriteLine("SYNTAX: acl <optional keypath>");
 		return;
 	}
 
-	if (daclDefaulted)
-		pConnection->WriteLine("ACL is a default");
+	try {
+		RegPathParam path(_context, pCmdLine->GetArgs().size() == 1 ? "":pCmdLine->GetArgs().at(1), false);
+		PSECURITY_DESCRIPTOR securityDescriptor = NULL;
+		PSECURITY_DESCRIPTOR ownerSecurityDescriptor = NULL;
+		DWORD descriptorSize = 0;
+		path.GetKeySecurity(DACL_SECURITY_INFORMATION, securityDescriptor, &descriptorSize);
+		securityDescriptor = malloc(descriptorSize);
+		path.GetKeySecurity(DACL_SECURITY_INFORMATION, securityDescriptor, &descriptorSize);
+		
+		descriptorSize = 0;
+		path.GetKeySecurity(OWNER_SECURITY_INFORMATION, ownerSecurityDescriptor, &descriptorSize);
+		ownerSecurityDescriptor = malloc(descriptorSize);
+		path.GetKeySecurity(OWNER_SECURITY_INFORMATION, ownerSecurityDescriptor, &descriptorSize);
+		
+		BOOL daclPresent;
+		BOOL daclDefaulted;
+		PACL acl;
+		if (!GetSecurityDescriptorDacl(securityDescriptor, &daclPresent, &acl, &daclDefaulted)) {
+			pConnection->WriteLastError();
+			return;
+		}
+		if (!daclPresent) {
+			pConnection->WriteLine("No ACL present");
+			return;
+		}
 
-	PrintOwnerInformation(pConnection, ownerSecurityDescriptor);
-	PrintAclInformation(pConnection, securityDescriptor, acl);
-	free(securityDescriptor);
-	free(ownerSecurityDescriptor);
+		if (daclDefaulted)
+			pConnection->WriteLine("ACL is a default");
+
+		PrintOwnerInformation(pConnection, ownerSecurityDescriptor);
+		PrintAclInformation(pConnection, securityDescriptor, acl);
+		free(securityDescriptor);
+		free(ownerSecurityDescriptor);
+	}
+	catch (invalid_argument pE) {
+		pConnection->WriteLine(string("ERROR: ") + pE.what());
+	}
+	
 }
 
 string RegAclCommand::GetName() {
