@@ -460,7 +460,6 @@ void FindRegCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 	pConnection->WriteLine("Searching... ");
 	ProcessLevel(pConnection, _context->regPath=="" ? NULL : _context->regPath.c_str(), pCmdLine->GetArgs().at(1).c_str());
 	pConnection->WriteLine("Done");
-
 }
 
 bool strcontains(const char *s1, const char *s2)
@@ -860,7 +859,7 @@ void RegDelValCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 		path.DeleteValue();
 	}
 	catch (invalid_argument pE) {
-		pConnection->WriteLine(string("ERROR")+pE.what());
+		pConnection->WriteLine(string("ERROR: ")+pE.what());
 	}
 }
 
@@ -886,7 +885,7 @@ void RegCreateKeyCommand::ProcessCommand(Connection *pConnection, ParsedCommandL
 		path.CreateKey();
 	}
 	catch (invalid_argument pE) {
-		pConnection->WriteLine(string("ERROR") + pE.what());
+		pConnection->WriteLine(string("ERROR: ") + pE.what());
 	}
 	
 }

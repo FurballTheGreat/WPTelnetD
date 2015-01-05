@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest" xmlns:m3="http://schemas.microsoft.com/appx/2014/manifest" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest">
-  <Identity Name="2A7B2F90-04A5-4C40-BA2D-7689413C4D9A" Publisher="CN=James Martin" Version="1.0.0.9" />
+  <Identity Name="2A7B2F90-04A5-4C40-BA2D-7689413C4D9A" Publisher="CN=James Martin" Version="1.0.0.11" />
   <mp:PhoneIdentity PhoneProductId="acb8011a-53b4-4ac1-8831-a9df3d1157b7" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>AppRepurposer</DisplayName>

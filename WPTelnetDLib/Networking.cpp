@@ -14,30 +14,33 @@ Connection::~Connection() {
 
 const char *Connection::ReadLine() {
 	while (true){
+		if (_used > 0){
+			char *ptr = _buf;
+
+			while ((*ptr != '\n' && *ptr != '\r') && (ptr - _buf) < _used)
+				ptr++;
+
+
+			if ((ptr - _buf)<_used) {
+				*ptr = 0;
+				strcpy_s(_lineBuf, _buf);
+				ptr++;
+				while ((*ptr == '\n' || *ptr == '\r') && (ptr - _buf) < _used)
+					ptr++;
+
+				memcpy(_buf, ptr, sizeof(_buf) - (ptr - _buf));
+				_used -= (ptr - _buf);
+				return _lineBuf;
+			}
+			if ((ptr - _buf) == sizeof(_buf))
+				_used = 0;
+		}
 		int read = recv(_socket, _buf + _used, sizeof(_buf) - _used, 0);
 		if (read == 0)
 			return NULL;
 
 		_used += read;
-		char *ptr = _buf;
-
-		while ((*ptr != '\n' && *ptr != '\r') && (ptr - _buf) < _used)
-			ptr++;
-	
 		
-		if ((ptr - _buf)<_used) {
-			*ptr = 0;
-			strcpy_s(_lineBuf, _buf);
-			ptr++;
-			while ((*ptr == '\n' || *ptr == '\r') && (ptr - _buf) < _used) 
-				ptr++;
-
-			memcpy(_buf, ptr + 1, sizeof(_buf) - (ptr - _buf));
-			_used -= (ptr - _buf);
-			return _lineBuf;
-		}
-		if ((ptr - _buf) == sizeof(_buf))
-			_used = 0;
 	}
 }
 
