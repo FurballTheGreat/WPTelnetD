@@ -1074,6 +1074,7 @@ void RegHelpCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 	pConnection->WriteLine("delkey [subkey] - Deletes a subkey");
 	pConnection->WriteLine("deltree [subkey] - Deletes a subkey and all its children");
 	pConnection->WriteLine("mkkey [subkey] - Creates a new subkey");
+	pConnection->WriteLine("acl [key] - Displays the ACL of a key.");
 	
 	pConnection->WriteLine("");
 	pConnection->WriteLine("A path can also be opened by just typing it. '..' may be used to goto the parent key and a subkey can be opened by just specifying its name.");
