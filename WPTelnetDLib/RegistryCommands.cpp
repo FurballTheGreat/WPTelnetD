@@ -211,31 +211,18 @@ public:
 };
 
 
-class RegProcessHost : public ICommandProcessorHost
-{
-private:
-	RegContext *_context;
-	bool _noPrompt;
-public:
-	RegProcessHost(RegContext*pContext, bool pNoPrompt) {
-		_context = pContext;
-		_noPrompt = pNoPrompt;
-	}
-	virtual void PrintPrompt(Connection *pConnection) {
-		if (_noPrompt)return;
-		if (_context->rootKey == HKEY_LOCAL_MACHINE) pConnection->Write("HKLM\\");
-		else if (_context->rootKey == HKEY_CLASSES_ROOT) pConnection->Write("HKCR\\");
-		else if (_context->rootKey == HKEY_CURRENT_USER) pConnection->Write("HKCU\\");
-		else if (_context->rootKey == HKEY_USERS) pConnection->Write("HKU\\");
-		else if (_context->rootKey == HKEY_CURRENT_CONFIG) pConnection->Write("HKCC\\");
-		else if (_context->rootKey == HKEY_PERFORMANCE_DATA) pConnection->Write("HKPD\\");
 
-		pConnection->Write("%s>", _context->regPath.c_str());
-	}
-	virtual void UnhandledLine(Connection *pConnection, string pLine){
-		ProcessChangeRegPath(_context, pConnection, pLine);
-	}
-};
+void PrintPrompt(Connection *pConnection, RegContext *pContext) {
+
+	if (pContext->rootKey == HKEY_LOCAL_MACHINE) pConnection->Write("HKLM\\");
+	else if (pContext->rootKey == HKEY_CLASSES_ROOT) pConnection->Write("HKCR\\");
+	else if (pContext->rootKey == HKEY_CURRENT_USER) pConnection->Write("HKCU\\");
+	else if (pContext->rootKey == HKEY_USERS) pConnection->Write("HKU\\");
+	else if (pContext->rootKey == HKEY_CURRENT_CONFIG) pConnection->Write("HKCC\\");
+	else if (pContext->rootKey == HKEY_PERFORMANCE_DATA) pConnection->Write("HKPD\\");
+
+	pConnection->Write("%s>", pContext->regPath.c_str());
+}
 
 void RegCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
 	RegContext *context = new RegContext();
@@ -259,27 +246,28 @@ void RegCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmd
 	commands.push_back((BaseCommand*)new RegAclCommand(context));
 	
 	if (pCmdLine->GetArgs().size() == 1) {
-		RegProcessHost host(context,false);
-		CommandProcessor processor = CommandProcessor(commands, &host);
+		CommandProcessor processor = CommandProcessor(&commands, pConnection);
 		pConnection->WriteLine("Registry Editor - Type HELP for assistance.");
 		
 
-		processor.PrintPrompt(pConnection);
+		PrintPrompt(pConnection, context);
 		const char* line = pConnection->ReadLine();
 
 		while (line != NULL) {
-			if (processor.ProcessData(pConnection, line)) {
-
-				break;
+			ParsedCommandLine commandLine(string(line),pCmdLine->GetHost());
+			if (commandLine.GetName() == "exit") break;
+			if (!processor.ProcessCommandLine(&commandLine)) {
+				ProcessChangeRegPath(context, pConnection, line);
+				
 			}
+			PrintPrompt(pConnection, context);			
 			line = pConnection->ReadLine();
 		}
 	}
 	else {
-		RegProcessHost host(context,true);
-		CommandProcessor processor = CommandProcessor(commands, &host);
+		CommandProcessor processor = CommandProcessor(&commands, pConnection);
 		ParsedCommandLine line = pCmdLine->GetParametersAsLine();
-		processor.ProcessCommandLine(pConnection, &line);
+		processor.ProcessCommandLine( &line);
 	}
 }
 

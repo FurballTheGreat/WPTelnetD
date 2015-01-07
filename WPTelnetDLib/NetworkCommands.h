@@ -19,3 +19,15 @@ public:
 	string GetName();
 };
 
+
+class RunFromCommand : BaseCommand {
+private:
+	IExecutionContext *_executionContext;
+	CommandProcessor *_processor;
+public:
+	RunFromCommand(IExecutionContext *pExecutionContext, CommandProcessor *pProcessor);
+	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
+
+	string GetName();
+};
+

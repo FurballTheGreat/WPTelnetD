@@ -9,29 +9,32 @@ using namespace std;
 
 typedef void (*PPRINT_PROMPT)(Connection*, LPVOID);
 
+
+class IExecutionContext
+{
+public:
+	virtual string GetVariable(string pName) = 0;
+	virtual void SetVariable(string pName, string pValue) = 0;
+};
+
 class ParsedCommandLine
 {
 private:
 	vector<string> _arguments ;
 	string _command;
 	string _originalLine;
+	IExecutionContext *_host;
 public:
-	ParsedCommandLine(string pCommandLine) ;
+	ParsedCommandLine(string pCommandLine, IExecutionContext *pHost) ;
 
 	string GetName();
 	string GetRaw();
 	vector<string> GetArgs();
-
+	IExecutionContext *GetHost();
 	ParsedCommandLine GetParametersAsLine();
 };
 
-class ICommandProcessorHost 
-{
 
-	public:
-		virtual void PrintPrompt(Connection *pConnection) = 0;
-		virtual void UnhandledLine(Connection *pConnection, string pLine) = 0;
-};
 
 class BaseCommand 
 {
@@ -44,13 +47,9 @@ public:
 class CommandProcessor 
 {
 private:
-	vector<BaseCommand *> _commands;
-	ICommandProcessorHost *_host;
+	vector<BaseCommand *> *_commands;
+	Connection *_connection;
 public:
-	CommandProcessor(vector<BaseCommand *> pCommands, ICommandProcessorHost *pHost);
-	void PrintPrompt(Connection *pConnection);
-
-
-	bool ProcessData(Connection *pConnection,const char *pLine);
-	bool ProcessCommandLine(Connection *pConnection, ParsedCommandLine *pLine);
+	CommandProcessor(vector<BaseCommand *> *pCommands,Connection *pConnection);
+	bool ProcessCommandLine(ParsedCommandLine *pLine);
 };

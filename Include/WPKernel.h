@@ -1426,3 +1426,34 @@ WINAPI
 GlobalMemoryStatusEx(
 _Out_ LPMEMORYSTATUSEX lpBuffer
 );
+
+#define NET_API_FUNCTION    __stdcall
+#define NET_API_STATUS          DWORD
+
+#define MAX_PREFERRED_LENGTH    ((DWORD) -1)
+#define FILTER_NORMAL_ACCOUNT               (0x0002)
+
+
+typedef HRESULT(WINAPI *PNetUserEnum)(
+	_In_opt_    LPCWSTR     servername OPTIONAL,
+	_In_        DWORD      level,
+	_In_        DWORD      filter,
+	_Outptr_result_buffer_(_Inexpressible_("varies")) LPBYTE     *bufptr,
+	_In_        DWORD      prefmaxlen,
+	_Out_       LPDWORD    entriesread,
+	_Out_       LPDWORD    totalentries,
+	_Inout_opt_ PDWORD resume_handle OPTIONAL
+	);
+
+typedef struct _USER_INFO_0 {
+	LPWSTR   usri0_name;
+}USER_INFO_0, *PUSER_INFO_0, *LPUSER_INFO_0;
+
+
+extern "C" WINBASEAPI
+HANDLE
+WINAPI
+FindFirstFileA(
+_In_ LPCSTR lpFileName,
+_Out_ LPWIN32_FIND_DATAA lpFindFileData
+);

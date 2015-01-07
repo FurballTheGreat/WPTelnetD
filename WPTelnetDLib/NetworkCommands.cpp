@@ -2,6 +2,10 @@
 #include "NetworkCommands.h"
 #include "TcpConnectionTable.h"
 #include "UdpConnectionTable.h"
+#include "FileHelpers.h"
+#include "TelnetD.h"
+#include<string>
+#include<vector>
 
 void NetstatCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
 	try {
@@ -102,4 +106,37 @@ void DownloadCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine 
 
 string DownloadCommand::GetName() {
 	return "down";
+}
+
+RunFromCommand::RunFromCommand(IExecutionContext *pExecutionContext, CommandProcessor *pProcessor) {
+	_executionContext = pExecutionContext;
+	_processor = pProcessor;
+}
+
+bool ProcessLine(Connection *pConnection, IExecutionContext *pExecutionContext, CommandProcessor *pProcessor, string pLine);
+
+void RunFromCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+	if (pCmdLine->GetArgs().size()<2)
+		pConnection->WriteLine("ERROR: You must specify a URL and save name");
+	else {
+		std::vector<std::string> lines;
+		try {
+			DownloadTextFileReader reader(pCmdLine->GetArgs().at(1));
+			string line;
+			while (reader.ReadLine(line)) {
+				lines.push_back(line);
+			}
+		}
+		catch (std::string msg) {
+			pConnection->WriteLine(string("ERROR: ") + msg);
+		}
+		for (int i = 0; i < lines.size(); i++)
+			ProcessLine(pConnection, _executionContext, _processor, lines.at(i));
+
+
+	}
+}
+
+string RunFromCommand::GetName() {
+	return "runfrom";
 }

@@ -19,6 +19,12 @@ public:
 	string GetName();
 };
 
+class EchoCommand : BaseCommand {
+public:
+	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
+	string GetName();
+};
+
 class ListPrivsCommand : BaseCommand {
 public:
 	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);

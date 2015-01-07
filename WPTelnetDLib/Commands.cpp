@@ -61,6 +61,16 @@ string EnvCommand::GetName() {
 	return "env";
 }
 
+void EchoCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+	string text = pCmdLine->GetParametersAsLine().GetRaw();
+	pConnection->WriteLine(text);
+}
+
+string EchoCommand::GetName() {
+	return "echo";
+}
+
+
 void ListPrivsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
 
 	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, TRUE, GetCurrentProcessId());

@@ -23,28 +23,60 @@
 #include "DirectoryCommands.h"
 #include "Commands.h"
 #include "ProcessHost.h"
+#include "FileHelpers.h"
 #ifdef PHONE
 #include<WPKernel.h>
 #endif
 
 
-class CmdProcessHost : public ICommandProcessorHost
+
+
+class ExecutionContext : public IExecutionContext
 {
 
 public:
-	CmdProcessHost() {
+	ExecutionContext() {
 
 	}
-	virtual void PrintPrompt(Connection *pConnection) {
-		char buf[1024];
-		GetCurrentDirectoryA(sizeof(buf), buf);
-		pConnection->Write("%s>", buf);
-	}
-	virtual void UnhandledLine(Connection *pConnection, string pLine){
-		ProcessHost host(pConnection);
-		host.ExecuteProcess(pConnection, pLine.c_str());
-	}
+	string GetVariable(string pName) {
+		return "";
+	};
+	void SetVariable(string pName, string pValue) {
+	};
 };
+
+void PrintPrompt(Connection *pConnection) {
+	char buf[1024];
+	GetCurrentDirectoryA(sizeof(buf), buf);
+	pConnection->Write("%s>", buf);
+}
+
+bool ProcessLine(Connection *pConnection, IExecutionContext *pExecutionContext, CommandProcessor *pProcessor,  string pLine) {
+	ParsedCommandLine cmdLine = ParsedCommandLine(pLine, pExecutionContext);
+	if (cmdLine.GetName() == "exit"){
+		pConnection->WriteLine("Shutting Down");
+		return true;
+	}
+	bool result = false;
+	if (!pProcessor->ProcessCommandLine(&cmdLine)) {
+		string batName = GetCurrentDirectory() + "\\" + cmdLine.GetName() + ".bat";
+		if (FileExists(batName)){
+			TextFileReader *reader = new TextFileReader(batName);
+			string batLine;
+			while (reader->ReadLine(batLine)) {
+				ParsedCommandLine batCmdLine = ParsedCommandLine(batLine, pExecutionContext);
+				result = ProcessLine(pConnection, pExecutionContext, pProcessor, batLine);
+				if (result)
+					return result;
+			}
+		}
+		else {
+			ProcessHost host(pConnection);
+			host.ExecuteProcess(pConnection, pLine.c_str());
+		}
+	}
+	return result;
+}
 
 bool ProcessConnection(SOCKET pSocket, char *pWelcomeInfo) {
 	Connection *connection = new Connection(pSocket);
@@ -78,6 +110,8 @@ bool ProcessConnection(SOCKET pSocket, char *pWelcomeInfo) {
 	commands.push_back((BaseCommand*)new EnumWindowsCommand());
 	commands.push_back((BaseCommand*)new ListPrivsCommand());
 	commands.push_back((BaseCommand*)new RegCommand());
+	commands.push_back((BaseCommand*)new EchoCommand());
+	commands.push_back((BaseCommand*)new EchoCommand());
 
 
 	commands.push_back((BaseCommand*)new AttribCommand());
@@ -87,17 +121,18 @@ bool ProcessConnection(SOCKET pSocket, char *pWelcomeInfo) {
 	commands.push_back((BaseCommand*)new TestCommand());
 	commands.push_back((BaseCommand*)new TestCommand2());
 	
-	CmdProcessHost host;
+	ExecutionContext context;
 
-	CommandProcessor processor = CommandProcessor(commands, (ICommandProcessorHost*)&host);
-	processor.PrintPrompt(connection);
+	CommandProcessor processor = CommandProcessor(&commands,connection);
+	PrintPrompt(connection);
 	const char* line = connection->ReadLine();
-
+	commands.push_back((BaseCommand*)new RunFromCommand(&context, &processor));
 	while (line!=NULL) {
-		if (processor.ProcessData(connection, line)) {
-			connection->WriteLine("Shutting Down");
+		if (ProcessLine(connection, &context, &processor, line))
+		{
 			break;
 		}
+		PrintPrompt(connection);
 		line = connection->ReadLine();
 	}
 

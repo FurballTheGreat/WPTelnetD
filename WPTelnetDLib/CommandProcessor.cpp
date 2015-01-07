@@ -5,10 +5,40 @@
 #include<vector>
 using namespace std;
 
-ParsedCommandLine::ParsedCommandLine(string pCommandLine) {		
+ParsedCommandLine::ParsedCommandLine(string pCommandLine, IExecutionContext *pHost) {		
 	int pos = 0;
 	_arguments = vector<string>();
-	_originalLine = pCommandLine;
+	_host = pHost;
+	_originalLine = "";
+	while (pos < pCommandLine.length()) {
+		_originalLine += pCommandLine.substr(pos, pCommandLine.find_first_of('%', pos)-pos);
+		if (pCommandLine.find_first_of('%', pos) == string::npos){			
+			break;
+		}
+		else {
+			int start = pCommandLine.find_first_of('%', pos) + 1;
+			if (pCommandLine.find_first_of('%', start) == string::npos){
+				_originalLine += "%";
+				pos = start;
+				continue;
+			}
+			int end = pCommandLine.find_first_of('%', start)-1;
+			
+			if (end<start)
+
+				_originalLine += "%";
+			else{
+				string varName = pCommandLine.substr(start, end-start+1);
+				_originalLine += pHost->GetVariable(varName);
+			}
+			
+			pos = end + 2;
+
+		}
+	}
+
+	pos = 0;
+
 	for (;;) {	
 		bool skip = false;
 		while(pCommandLine[pos]==' ')
@@ -67,47 +97,41 @@ string ParsedCommandLine::GetRaw() {
 
 ParsedCommandLine ParsedCommandLine::GetParametersAsLine(){
 	if (_arguments.size() <= 1)
-		return ParsedCommandLine(_originalLine);
+		return ParsedCommandLine(_originalLine,_host);
 
-	return ParsedCommandLine(_originalLine.substr(_command.length() + 1, string::npos));
+	return ParsedCommandLine(_originalLine.substr(_command.length() + 1, string::npos),_host);
 }
 
 vector<string> ParsedCommandLine::GetArgs() {
 	return _arguments;
-}		         
+}		
+
+IExecutionContext *ParsedCommandLine::GetHost(){
+	return _host;
+}
 
 BaseCommand::BaseCommand() {
 }
 
-CommandProcessor::CommandProcessor(vector<BaseCommand *> pCommands, ICommandProcessorHost *pHost) {
+CommandProcessor::CommandProcessor(vector<BaseCommand *> *pCommands, Connection *pConnection) {
 	_commands = pCommands;
-	_host = pHost;
-
-}
-void CommandProcessor::PrintPrompt(Connection *pConnection) {
-	_host->PrintPrompt(pConnection);
+	_connection = pConnection;
 }
 
-bool CommandProcessor::ProcessData(Connection *pConnection, const char *pLine) {
-	ParsedCommandLine cmdLine = ParsedCommandLine(string(pLine));
-	return ProcessCommandLine(pConnection,&cmdLine);
-}
 
-bool CommandProcessor::ProcessCommandLine(Connection *pConnection, ParsedCommandLine *pLine) {
+
+bool CommandProcessor::ProcessCommandLine(ParsedCommandLine *pLine) {
 	string cmd = pLine->GetName();
-	if (cmd == string("exit"))
-		return true;
 	bool done = false;
-	for (std::vector<BaseCommand *>::iterator it = _commands.begin() ; it != _commands.end(); ++it)
+	for (std::vector<BaseCommand *>::iterator it = _commands->begin() ; it != _commands->end(); ++it)
 		if((*it)->GetName() == cmd) {
-			(*it)->ProcessCommand(pConnection,pLine);
+			(*it)->ProcessCommand(_connection,pLine);
 			done = true;
 			break;
 		}				  
-	if(!done) 
-		_host->UnhandledLine(pConnection, pLine->GetRaw());
 	
-	PrintPrompt(pConnection);
-	return false;
+	
+	
+	return done;
 }
 

@@ -124,6 +124,7 @@
     <ClCompile Include="DirectoryCommands.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="FileCommands.cpp" />
+    <ClCompile Include="FileHelpers.cpp" />
     <ClCompile Include="GuiCommands.cpp" />
     <ClCompile Include="NetworkCommands.cpp" />
     <ClCompile Include="Networking.cpp" />
@@ -146,6 +147,7 @@
     <ClInclude Include="DirectoryCommands.h" />
     <ClInclude Include="ExperimentalCommands.h" />
     <ClInclude Include="FileCommands.h" />
+    <ClInclude Include="FileHelpers.h" />
     <ClInclude Include="GuiCommands.h" />
     <ClInclude Include="NetworkCommands.h" />
     <ClInclude Include="Networking.h" />
