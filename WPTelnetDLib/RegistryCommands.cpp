@@ -211,6 +211,20 @@ public:
 };
 
 
+class RecursiveRegOperation
+{
+private:
+
+public:
+	RecursiveRegOperation(RegPathParam *pPath) {
+		
+	}
+
+	~RecursiveRegOperation() {
+	
+	}
+};
+
 
 void PrintPrompt(Connection *pConnection, RegContext *pContext) {
 

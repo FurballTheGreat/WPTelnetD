@@ -30,7 +30,9 @@ void HelpCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCm
 	pConnection->WriteLine("postmessage - Posts a message using PostMessageW.");
 	pConnection->WriteLine("listprivs - Posts a message using PostMessageW");
 	pConnection->WriteLine("reg - Open the WPTD registry editor.");
-	
+	pConnection->WriteLine("toast - Open the WPTD registry editor.");
+	pConnection->WriteLine("echo - Open the WPTD registry editor.");
+	pConnection->WriteLine("provxml - Open the WPTD registry editor.");
 }
 
 string HelpCommand::GetName() {

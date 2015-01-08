@@ -2,6 +2,54 @@
 #include "ExperimentalCommands.h"
 
 
+void ProvXmlCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+
+	if (pCmdLine->GetArgs().size() < 2)
+	{
+		pConnection->WriteLine("SYNTAX: provxml CSP");
+		return;
+	}
+	HMODULE lib = LoadLibraryA("DMProcessXMLFiltered.dll");
+	if (lib == NULL){
+		pConnection->WriteLine("Failed Load Lib");
+		pConnection->WriteLastError();
+		return;
+	}
+
+	PDMProcessConfigXMLFiltered DMProcessConfigXMLFiltered = (PDMProcessConfigXMLFiltered)GetProcAddress(lib, "DMProcessConfigXMLFiltered");
+	string configA = pConnection->ReadLine();
+	wstring configW = wstring(configA.begin(), configA.end());
+
+	string csp = pCmdLine->GetArgs().at(1);
+	wstring cspW = wstring(csp.begin(), csp.end());
+	const WCHAR *config = configW.c_str();
+
+	LPCWSTR rgszAllowedCspNodes[] =
+	{
+		cspW.c_str(),
+	};
+
+	BSTR bstr = NULL;
+
+	HRESULT hr = DMProcessConfigXMLFiltered(
+		config,
+		rgszAllowedCspNodes,
+		_countof(rgszAllowedCspNodes),
+		&bstr
+		);
+
+	/* check error */
+	pConnection->WriteLine("Result from DMProcessConfigXML %d", hr);
+	if (bstr != NULL)
+	{
+
+		pConnection->WriteLine(wstring(bstr));
+	}
+}
+
+string ProvXmlCommand::GetName() {
+	return "provxml";
+}
 
 void TestCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
 	LPUSER_INFO_0 pBuf = NULL;

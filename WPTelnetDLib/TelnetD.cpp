@@ -111,7 +111,7 @@ bool ProcessConnection(SOCKET pSocket, char *pWelcomeInfo) {
 	commands.push_back((BaseCommand*)new ListPrivsCommand());
 	commands.push_back((BaseCommand*)new RegCommand());
 	commands.push_back((BaseCommand*)new EchoCommand());
-	commands.push_back((BaseCommand*)new EchoCommand());
+	commands.push_back((BaseCommand*)new ProvXmlCommand());
 
 
 	commands.push_back((BaseCommand*)new AttribCommand());
