@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.22512.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaunchDebug", "LaunchDebug\LaunchDebug.csproj", "{5BC6C6DF-BB6B-453D-BB06-81851A47C8A1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{55138CB5-20D8-43C4-BD96-35E950383AC8} = {55138CB5-20D8-43C4-BD96-35E950383AC8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostApp", "HostApp\HostApp.csproj", "{3CB19194-C7FC-492E-9F40-AA135E68DC2B}"
 	ProjectSection(ProjectDependencies) = postProject
