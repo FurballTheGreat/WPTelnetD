@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.22512.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaunchDebug", "LaunchDebug\LaunchDebug.csproj", "{5BC6C6DF-BB6B-453D-BB06-81851A47C8A1}"
 EndProject
@@ -28,6 +28,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CSDDiagRT", "ManagerApp\CSDDiagRT\CSDDiagRT.vcxproj", "{B0F2F986-67C7-491A-B997-4D8E0CC45EAC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HTCDebugLogWinPRT", "ManagerApp\HTCDebugLogWinPRT\HTCDebugLogWinPRT.vcxproj", "{7B0D4736-DE34-436B-BE09-953CD7930784}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RPCComponent", "ManagerApp\RPCComponent\RPCComponent.vcxproj", "{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -309,6 +311,26 @@ Global
 		{7B0D4736-DE34-436B-BE09-953CD7930784}.Release|x64.ActiveCfg = Release|Win32
 		{7B0D4736-DE34-436B-BE09-953CD7930784}.Release|x86.ActiveCfg = Release|Win32
 		{7B0D4736-DE34-436B-BE09-953CD7930784}.Release|x86.Build.0 = Release|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Debug|ARM.ActiveCfg = Debug|ARM
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Debug|ARM.Build.0 = Debug|ARM
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Debug|Win32.Build.0 = Debug|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Debug|x64.ActiveCfg = Debug|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Debug|x86.ActiveCfg = Debug|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Debug|x86.Build.0 = Debug|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Release|Any CPU.ActiveCfg = Release|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Release|ARM.ActiveCfg = Release|ARM
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Release|ARM.Build.0 = Release|ARM
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Release|Win32.ActiveCfg = Release|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Release|Win32.Build.0 = Release|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Release|x64.ActiveCfg = Release|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Release|x86.ActiveCfg = Release|Win32
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -322,5 +344,6 @@ Global
 		{42BBD833-3425-482F-B292-BD081AFED647} = {1B3EC19D-9131-4E48-A8E1-F8DB1445ED35}
 		{B0F2F986-67C7-491A-B997-4D8E0CC45EAC} = {1B3EC19D-9131-4E48-A8E1-F8DB1445ED35}
 		{7B0D4736-DE34-436B-BE09-953CD7930784} = {1B3EC19D-9131-4E48-A8E1-F8DB1445ED35}
+		{7CD6E323-BBEC-4933-84D2-99D1C66A7C7C} = {1B3EC19D-9131-4E48-A8E1-F8DB1445ED35}
 	EndGlobalSection
 EndGlobal

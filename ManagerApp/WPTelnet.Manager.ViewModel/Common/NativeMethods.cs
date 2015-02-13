@@ -67,6 +67,15 @@ namespace WPTelnet.Manager.ViewModel.Common
 
             }
 
+            try
+            {
+                return RPCComponent.CRPCComponent.GetCommandLine();
+            }
+            catch (Exception)
+            {
+
+            }
+
             return "Failed to call GetCommnadLine";
         }
 
@@ -126,7 +135,16 @@ namespace WPTelnet.Manager.ViewModel.Common
 
             }
 
-            
+            try
+            {
+                return RPCComponent.CRPCComponent.CreateProcess(pCommandLine);
+            }
+            catch (Exception)
+            {
+
+            }
+
+
             throw new InvalidProgramException("Failed to call create process (WinRT)");
         }
 
@@ -177,11 +195,21 @@ namespace WPTelnet.Manager.ViewModel.Common
             {
 
             }
-            
-        
+
+
             try
             {
                 return HTCDebugLogWinPRT.HTCLog.GetLastError();
+            }
+            catch (Exception)
+            {
+
+            }
+
+
+            try
+            {
+                return RPCComponent.CRPCComponent.GetLastError();
             }
             catch (Exception)
             {
