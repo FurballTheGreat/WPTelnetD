@@ -106,6 +106,10 @@
       <Project>{42bbd833-3425-482f-b292-bd081afed647}</Project>
       <Name>DiagDebugLogWinPRT</Name>
     </ProjectReference>
+    <ProjectReference Include="..\FactoryKey\FactoryKey.vcxproj">
+      <Project>{7e97446d-9f14-41af-be9e-c205fa6e9290}</Project>
+      <Name>FactoryKey</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HTCDebugLogWinPRT\HTCDebugLogWinPRT.vcxproj">
       <Project>{7b0d4736-de34-436b-be09-953cd7930784}</Project>
       <Name>HTCDebugLogWinPRT</Name>
@@ -113,10 +117,6 @@
     <ProjectReference Include="..\RegistryUtils\RegistryUtils.vcxproj">
       <Project>{782d5b6c-3ccb-40be-87f5-543d2c0e0ab1}</Project>
       <Name>RegistryUtils</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RegistryWPRT\RegistryWPRT.vcxproj">
-      <Project>{cdf54dff-0112-4572-971b-6288fbca9acd}</Project>
-      <Name>RegistryWPRT</Name>
     </ProjectReference>
     <ProjectReference Include="..\RPCComponent\RPCComponent.vcxproj">
       <Project>{7cd6e323-bbec-4933-84d2-99d1c66a7c7c}</Project>

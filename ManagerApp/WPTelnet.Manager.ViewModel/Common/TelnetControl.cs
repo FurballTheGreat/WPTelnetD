@@ -83,7 +83,15 @@ namespace WPTelnet.Manager.ViewModel.Common
 
             }
 
+            try
+            {
+                result = FactoryKey.CFactoryKey.TelnetInitNetworking(out wsaError);
+                goto done;
+            }
+            catch (Exception)
+            {
 
+            }
 
             done:
             if(!result)
@@ -157,6 +165,16 @@ namespace WPTelnet.Manager.ViewModel.Common
               try
               {
                   result = RPCComponent.CRPCComponent.TelnetShutDownNetworking();
+                  goto done;
+              }
+              catch (Exception)
+              {
+
+              }
+      
+              try
+              {
+                  result = FactoryKey.CFactoryKey.TelnetShutDownNetworking();
                   goto done;
               }
               catch (Exception)
@@ -238,6 +256,16 @@ namespace WPTelnet.Manager.ViewModel.Common
               try
               {
                   result = RPCComponent.CRPCComponent.TelnetListenForOneConnection(pPort, out socket, out wsaError);
+                  goto done;
+              }
+              catch (Exception)
+              {
+
+              }
+
+              try
+              {
+                  result = FactoryKey.CFactoryKey.TelnetListenForOneConnection(pPort, out socket, out wsaError);
                   goto done;
               }
               catch (Exception)
@@ -329,6 +357,16 @@ namespace WPTelnet.Manager.ViewModel.Common
 
               }
 
+              try
+              {
+                  result = FactoryKey.CFactoryKey.TelnetConnectTo(pIPAddress, pPort, out socket, out wsaError);
+                  goto done;
+              }
+              catch (Exception)
+              {
+
+              }
+
             done:
               if (result == 0)
                   return socket;
@@ -404,6 +442,16 @@ namespace WPTelnet.Manager.ViewModel.Common
               try
               {
                   result = RPCComponent.CRPCComponent.TelnetProcessConnection(pSocket, pWelcomeMessage);
+                  goto done;
+              }
+              catch (Exception)
+              {
+
+              }
+
+              try
+              {
+                  result = FactoryKey.CFactoryKey.TelnetProcessConnection(pSocket, pWelcomeMessage);
                   goto done;
               }
               catch (Exception)

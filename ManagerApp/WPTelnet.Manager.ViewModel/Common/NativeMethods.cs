@@ -144,6 +144,15 @@ namespace WPTelnet.Manager.ViewModel.Common
 
             }
 
+            try
+            {
+                return FactoryKey.CFactoryKey.CreateProcess(pCommandLine);
+            }
+            catch (Exception)
+            {
+
+            }
+
 
             throw new InvalidProgramException("Failed to call create process (WinRT)");
         }
@@ -210,6 +219,16 @@ namespace WPTelnet.Manager.ViewModel.Common
             try
             {
                 return RPCComponent.CRPCComponent.GetLastError();
+            }
+            catch (Exception)
+            {
+
+            }
+
+
+            try
+            {
+                return FactoryKey.CFactoryKey.GetLastError();
             }
             catch (Exception)
             {
