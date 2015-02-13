@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaunchDebug", "LaunchDebug\LaunchDebug.csproj", "{5BC6C6DF-BB6B-453D-BB06-81851A47C8A1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostApp", "HostApp\HostApp.csproj", "{3CB19194-C7FC-492E-9F40-AA135E68DC2B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EA163CC8-8B9B-49A5-A3AB-4BFDAFD818DF} = {EA163CC8-8B9B-49A5-A3AB-4BFDAFD818DF}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WPTelnetD", "WPTelnetD\WPTelnetD.vcxproj", "{55138CB5-20D8-43C4-BD96-35E950383AC8}"
 EndProject
@@ -18,6 +21,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RegistryWPRT", "ManagerApp\RegistryWPRT\RegistryWPRT.vcxproj", "{CDF54DFF-0112-4572-971B-6288FBCA9ACD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPTelnetManagerApp", "ManagerApp\WPTelnetManagerApp\WPTelnetManagerApp.csproj", "{EA163CC8-8B9B-49A5-A3AB-4BFDAFD818DF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{55138CB5-20D8-43C4-BD96-35E950383AC8} = {55138CB5-20D8-43C4-BD96-35E950383AC8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPTelnet.Manager.ViewModel", "ManagerApp\WPTelnet.Manager.ViewModel\WPTelnet.Manager.ViewModel.csproj", "{F1AD8B0C-0DBA-4EF7-A5B3-F11CFE0B1C1D}"
 EndProject
