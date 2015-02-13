@@ -62,8 +62,17 @@ namespace DevProgram
 		return ShutDownNetworking();
 	}
 
+
+	bool DevProgramReg::TelnetExecuteCommand(String^ pCommandLine) {
+		std::wstring cmdW(pCommandLine->Begin());
+		std::string cmd(cmdW.begin(), cmdW.end());
+		//return ExecuteCommand((char *)cmd.c_str());
+		return true;
+	}
 		ProcessInfo::ProcessInfo(PROCESS_INFORMATION pInfo) {
 			_info = pInfo;
 		}
+
+
 	
 }

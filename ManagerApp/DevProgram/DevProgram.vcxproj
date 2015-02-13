@@ -71,7 +71,7 @@
     <IncludePath>$(SolutionDir)Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <IncludePath>$(SolutionDir)WPTelnetDLib;$(SolutionDir)Include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\personalwork\WPTelnet\gitsvs\WPTelnetD\WPTelnetDLib;$(SolutionDir)Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\WPTelnetDLib;$(SolutionDir)Lib\arm;$(WP80ToolSetPath)lib\arm;$(WindowsSDK_LibraryPath_ARM)</LibraryPath>
     <TargetName>DevProgram</TargetName>
   </PropertyGroup>

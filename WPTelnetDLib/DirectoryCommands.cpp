@@ -58,7 +58,7 @@ void DirCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmd
 		search = "*.*";
 	else {
 		string s = pCmdLine->GetArgs().at(1);
-		search = strdup(s.c_str());
+		search = _strdup(s.c_str());
 	}
 	WIN32_FIND_DATAA data;
 	HANDLE handle = FindFirstFileExA(search, FindExInfoBasic, &data, FindExSearchNameMatch, NULL, 0);

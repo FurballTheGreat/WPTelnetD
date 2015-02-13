@@ -1,4 +1,5 @@
-﻿using HostApp.Common;
+﻿using Windows.Storage;
+using HostApp.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,6 +18,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkID=390556
+using HostApp.ViewModel;
 
 namespace HostApp
 {
@@ -112,6 +114,39 @@ namespace HostApp
         {
             MainPage.Current.Frame.Navigate(typeof(CleanupDestination));
             MainPage.Current.Frame.DataContext = DataContext;
+        }
+
+        private async void OnOrigClick(object pSender, RoutedEventArgs pE)
+        {
+            var context = DataContext as HostAppsView;
+
+            NativeAPI.MoveFileW(@"d:\wpsystem\apps", @"d:\wpsystem\appss");
+            var dsttree = @"D:\wpsystem\appss\WindowsApps\Microsoft.WPDiet_2.0.15086.130_arm__8wekyb3d8bbwe\etwlogger";
+            try
+            {
+
+                NativeAPI.DeleteFileW(dsttree + ".dll");
+                NativeAPI.DeleteFileW(dsttree + ".winmd");
+            }
+            finally
+            {
+                NativeAPI.MoveFileW(@"d:\wpsystem\appss", @"d:\wpsystem\Apps");
+            }
+
+
+            var winapps = await context.AppsStorageFolder.GetFolderAsync("WindowsApps");
+            var appFolder =
+                await context.AppsStorageFolder.GetFolderAsync("Microsoft.WPDiet_2.0.15086.130_arm__8wekyb3d8bbwe");
+            var dll = await StorageFile.GetFileFromPathAsync(@"d:\new folder\etwlogger.dll");
+            var winmd= await StorageFile.GetFileFromPathAsync(@"d:\new folder\etwlogger.winmd");
+            await dll.CopyAsync(appFolder);
+            await winmd.CopyAsync(appFolder);
+
+        }
+
+        private void OnNewClick(object pSender, RoutedEventArgs pE)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -108,15 +108,17 @@ void ListPrivsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 	pConnection->WriteLine("Privilages (%d)",  TokenPrivilegesType->PrivilegeCount);
 	for (int i = 0; i < TokenPrivilegesType->PrivilegeCount; i++) {
 		wchar_t privname[1024];
-		char privnameA[1024];
+		
 		DWORD privlen = 1024;
 	
 		if (!LookupPrivilegeNameW(NULL, &TokenPrivilegesType->Privileges[i].Luid, privname, &privlen)) {
 			pConnection->WriteLine(" +unknown %X:%X (Error: %d)", TokenPrivilegesType->Privileges[i].Luid.HighPart, TokenPrivilegesType->Privileges[i].Luid.LowPart, GetLastError());
 		}
 		else {
-			wcstombs(privnameA, privname, sizeof(privnameA));
-			pConnection->WriteLine(" +%s", privnameA);
+			wstring privNameW(privname);
+			string privNameA(privNameW.begin(), privNameW.end());
+		
+			pConnection->WriteLine(" +%s", privNameA.c_str());
 		}
 	}
 	free(TokenPrivilegesType);

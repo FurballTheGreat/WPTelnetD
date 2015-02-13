@@ -123,6 +123,44 @@
                     </ListBox>
                 </Grid>
             </phone:PivotItem>
+            <phone:PivotItem Header="Sms Intercept">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource PhoneTextNormalStyle}" TextWrapping="Wrap">
+                            Sms Intercept.<LineBreak/>
+                        </TextBlock>
+                      
+                        <TextBlock Style="{StaticResource PhoneTextNormalStyle}" TextWrapping="Wrap">
+                             <LineBreak/>
+                            Current Status:-
+                            <LineBreak/>
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource  PhoneTextAccentStyle}" TextWrapping="Wrap" Text="{Binding SmsIntercept.Status}">
+                        </TextBlock>
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding SmsIntercept.Messages}" Grid.Row="1">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource  PhoneTextAccentStyle}" TextWrapping="Wrap" Text="{Binding Body}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource  PhoneTextNormalStyle}" TextWrapping="Wrap" Text="{Binding SmsPrefix}"/>
+                                        <TextBlock Style="{StaticResource  PhoneTextNormalStyle}" TextWrapping="Wrap" Text="{Binding SenderPhoneNumber}"/>
+                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                       <TextBlock Style="{StaticResource  PhoneTextNormalStyle}" TextWrapping="Wrap" Text="{Binding ProductId}"/>
+                                       <TextBlock Style="{StaticResource  PhoneTextNormalStyle}" TextWrapping="Wrap" Text="{Binding TimeStamp}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </phone:PivotItem>
         </phone:Pivot>
     </Grid>  
 </UserControl>

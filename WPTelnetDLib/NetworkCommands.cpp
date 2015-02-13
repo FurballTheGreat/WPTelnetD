@@ -26,6 +26,12 @@ void NetstatCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 				(*it).GetOwningModule().data(),
 				(*it).GetOwningModulePath().data());
 		}
+	}
+	catch (runtime_error *re) {
+
+		pConnection->WriteLine(string("ERROR: ") + string(re->what()));
+	}
+	try {
 		UdpConnectionTable table2 = UdpConnectionTable();
 		for (std::vector<UdpConnectionEntry, std::allocator<UdpConnectionEntry>>::iterator it = table2.begin(); it != table2.end(); ++it)
 		{
@@ -42,8 +48,9 @@ void NetstatCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 				(*it).GetOwningModulePath().data());
 		}
 	}
-	catch (...) {
-		pConnection->WriteLine("An Error occured");
+	catch (runtime_error *re) {
+		
+		pConnection->WriteLine(string("ERROR: ")+string(re->what()));
 	}
 
 }
@@ -70,7 +77,7 @@ void DownloadCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine 
 		FILE * fileHandle;
 		std::string url = pCmdLine->GetArgs().at(1);
 
-		if (!(connectHanlde = InternetOpenUrlA(handle, strdup(url.c_str()),
+		if (!(connectHanlde = InternetOpenUrlA(handle, _strdup(url.c_str()),
 			headerStr,
 			strlen(headerStr), INTERNET_FLAG_DONT_CACHE | INTERNET_FLAG_PRAGMA_NOCACHE | INTERNET_FLAG_RELOAD, 0)))
 		{

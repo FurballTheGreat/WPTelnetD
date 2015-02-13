@@ -51,6 +51,46 @@ void PrintPrompt(Connection *pConnection) {
 	pConnection->Write("%s>", buf);
 }
 
+CommandProcessor* CreateProcessor(Connection *pConnection, IExecutionContext *pExecutionContext) {
+	vector<BaseCommand *> *commands = new vector<BaseCommand *>();
+	commands->push_back((BaseCommand*)new HelpCommand());
+#ifdef PHONE
+	commands->push_back((BaseCommand*)new ToastCommand());
+#endif
+	commands->push_back((BaseCommand*)new CdCommand());
+	commands->push_back((BaseCommand*)new TypeCommand());
+	commands->push_back((BaseCommand*)new DirCommand());
+	commands->push_back((BaseCommand*)new MkdirCommand());
+	commands->push_back((BaseCommand*)new RmdirCommand());
+	commands->push_back((BaseCommand*)new CopyCommand());
+	commands->push_back((BaseCommand*)new DeleteCommand());
+	commands->push_back((BaseCommand*)new MoveCommand());
+	commands->push_back((BaseCommand*)new EnvCommand());
+	commands->push_back((BaseCommand*)new DownloadCommand());
+	commands->push_back((BaseCommand*)new PsCommand());
+	commands->push_back((BaseCommand*)new KillCommand());
+	commands->push_back((BaseCommand*)new NetstatCommand());
+	commands->push_back((BaseCommand*)new PostMessageCommand());
+	commands->push_back((BaseCommand*)new EnumWindowsCommand());
+	commands->push_back((BaseCommand*)new ListPrivsCommand());
+	commands->push_back((BaseCommand*)new RegCommand());
+	commands->push_back((BaseCommand*)new EchoCommand());
+	commands->push_back((BaseCommand*)new ProvXmlCommand());
+
+
+	commands->push_back((BaseCommand*)new AttribCommand());
+	commands->push_back((BaseCommand*)new CertsCommand());
+	commands->push_back((BaseCommand*)new ListAclsCommand());
+	commands->push_back((BaseCommand*)new WhoAmICommand());
+	commands->push_back((BaseCommand*)new TestCommand());
+	commands->push_back((BaseCommand*)new TestCommand2());
+	
+	CommandProcessor *processor = new CommandProcessor(commands, pConnection);
+	commands->push_back((BaseCommand*)new RunFromCommand(pExecutionContext, processor));
+	return processor;
+	
+}
+
 bool ProcessLine(Connection *pConnection, IExecutionContext *pExecutionContext, CommandProcessor *pProcessor,  string pLine) {
 	ParsedCommandLine cmdLine = ParsedCommandLine(pLine, pExecutionContext);
 	if (cmdLine.GetName() == "exit"){
@@ -78,6 +118,14 @@ bool ProcessLine(Connection *pConnection, IExecutionContext *pExecutionContext, 
 	return result;
 }
 
+bool ExecuteCommand(char *pCommandLine){
+	Connection connection(0);
+	ExecutionContext context;
+	CommandProcessor*processor = CreateProcessor(&connection, &context);
+	ProcessLine(&connection, &context, processor, pCommandLine);
+	return true;
+}
+
 bool ProcessConnection(SOCKET pSocket, char *pWelcomeInfo) {
 	Connection *connection = new Connection(pSocket);
 	connection->WriteLine("******************************************");
@@ -88,54 +136,22 @@ bool ProcessConnection(SOCKET pSocket, char *pWelcomeInfo) {
 	
 	Sleep(100);
 	//LaunchAnotherInstance(connection);
-	vector<BaseCommand *> commands = vector<BaseCommand *>();
-	commands.push_back((BaseCommand*)new HelpCommand());
-#ifdef PHONE
-	commands.push_back((BaseCommand*)new ToastCommand());
-#endif
-	commands.push_back((BaseCommand*)new CdCommand());
-	commands.push_back((BaseCommand*)new TypeCommand());
-	commands.push_back((BaseCommand*)new DirCommand());
-	commands.push_back((BaseCommand*)new MkdirCommand());
-	commands.push_back((BaseCommand*)new RmdirCommand());
-	commands.push_back((BaseCommand*)new CopyCommand());
-	commands.push_back((BaseCommand*)new DeleteCommand());
-	commands.push_back((BaseCommand*)new MoveCommand());
-	commands.push_back((BaseCommand*)new EnvCommand());
-	commands.push_back((BaseCommand*)new DownloadCommand());
-	commands.push_back((BaseCommand*)new PsCommand());
-	commands.push_back((BaseCommand*)new KillCommand());
-	commands.push_back((BaseCommand*)new NetstatCommand());
-	commands.push_back((BaseCommand*)new PostMessageCommand());
-	commands.push_back((BaseCommand*)new EnumWindowsCommand());
-	commands.push_back((BaseCommand*)new ListPrivsCommand());
-	commands.push_back((BaseCommand*)new RegCommand());
-	commands.push_back((BaseCommand*)new EchoCommand());
-	commands.push_back((BaseCommand*)new ProvXmlCommand());
-
-
-	commands.push_back((BaseCommand*)new AttribCommand());
-	commands.push_back((BaseCommand*)new CertsCommand());
-	commands.push_back((BaseCommand*)new ListAclsCommand());
-	commands.push_back((BaseCommand*)new WhoAmICommand());
-	commands.push_back((BaseCommand*)new TestCommand());
-	commands.push_back((BaseCommand*)new TestCommand2());
 	
 	ExecutionContext context;
 
-	CommandProcessor processor = CommandProcessor(&commands,connection);
+	CommandProcessor*processor = CreateProcessor(connection, &context);
 	PrintPrompt(connection);
 	const char* line = connection->ReadLine();
-	commands.push_back((BaseCommand*)new RunFromCommand(&context, &processor));
+	
 	while (line!=NULL) {
-		if (ProcessLine(connection, &context, &processor, line))
+		if (ProcessLine(connection, &context, processor, line))
 		{
 			break;
 		}
 		PrintPrompt(connection);
 		line = connection->ReadLine();
 	}
-
+	delete processor;
 	return true;
 }
 

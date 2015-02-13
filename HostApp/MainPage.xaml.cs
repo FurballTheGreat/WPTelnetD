@@ -43,7 +43,12 @@ namespace HostApp
             SetFolderAttributes();
             this.NavigationCacheMode = NavigationCacheMode.Required;
             var context = new HostAppsView(@"d:\wpsystem\apps");
-
+            var sb = new StringBuilder(1024);
+            NativeAPI.GetCurrentDirectoryW(1024, sb);
+            if(sb.ToString().ToUpper().StartsWith("D:\\"))
+            {
+                Frame.Navigate(typeof(MoveToPhone));
+            } else
             if (Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.ContainsItem("WPSYSTEM"))
             {
                 DoStuff(context);

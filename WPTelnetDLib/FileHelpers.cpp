@@ -4,7 +4,7 @@
 
 bool FileExists(std::string pFileName)
 {
-	WIN32_FIND_DATA findFileData;
+	WIN32_FIND_DATAA findFileData;
 	HANDLE handle = FindFirstFileA(pFileName.c_str(), &findFileData);
 	bool found = handle != INVALID_HANDLE_VALUE;
 	if (found)
@@ -64,7 +64,7 @@ DownloadTextFileReader::DownloadTextFileReader(std::string pUrl){
 
 
 
-	if (!(_connectHandle = InternetOpenUrlA(_handle, strdup(pUrl.c_str()),
+	if (!(_connectHandle = InternetOpenUrlA(_handle, _strdup(pUrl.c_str()),
 		headerStr,
 		strlen(headerStr), INTERNET_FLAG_DONT_CACHE | INTERNET_FLAG_PRAGMA_NOCACHE | INTERNET_FLAG_RELOAD, 0)))
 	{

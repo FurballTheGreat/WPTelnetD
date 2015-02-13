@@ -52,7 +52,14 @@
                 </ListBox.ItemTemplate>
             </ListBox>
             <StackPanel Orientation="Horizontal" Grid.Row="2" 
+                        VerticalAlignment="Bottom" HorizontalAlignment="Left">
+
+                <Button Width="100" Click="OnOrigClick">Orig</Button>
+                <Button Width="100" Click="OnNewClick">New</Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="2" 
                         VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                
                 <Button Width="100" Click="OnNextClick">Next</Button>
             </StackPanel>
 

@@ -16,7 +16,7 @@ namespace WPTelnet.Manager.ViewModel.Daemon
         public ControllerView()
         {
             Installations = new InstallationManagerViewModel();
-  
+            SmsIntercept = new SmsInterceptViewModel();
             LaunchCommand=new BaseCommand(() =>
             {
                 if (!IsRunning)
@@ -46,6 +46,8 @@ namespace WPTelnet.Manager.ViewModel.Daemon
             LaunchListenInProcess = new BaseCommand(OnLaunchListenInProcess);
             Port = 23422;
         }
+
+        public SmsInterceptViewModel SmsIntercept { get; set; }
 
         private void OnLaunchListenInProcess(object pObj)
         {

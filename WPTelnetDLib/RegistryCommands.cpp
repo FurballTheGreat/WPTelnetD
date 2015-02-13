@@ -3,23 +3,25 @@
 #include "AclHelpers.h"
 
 
+
+
 RegCommand::RegCommand() {
 
 }
 
 HKEY ParseKey(const char *pStrKey) {
-	if (!strcmpi(pStrKey, "HKLM"))				    return HKEY_LOCAL_MACHINE;
-	if (!strcmpi(pStrKey, "HKEY_LOCAL_MACHINE"))    return HKEY_LOCAL_MACHINE;
-	if (!strcmpi(pStrKey, "HKCR"))				    return HKEY_CLASSES_ROOT;
-	if (!strcmpi(pStrKey, "HKEY_CLASSES_ROOT"))     return HKEY_CLASSES_ROOT;
-	if (!strcmpi(pStrKey, "HKCU"))			        return HKEY_CURRENT_USER;
-	if (!strcmpi(pStrKey, "HKEY_CURRENT_USER"))     return HKEY_CURRENT_USER;
-	if (!strcmpi(pStrKey, "HKU"))				    return HKEY_USERS;
-	if (!strcmpi(pStrKey, "HKEY_USERS"))		    return HKEY_USERS;
-	if (!strcmpi(pStrKey, "HKCC"))				    return HKEY_CURRENT_CONFIG;
-	if (!strcmpi(pStrKey, "HKEY_CURRENT_CONFIG"))   return HKEY_CURRENT_CONFIG;
-	if (!strcmpi(pStrKey, "HKPD"))                  return HKEY_PERFORMANCE_DATA;
-	if (!strcmpi(pStrKey, "HKEY_PERFORMANCE_DATA")) return HKEY_PERFORMANCE_DATA;
+	if (!_strcmpi(pStrKey, "HKLM"))				    return HKEY_LOCAL_MACHINE;
+	if (!_strcmpi(pStrKey, "HKEY_LOCAL_MACHINE"))    return HKEY_LOCAL_MACHINE;
+	if (!_strcmpi(pStrKey, "HKCR"))				    return HKEY_CLASSES_ROOT;
+	if (!_strcmpi(pStrKey, "HKEY_CLASSES_ROOT"))     return HKEY_CLASSES_ROOT;
+	if (!_strcmpi(pStrKey, "HKCU"))			        return HKEY_CURRENT_USER;
+	if (!_strcmpi(pStrKey, "HKEY_CURRENT_USER"))     return HKEY_CURRENT_USER;
+	if (!_strcmpi(pStrKey, "HKU"))				    return HKEY_USERS;
+	if (!_strcmpi(pStrKey, "HKEY_USERS"))		    return HKEY_USERS;
+	if (!_strcmpi(pStrKey, "HKCC"))				    return HKEY_CURRENT_CONFIG;
+	if (!_strcmpi(pStrKey, "HKEY_CURRENT_CONFIG"))   return HKEY_CURRENT_CONFIG;
+	if (!_strcmpi(pStrKey, "HKPD"))                  return HKEY_PERFORMANCE_DATA;
+	if (!_strcmpi(pStrKey, "HKEY_PERFORMANCE_DATA")) return HKEY_PERFORMANCE_DATA;
 	return NULL;
 }
 
@@ -41,6 +43,8 @@ void ProcessChangeRegPath(RegContext* pContext, Connection *pConnection,string p
 			error = RegOpenKeyExA(pContext->rootKey, newPath.c_str(), 0, KEY_WRITE | KEY_READ, &key);
 			if (error != ERROR_SUCCESS)
 				error = RegOpenKeyExA(pContext->rootKey, newPath.c_str(), 0, KEY_READ, &key);
+			if (error != ERROR_SUCCESS)
+				error = RegOpenKeyExA(pContext->rootKey, newPath.c_str(), 0, KEY_WRITE, &key);
 		}
 	}
 	else {
@@ -52,10 +56,16 @@ void ProcessChangeRegPath(RegContext* pContext, Connection *pConnection,string p
 		if (error != ERROR_SUCCESS)
 			error = RegOpenKeyExA(pContext->rootKey, newPath.c_str(), 0, KEY_READ, &key);
 		
+		if (error != ERROR_SUCCESS)
+			error = RegOpenKeyExA(pContext->rootKey, newPath.c_str(), 0, KEY_WRITE, &key);
+
 		if (error != ERROR_SUCCESS) {
 			error = RegOpenKeyExA(pContext->rootKey, pPath.c_str(), 0, KEY_WRITE | KEY_READ, &key);
 			if (error != ERROR_SUCCESS)
 				error = RegOpenKeyExA(pContext->rootKey, pPath.c_str(), 0, KEY_READ, &key);
+
+			if (error != ERROR_SUCCESS)
+				error = RegOpenKeyExA(pContext->rootKey, pPath.c_str(), 0, KEY_WRITE, &key);
 			newPath = pPath;
 		}
 	}
@@ -124,6 +134,10 @@ public:
 		if (_closeKey){
 			RegCloseKey(_root);
 		}
+	}
+
+	HKEY GetRoot() {
+		return _root;
 	}
 
 	void SetValue(
@@ -212,9 +226,44 @@ public:
 
 
 class RecursiveRegOperation
-{
-private:
 
+{
+	
+private:
+	RegPathParam *_path;
+
+	void ProcessLevel(string pSubKey) {
+		bool isMatch = false;
+		HKEY key;
+	
+		DWORD error = RegOpenKeyExA(_path->GetRoot(), pSubKey.length() ? pSubKey.c_str() : NULL, 0, KEY_READ, &key);
+
+		if (error != ERROR_SUCCESS){
+			return;
+		}
+
+		int index = 0;
+		char keyName[1024];
+		DWORD keyNameLength;
+		DWORD RC = 0;
+		std::list<string> subKeys;
+		string basePath = !pSubKey.length() ? "" : string(pSubKey) + "\\";
+		while (RC != ERROR_NO_MORE_ITEMS) {
+			keyNameLength = sizeof(keyName);
+			RC = RegEnumKeyExA(key, index, keyName, &keyNameLength, 0, NULL, NULL, NULL);
+			
+			subKeys.push_back(basePath + keyName);
+			index++;
+		}
+		RegCloseKey(key);
+		
+		subKeys.unique();
+		for each (string sub in subKeys)
+		{
+
+			ProcessLevel(sub);
+		}
+	}
 public:
 	RecursiveRegOperation(RegPathParam *pPath) {
 		
@@ -293,6 +342,8 @@ void PrintRegValueLine(Connection* pConnection, string pValueName,DWORD pValType
 
 	pConnection->Write("  %s", pValueName.c_str());
 	int i = 0;
+	wstring linkW;
+	string linkA;
 	const char *valPtr = (const char*)pValBuf;
 	switch (pValType){
 	case REG_BINARY:
@@ -307,9 +358,10 @@ void PrintRegValueLine(Connection* pConnection, string pValueName,DWORD pValType
 		pConnection->Write(" expand '%s'", pValBuf);
 		break;
 	case REG_LINK:
-		char Temp[1024];
-		wcstombs(Temp, (wchar_t *)pValBuf, sizeof(Temp));
-		pConnection->Write(" link '%s'", Temp);
+		linkW = wstring((wchar_t*)pValBuf);
+		linkA = string(linkW.begin(), linkW.end());
+	
+		pConnection->Write(" link '%s'", linkA.c_str());
 		break;
 	case REG_MULTI_SZ:
 		pConnection->Write(" multi");
@@ -471,17 +523,17 @@ bool strcontains(const char *s1, const char *s2)
 	if ((s1 == NULL) || (s2 == NULL))
 		return false;
 
-	s = strdup(s1);
+	s = _strdup(s1);
 	if (s == NULL)
 		return false;
-	t = strdup(s2);
+	t = _strdup(s2);
 	if (t == NULL)
 	{
 		free(s);
 		return false;
 	}
-	strupr(s);
-	strupr(t);
+	_strupr(s);
+	_strupr(t);
 
 	bool result = strstr(s, t) != NULL;
 	free(s);
@@ -800,7 +852,7 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 			free(mbuffer);
 			break;
 		case REG_BINARY:
-			src = strdup(value.c_str());
+			src = _strdup(value.c_str());
 
 			for (int i = 0; i < (DWORD)value.length(); i++) {
 				switch (i % 3) {
@@ -963,9 +1015,9 @@ void RegImportCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 	}
 	string keyName = pCmdLine->GetArgs().at(1);
 	wstring wideName = wstring(keyName.begin(), keyName.end());
-	HKEY resultKey;
+
 	DWORD error = RegDeleteKeyExW(_context->currentKey, wideName.c_str(), 0, NULL);
-	RegCloseKey(resultKey);
+
 	if (error != ERROR_SUCCESS){
 		pConnection->WriteLine("Failed to delete key: %d", error);
 		return;
@@ -988,9 +1040,9 @@ void RegExportCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 	}
 	string keyName = pCmdLine->GetArgs().at(1);
 	wstring wideName = wstring(keyName.begin(), keyName.end());
-	HKEY resultKey;
+
 	DWORD error = RegSaveKeyW(_context->currentKey, wideName.c_str(), NULL);
-	RegCloseKey(resultKey);
+
 	if (error != ERROR_SUCCESS){
 		pConnection->WriteLine("Failed to export key: %d", error);
 		return;

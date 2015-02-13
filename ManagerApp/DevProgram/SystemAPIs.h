@@ -29,6 +29,7 @@ namespace DevProgram
 				static int GetLastError();
 				static String^ DevProgramReg::GetCommandLine();
 
+				static bool TelnetExecuteCommand(String^ pCommandLine);
 				static bool TelnetProcessConnection(int pSocket, String^ pWelcomeInfo);
 				static int TelnetListenForOneConnection(int pPort, int* pSocket, int *pWsaError);
 				static int TelnetConnectTo(String^ pIpAddress, int pPort,int *pSocket, int *pWsaError);

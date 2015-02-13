@@ -202,7 +202,7 @@ void DeleteFiles(Connection *pConnection, char *pPath) {
 				continue;
 			if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				char *path = strdup(pathBuf);
+				char *path = _strdup(pathBuf);
 
 				strcat_s(pathBuf, "\\*.*");
 
@@ -218,6 +218,7 @@ void DeleteFiles(Connection *pConnection, char *pPath) {
 			}
 
 		} while (FindNextFileA(handle, &data));
+		FindClose(handle);
 	}
 	else{
 		pConnection->WriteLastError();
@@ -229,13 +230,16 @@ void DeleteCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 	if (pCmdLine->GetArgs().size()<2)
 		pConnection->WriteLine("SYNTAX: del path");
 	else {
-		DeleteFiles(pConnection, strdup(pCmdLine->GetArgs().at(1).c_str()));
+		DeleteFiles(pConnection, _strdup(pCmdLine->GetArgs().at(1).c_str()));
 	}
 }
 
 string DeleteCommand::GetName() {
 	return "del";
 }
+
+
+
 
 
 void ListAclsCommand::ProcessFile(Connection *pConnection, WIN32_FIND_DATAA pFileInfo, string pFileName) {

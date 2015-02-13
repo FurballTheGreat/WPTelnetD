@@ -1,16 +1,14 @@
-﻿//
-// pch.h
-// Header for standard system include files.
-//
+﻿#pragma once
 
-#pragma once
-
+#define _CRT_SECURE_NO_WARNINGS
 #include "targetver.h"
 
-// Windows Header Files:
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 
+#include <windows.h>
 
-#ifdef PHONE
 #include <windows.h>
 #ifndef WINAPI_PARTITION_DESKTOP 
 #define WINAPI_PARTITION_DESKTOP 1
@@ -21,15 +19,8 @@
 #include <handleapi.h>
 #include <fileapi.h>
 #include <processthreadsapi.h>
-#endif 
 
 
-#ifndef PHONE
-#include <windows.h>
-#include <Wininet.h>
-#include <Iphlpapi.h>
-#include <TlHelp32.h>
-#endif
 
 
 #include "stdio.h"
@@ -38,10 +29,10 @@
 #include <list>
 
 
-#ifdef PHONE
+
 #include<WPKernel.h>
 #include<WPInetAPI.h>
 #include<WPShellChromeAPI.h>
-#endif
-#include<vector>
+#include<WPIPHldAPI.h>
 
+#include<vector>

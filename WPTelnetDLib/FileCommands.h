@@ -48,6 +48,7 @@ public:
 };
 
 
+
 class MoveCommand : BaseCommand {
 public:
 	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);

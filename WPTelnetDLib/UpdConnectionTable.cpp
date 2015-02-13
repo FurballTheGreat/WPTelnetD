@@ -70,7 +70,7 @@ UdpConnectionTable::UdpConnectionTable() {
 
 	udpTable = ( MIB_UDPTABLE_OWNER_MODULE *) MALLOC(sizeof ( MIB_UDPTABLE_OWNER_MODULE));
 	if (udpTable == NULL) 
-		throw new runtime_error("Error allocating memory");
+		throw new runtime_error(string("Error allocating memory ") + to_string(GetLastError()));
 	
 
 	size = sizeof ( MIB_UDPTABLE_OWNER_MODULE);
@@ -81,7 +81,7 @@ UdpConnectionTable::UdpConnectionTable() {
 				FREE(udpTable);
 				udpTable = ( MIB_UDPTABLE_OWNER_MODULE *) MALLOC(size);
 				if(udpTable==NULL) 
-					throw new runtime_error("Error allocating table memory");
+					throw new runtime_error(string("Error allocating memory ") + to_string(GetLastError()));
 				
 		}
 	} while(retVal==ERROR_INSUFFICIENT_BUFFER);
@@ -91,7 +91,7 @@ UdpConnectionTable::UdpConnectionTable() {
 			push_back(UdpConnectionEntry(&udpTable->table[i]));
 		}
 	} else {
-		string str = "GetUdpTable failed with " + retVal;
+		string str = "GetUdpTable failed with " + to_string(retVal);
 
 		FREE(udpTable);
 		throw new runtime_error(str.c_str());		

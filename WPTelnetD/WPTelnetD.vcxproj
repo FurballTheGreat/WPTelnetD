@@ -117,7 +117,8 @@
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)\wptd.exe"  "$(SolutionDir)\LaunchDebug" 
-copy "$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)\wptd.exe"  "$(SolutionDir)\ManagerApp\WPTelnetManagerApp\wptd.exe" </Command>
+copy "$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)\wptd.exe"  "$(SolutionDir)\ManagerApp\WPTelnetManagerApp\wptd.exe" 
+copy "$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)\wptd.exe"  "$(SolutionDir)\AppRepurposer\new" </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">

@@ -67,17 +67,19 @@ void printWindow(char*prefix, HWND hwnd) {
 	wchar_t class_name[80];
 	wchar_t title[80];
 	if (!GetClassNameW(hwnd, class_name, sizeof(class_name)))
-		wcscpy(class_name, L"*Unknown Class*");
+		wcscpy_s(class_name, L"*Unknown Class*");
 	if (!GetWindowTextW(hwnd, title, sizeof(title)))
-		wcscpy(title, L"*Untitled*");
+		wcscpy_s(title, L"*Untitled*");
 	DWORD processId = 0;
 	DWORD threadId = GetWindowThreadProcessId(hwnd, &processId);
-	char classA[1024], titleA[1024];
 
-	wcstombs(classA, class_name, 1024);
-	wcstombs(titleA, title, 1024);
+	wstring classNameW(class_name);
+	wstring titleW(title);
+	string classA(classNameW.begin(), classNameW.end());
+	string titleA(titleW.begin(), titleW.end());
 
-	_cmdCon->WriteLine("%s[%d] - %s %s (%d, %d)\n", prefix, hwnd, classA, titleA, processId, threadId);
+
+	_cmdCon->WriteLine("%s[%d] - %s %s (%d, %d)\n", prefix, hwnd, classA.c_str(), titleA.c_str(), processId, threadId);
 
 }
 

@@ -125,7 +125,7 @@ TcpConnectionTable::TcpConnectionTable() {
 
 	tcpTable = (MIB_TCPTABLE_OWNER_MODULE *) MALLOC(sizeof (MIB_TCPTABLE_OWNER_MODULE));
 	if (tcpTable == NULL) 	
-		throw new runtime_error("Error allocating memory");
+		throw new runtime_error(string("Error allocating memory ")+to_string(GetLastError()));
 	
 
 	size = sizeof (MIB_TCPTABLE_OWNER_MODULE);
@@ -136,7 +136,7 @@ TcpConnectionTable::TcpConnectionTable() {
 				FREE(tcpTable);
 				tcpTable = (MIB_TCPTABLE_OWNER_MODULE *) MALLOC(size);
 				if(tcpTable==NULL) 					
-					throw new runtime_error("Error allocating memory");				
+					throw new runtime_error(string("Error allocating memory ") + to_string(GetLastError()));
 		}
 	} while(returnValue==ERROR_INSUFFICIENT_BUFFER);
 
@@ -145,7 +145,7 @@ TcpConnectionTable::TcpConnectionTable() {
 			push_back(TcpConnectionEntry(&tcpTable->table[i]));
 		}
 	} else {
-		string str = "GetTcpTable failed with " + returnValue;
+		string str = "GetTcpTable failed with " + to_string(returnValue);
 		
 		FREE(tcpTable);
 		throw new runtime_error(str.c_str());

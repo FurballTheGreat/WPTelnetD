@@ -172,6 +172,9 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Phone.Controls, Version=8.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
+    <Reference Include="PhoneInternal.CorePlat">
+      <HintPath>..\..\ThirdParty\PhoneInternal.CorePlat.winmd</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WPTelnet.Manager.ViewModel\WPTelnet.Manager.ViewModel.csproj">
@@ -190,6 +193,7 @@
   -->
   <ProjectExtensions />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)\wptelnetd.xap"  "$(SolutionDir)\HostApp\wptelnetd.xap"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetDir)\wptelnetd.xap"  "$(SolutionDir)\HostApp\wptelnetd.xap"
+copy "$(TargetDir)\wptelnetd.xap"  "$(SolutionDir)AppRepurposer\wptelnetd.xap"</PostBuildEvent>
   </PropertyGroup>
 </Project>
