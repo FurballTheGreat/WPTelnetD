@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Deployment xmlns="http://schemas.microsoft.com/windowsphone/2012/deployment" AppPlatformVersion="8.0">
+  <DefaultLanguage xmlns="" code="en-US" />
+  <Languages xmlns="">
+    <Language code="zh-CN" />
+  </Languages>
+  <App xmlns="" ProductID="{178ac8a1-6519-4a0b-960c-038393741e96}" Title="@AppResLib.dll,-100" RuntimeType="Silverlight" Version="1.1.0.0" Genre="apps.normal" Author="Microsoft Corporation" Description="Windows Phone Preview for Developers" Publisher="Microsoft Corporation" PublisherID="{6d4401b5-a28a-47e3-bcc4-212799e36cf0}" IsBeta="false" PublisherId="{95d94207-0c7c-47ed-82db-d75c81153c35}">
+    <IconPath IsRelative="true" IsResource="false">Assets\ApplicationIcon.png</IconPath>
+    <Capabilities>
+      <Capability Name="ID_CAP_BACKGROUND_EXECUTION_MANAGEMENT"/>
+      <Capability Name="ID_CAP_BACKGROUND_SETTINGS_MANAGEMENT"/>
+      <Capability Name="ID_CAP_BINGCLIENT_BINGCONFIGURATION"/>
+      <Capability Name="ID_CAP_CHAMBER_PROFILE_CODE_R"/>
+      <Capability Name="ID_CAP_COMMS_APPLICATIONS"/>
+      <Capability Name="ID_CAP_COMMS_COMMON"/>
+      <Capability Name="ID_CAP_DIAGNOSTIC_CLIENT"/>
+      <Capability Name="ID_CAP_DU_PROVISIONING"/>
+      <Capability Name="ID_CAP_EDM_CACHE_WRITE"/>
+      <Capability Name="ID_CAP_ENDPOINTDISCOVERY"/>
+      <Capability Name="ID_CAP_ICS_RO"/>
+      <Capability Name="ID_CAP_IMMERSIVE_SHELL"/>
+      <Capability Name="ID_CAP_INPUT_FEATURES"/>
+      <Capability Name="ID_CAP_MEDIALIB_INT"/>
+      <Capability Name="ID_CAP_PM_1ST_PARTY"/>
+      <Capability Name="ID_CAP_POWERNOTIF_USER"/>
+      <Capability Name="ID_CAP_PROVISIONWPCERTIFICATE"/>
+      <Capability Name="ID_CAP_PUBLIC_FOLDER_FULL"/>
+      <!--<Capability Name="ID_CAP_READGWPCERTIFICATE"/>-->
+      <Capability Name="ID_CAP_ZMFSERVICES"/>
+      <Capability Name="ID_CAP_ZTRACE"/>
+      <Capability Name="ID_CAP_BLUETOOTH_ADMIN"/>
+      <Capability Name="ID_CAP_CALLMESSAGING_FILTER"/>
+      <Capability Name="ID_CAP_CAMERA"/>
+      <Capability Name="ID_CAP_CELL_API_COMMON"/>
+      <Capability Name="ID_CAP_CELL_API_LOCATION"/>
+      <Capability Name="ID_CAP_CELL_API_OEM_PASSTHROUGH"/>
+      <Capability Name="ID_CAP_CELL_API_UICC"/>
+      <Capability Name="ID_CAP_CELL_API_UICC_LOWLEVEL"/>
+      <Capability Name="ID_CAP_CELL_WNF"/>
+      <Capability Name="ID_CAP_CELL_OEM_UICC_DATASTORE"/>
+      <Capability Name="ID_CAP_CSP_FOUNDATION"/>
+      <Capability Name="ID_CAP_CSP_MAIL"/>
+      <Capability Name="ID_CAP_CSP_OEM"/>
+      <Capability Name="ID_CAP_CSP_W4_APPLICATION"/>
+      <Capability Name="ID_CAP_CSP_WIFI_HOTSPOT"/>
+      <Capability Name="ID_CAP_DATAPLANUSAGE_ADMIN"/>
+      <Capability Name="ID_CAP_DEVICE_MANAGEMENT"/>
+      <Capability Name="ID_CAP_DEVICE_MANAGEMENT_ADMIN"/>
+      <Capability Name="ID_CAP_DEVICE_MANAGEMENT_BOOTSTRAP"/>
+      <Capability Name="ID_CAP_DEVICE_MANAGEMENT_SECURITY_POLICIES"/>
+      <Capability Name="ID_CAP_DU_MIGRATOR_STATUS_OEM"/>
+      <Capability Name="ID_CAP_PLATFORM_EXTENSIBILITY"/>
+      <Capability Name="ID_CAP_INTERNAL_DEPLOYMENT"/>
+      <Capability Name="ID_CAP_INTERNET_EXPLORER_FAVORITES"/>
+      <Capability Name="ID_CAP_INTERNET_EXPLORER_SEARCH_PROVIDER_KEYS_HKCU"/>
+      <Capability Name="ID_CAP_INTEROPSERVICES"/>
+      <Capability Name="ID_CAP_KIDZONE_CUSTOMIZATION"/>
+      <Capability Name="ID_CAP_MAP_WRITE"/>
+      <Capability Name="ID_CAP_MEDIALIB_PHOTO_FULL"/>
+      <Capability Name="ID_CAP_MO_CLOUDMESSAGING"/>
+      <Capability Name="ID_CAP_NATIVE_NETWORK_REPLACEMENT"/>
+      <Capability Name="ID_CAP_NETWORKING_ADMIN"/>
+      <Capability Name="ID_CAP_NETWORKING_VPN_PROVIDER"/>
+      <Capability Name="ID_CAP_NVREADWRITE"/>
+      <Capability Name="ID_CAP_OEM_ADC"/>
+      <Capability Name="ID_CAP_OEM_DEPLOYMENT"/>
+      <Capability Name="ID_CAP_OEMPUBLICDIRECTORY"/>
+      <Capability Name="ID_CAP_PEOPLE_EXTENSION"/>
+      <Capability Name="ID_CAP_PEOPLE_EXTENSION_IM"/>
+      <Capability Name="ID_CAP_PEOPLE_EXTENSION_MOBILE"/>
+      <Capability Name="ID_CAP_PERSONAL_INFORMATION_IMPORT"/>
+      <Capability Name="ID_CAP_PHONE_ADMIN"/>
+      <Capability Name="ID_CAP_RUNTIME_CONFIG"/>
+      <Capability Name="ID_CAP_SHARED_USER_CERTIFICATES"/>
+      <Capability Name="ID_CAP_SHELL_DEVICE_LOCK_UI_API"/>
+      <Capability Name="ID_CAP_SCREEN_RECORDER_BKG"/>
+      <Capability Name="ID_CAP_SMS"/>
+      <Capability Name="ID_CAP_SMS_COMPANION"/>
+      <Capability Name="ID_CAP_SMS_INTERCEPT_AGENT"/>
+      <Capability Name="ID_CAP_SMS_INTERCEPT_RECIPIENT"/>
+      <Capability Name="ID_CAP_SYNC_EXTENSION"/>
+      <Capability Name="ID_CAP_VOICEMAIL"/>
+      <Capability Name="ID_CAP_WALLET_SECUREELEMENT"/>
+      <Capability Name="ID_CAP_WIFI_BASIC"/>
+      <Capability Name="ID_CAP_APPOINTMENTS"/>
+      <Capability Name="ID_CAP_BUILTIN_DEFAULT"/>
+      <Capability Name="ID_CAP_CHAMBER_PROFILE_CODE_NITEMP_RW"/>
+      <Capability Name="ID_CAP_CONTACTS"/>
+      <Capability Name="ID_CAP_EVERYONE"/>
+      <Capability Name="ID_CAP_GAMERSERVICES"/>
+      <Capability Name="ID_CAP_IDENTITY_DEVICE"/>
+      <Capability Name="ID_CAP_IDENTITY_USER"/>
+      <Capability Name="ID_CAP_ISV_CAMERA"/>
+      <Capability Name="ID_CAP_LOCATION"/>
+      <Capability Name="ID_CAP_MAP"/>
+      <Capability Name="ID_CAP_MEDIALIB"/>
+      <Capability Name="ID_CAP_MEDIALIB_AUDIO"/>
+      <Capability Name="ID_CAP_MEDIALIB_PHOTO"/>
+      <Capability Name="ID_CAP_MEDIALIB_PLAYBACK"/>
+      <Capability Name="ID_CAP_MICROPHONE"/>
+      <Capability Name="ID_CAP_NETWORKING"/>
+      <Capability Name="ID_CAP_NETWORKING_INTERNET_CLIENT"/>
+      <Capability Name="ID_CAP_NETWORKING_INTERNET_CLIENT_SERVER"/>
+      <Capability Name="ID_CAP_NETWORKING_PRIVATE_NETWORK_CLIENT_SERVER"/>
+      <Capability Name="ID_CAP_PHONEDIALER"/>
+      <Capability Name="ID_CAP_PUSH_NOTIFICATION"/>
+      <Capability Name="ID_CAP_PROXIMITY"/>
+      <Capability Name="ID_CAP_REMOVABLE_STORAGE"/>
+      <Capability Name="ID_CAP_RINGTONE_ADD"/>
+      <Capability Name="ID_CAP_SCREEN_RECORDER"/>
+      <Capability Name="ID_CAP_SENSORS"/>
+      <Capability Name="ID_CAP_SPEECH_RECOGNITION"/>
+      <Capability Name="ID_CAP_VOIP"/>
+      <Capability Name="ID_CAP_WALLET"/>
+      <Capability Name="ID_CAP_WALLET_PAYMENTINSTRUMENTS"/>
+      <Capability Name="ID_CAP_WEBBROWSERCOMPONENT"/>
+      <Capability Name="ID_CAP_NETWORKING_VPN_SERVICES"/>
+      <Capability Name="ID_CAP_OEM_CUSTOM"/>
+      <Capability Name="ID_CAP_SHELL_OEM_ADMIN"/>
+
+    </Capabilities>
+    <Tasks>
+      <DefaultTask Name="_default" NavigationPage="InformationPage.xaml" />
+    </Tasks>
+    <Tokens>
+      <PrimaryToken TokenID="DevProgramUIToken" TaskName="_default">
+        <TemplateFlip>
+          <SmallImageURI IsRelative="true" IsResource="false">Assets\Tiles\start.tile.ospreview.small.png</SmallImageURI>
+          <Count>0</Count>
+          <BackgroundImageURI IsRelative="true" IsResource="false">Assets\Tiles\start.tile.ospreview.png</BackgroundImageURI>
+          <Title>@AppResLib.dll,-200</Title>
+          <BackContent></BackContent>
+          <BackBackgroundImageURI></BackBackgroundImageURI>
+          <BackTitle></BackTitle>
+          <LargeBackgroundImageURI IsRelative="true" IsResource="false">Assets\Tiles\start.tile.ospreview.large.png</LargeBackgroundImageURI>
+          <LargeBackContent />
+          <LargeBackBackgroundImageURI IsRelative="true" IsResource="false"></LargeBackBackgroundImageURI>
+          <DeviceLockImageURI></DeviceLockImageURI>
+          <HasLarge>True</HasLarge>
+        </TemplateFlip>
+      </PrimaryToken>
+    </Tokens>
+    <ActivatableClasses>
+      <InProcessServer>
+        <Path>DevProgram.dll</Path>
+        <ActivatableClass ActivatableClassId="DevProgram.DevProgramReg" ThreadingModel="both" />
+      </InProcessServer>
+    </ActivatableClasses>
+    <ScreenResolutions>
+      <ScreenResolution Name="ID_RESOLUTION_WVGA" />
+      <ScreenResolution Name="ID_RESOLUTION_WXGA" />
+      <ScreenResolution Name="ID_RESOLUTION_HD720P" />
+    </ScreenResolutions>
+  </App>
+</Deployment>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WindowsPhoneReservedAppInfo xmlns="http://schemas.microsoft.com/phone/2013/windowsphonereservedappinfo">
+  <SoftwareCapabilities>
+    <SoftwareCapability Id="ID_CAP_DU_PROVISIONING"   />
+    <SoftwareCapability Id="ID_CAP_CELL_API_COMMON"   />
+    <SoftwareCapability Id="ID_CAP_CELL_API_UICC"     />
+    <SoftwareCapability Id="ID_CAP_INTEROPSERVICES"   />
+    <SoftwareCapability Id="ID_CAP_RUNTIME_CONFIG"    />
+    <SoftwareCapability Id="ID_CAP_DIAGNOSTIC_CLIENT" />
+    <!--<SoftwareCapability Id="ID_CAP_OEMPUBLICDIRECTORY" />-->
+  </SoftwareCapabilities>
+</WindowsPhoneReservedAppInfo>
+
