@@ -55,8 +55,13 @@ namespace HostApp.ViewModel
             },
             new HostableApp
             {
-                Name = "HTC Connection Setup", 
+                Name = "HTC Connection Setup",
                 Guid = new Guid("5edbdbbc-2ab2-df11-8a2f-00237de2db9e")
+            },
+            new HostableApp
+            {
+                Name = "Samsung Diagnosis",
+                Guid = new Guid("07a20ad9-a4f9-4de3-855f-dcda8c8cab39")
             },
         };
 
