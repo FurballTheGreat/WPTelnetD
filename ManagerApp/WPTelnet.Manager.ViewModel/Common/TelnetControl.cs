@@ -73,7 +73,17 @@ namespace WPTelnet.Manager.ViewModel.Common
 
             }
 
-              
+            try
+            {
+                result = RPCComponent.CRPCComponent.TelnetInitNetworking(out wsaError);
+                goto done;
+            }
+            catch (Exception)
+            {
+
+            }
+
+
 
             done:
             if(!result)
@@ -143,8 +153,18 @@ namespace WPTelnet.Manager.ViewModel.Common
               {
 
               }
-              
-          done:
+
+              try
+              {
+                  result = RPCComponent.CRPCComponent.TelnetShutDownNetworking();
+                  goto done;
+              }
+              catch (Exception)
+              {
+
+              }
+
+            done:
               if (!result)
                   throw new SocketException(wsaError);
 
@@ -205,7 +225,7 @@ namespace WPTelnet.Manager.ViewModel.Common
 
               }
 
-             try
+              try
               {
                   result = HTCDebugLogWinPRT.HTCLog.TelnetListenForOneConnection(pPort, out socket, out wsaError);
                   goto done;
@@ -214,8 +234,18 @@ namespace WPTelnet.Manager.ViewModel.Common
               {
 
               }
-              
-          done:
+
+              try
+              {
+                  result = RPCComponent.CRPCComponent.TelnetListenForOneConnection(pPort, out socket, out wsaError);
+                  goto done;
+              }
+              catch (Exception)
+              {
+
+              }
+
+            done:
               if (result == 0)
                   return socket;
 
@@ -278,8 +308,8 @@ namespace WPTelnet.Manager.ViewModel.Common
               {
 
               }
-               
-               try
+
+              try
               {
                   result = HTCDebugLogWinPRT.HTCLog.TelnetConnectTo(pIPAddress, pPort, out socket, out wsaError);
                   goto done;
@@ -288,8 +318,18 @@ namespace WPTelnet.Manager.ViewModel.Common
               {
 
               }
-              
-          done:
+
+              try
+              {
+                  result = RPCComponent.CRPCComponent.TelnetConnectTo(pIPAddress, pPort, out socket, out wsaError);
+                  goto done;
+              }
+              catch (Exception)
+              {
+
+              }
+
+            done:
               if (result == 0)
                   return socket;
 
@@ -331,7 +371,7 @@ namespace WPTelnet.Manager.ViewModel.Common
 
               }
 
-              try
+            try
               {
                   result = DiagDebugLogWinPRT.CDiagDebugLogWinPRT.TelnetProcessConnection(pSocket, pWelcomeMessage);
                   goto done;
@@ -350,7 +390,7 @@ namespace WPTelnet.Manager.ViewModel.Common
               {
 
               }
-              
+
               try
               {
                   result = HTCDebugLogWinPRT.HTCLog.TelnetProcessConnection(pSocket, pWelcomeMessage);
@@ -360,8 +400,18 @@ namespace WPTelnet.Manager.ViewModel.Common
               {
 
               }
-              
-          done:
+
+              try
+              {
+                  result = RPCComponent.CRPCComponent.TelnetProcessConnection(pSocket, pWelcomeMessage);
+                  goto done;
+              }
+              catch (Exception)
+              {
+
+              }
+
+            done:
               if (result)
                   return;
 
