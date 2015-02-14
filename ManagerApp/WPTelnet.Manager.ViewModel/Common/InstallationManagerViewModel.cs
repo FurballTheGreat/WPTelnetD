@@ -8,22 +8,7 @@ namespace WPTelnet.Manager.ViewModel.Common
 {
     public class InstallationManagerViewModel : BaseView, IEnumerable<PackageViewModel>
     {
-        private async void DoAdd()
-        {
-            try
-            {
-                await
-                    PhoneInternal.CorePlat.Diagnostics.DiagnosticsController.CopyFileAsync(
-                        @"c:\windows\system32\kernelbase.dll", @"c:\kernelbase.dll");
-            }
-            catch (Exception e)
-            {
-                Dispatch(() =>
-                {
-                    Status = e.Message;
-                });
-            }
-        }
+        
 
         public InstallationManagerViewModel()
         {
@@ -32,7 +17,7 @@ namespace WPTelnet.Manager.ViewModel.Common
             {
                 try
                 {
-                    DoAdd();
+                   
                 }
                 catch (Exception e)
                 {

@@ -236,7 +236,7 @@
       <Project>{7b6e2fdc-9f6e-464e-8a01-615e4cc3330f}</Project>
       <Name>TelnetDS81</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ThirdParty\ICSharpCode.SharpZipLib.WindowsPhone\ICSharpCode.SharpZipLib.WindowsPhone.csproj">
+    <ProjectReference Include="..\ThirdParty\ICSharpCode\WindowsPhone\ICSharpCode.SharpZipLib.WindowsPhone\ICSharpCode.SharpZipLib.WindowsPhone.csproj">
       <Project>{bf04a546-d681-4f5a-ac41-cfc67caec66e}</Project>
       <Name>ICSharpCode.SharpZipLib.WindowsPhone</Name>
     </ProjectReference>

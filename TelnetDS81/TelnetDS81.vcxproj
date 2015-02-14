@@ -148,7 +148,7 @@
     <ClCompile Include="SystemAPIs.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WPTelnetD81Lib\WPTelnetD81Lib.vcxproj">
+    <ProjectReference Include="..\WPTelnetDLib\WPTelnetD81Lib.vcxproj">
       <Project>{85b79795-4870-48b0-99e6-a410ab07cf6f}</Project>
     </ProjectReference>
   </ItemGroup>
