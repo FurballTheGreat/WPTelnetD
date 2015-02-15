@@ -14,3 +14,4 @@ public:
 	~TerminalHelper();
 };
 
+std::string GetErrorAsString(HRESULT pError);

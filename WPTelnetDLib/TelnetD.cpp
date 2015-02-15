@@ -82,6 +82,8 @@ CommandProcessor* CreateProcessor(Connection *pConnection, IExecutionContext *pE
 	commands->push_back((BaseCommand*)new CertsCommand());
 	commands->push_back((BaseCommand*)new ListAclsCommand());
 	commands->push_back((BaseCommand*)new WhoAmICommand());
+	commands->push_back((BaseCommand*)new LookupChamberSidCommand());
+	commands->push_back((BaseCommand*)new CreateProcessInChamberCommand());
 	commands->push_back((BaseCommand*)new TestCommand());
 	commands->push_back((BaseCommand*)new TestCommand2());
 	

@@ -38,7 +38,7 @@ int main(int args, char *argv[]){
 	string str = "Arguments:\n";
 	for (int i = 0; i < args; i++){
 		char buf[1024];
-		sprintf_s(buf, "arg[%d]=%s", i, argv[i]);
+		sprintf_s(buf, "%s ", argv[i]);
 		str = str + buf;
 	}
 	char *msg = strdup(str.c_str());

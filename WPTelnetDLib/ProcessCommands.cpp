@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ProcessCommands.h"
+#include "TerminalHelper.h"
 
 void KillCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
 
@@ -118,4 +119,83 @@ void WhoAmICommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 
 string WhoAmICommand::GetName() {
 	return "whoami";
+}
+
+void LookupChamberSidCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+
+	if (pCmdLine->GetArgs().size()<2)
+		pConnection->WriteLine("SYNTAX: lookupchamber {id}");
+	else {
+		LPWSTR sid = nullptr;
+		string idA = pCmdLine->GetArgs().at(1);
+		wstring idW = wstring(idA.begin(), idA.end());
+		HRESULT ret = ::GetChamberSidFromId((PWCHAR)idW.c_str(), &sid);
+		if (ret!=0)
+			pConnection->WriteLine("ERROR: HResult = %d", ret);
+
+		if (sid) {
+			pConnection->Write("SID: ");
+			pConnection->WriteLine(sid);
+
+			LocalFree(sid);
+		}
+	}
+}
+
+string LookupChamberSidCommand::GetName() {
+	return "lookupchamber";
+}
+
+
+
+void CreateProcessInChamberCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+
+	if (pCmdLine->GetArgs().size()<4)
+		pConnection->WriteLine("SYNTAX: execchamber sid|app {id} {exe} {params}");
+	else {
+		STARTUPINFOW si;
+		memset(&si, 0, sizeof(si));
+		si.cb = sizeof(STARTUPINFOW);
+		
+		PROCESS_INFORMATION pi;
+
+		string id = pCmdLine->GetArgs().at(2);
+		wstring idW = wstring(id.begin(), id.end());
+		PWSTR chamberSid = nullptr, appId = nullptr;
+		if (pCmdLine->GetArgs().at(1) == "sid")
+			chamberSid = (PWSTR)idW.c_str();
+		else
+			appId = (PWSTR)idW.c_str();
+
+		string exe = pCmdLine->GetArgs().at(3);
+		wstring exew = wstring(exe.begin(), exe.end());
+		PWSTR exewstr = nullptr;
+		if (exew.length() > 0)
+			exewstr = (PWSTR)exew.c_str();
+
+		wstring commandLine = L"";
+		if (pCmdLine->GetArgs().size() > 4){
+			string commandLineA = pCmdLine->GetArgs().at(4);
+			commandLine = wstring(commandLineA.begin(), commandLineA.end());
+		}
+
+		HRESULT ret = CreateProcessInChamber(
+			chamberSid,
+			appId,
+			exewstr,
+			(PWSTR)commandLine.c_str(),
+			TRUE,
+			0x0,
+			nullptr,
+			&si,
+			&pi);
+		if (ret == 0)
+			pConnection->WriteLine("ProcessID: %d, HProcess: %d, ThreadID: %d, HThread %d", pi.dwProcessId, pi.hProcess, pi.dwThreadId, pi.hThread);
+		else
+			pConnection->WriteLine(GetErrorAsString(ret));
+	}
+}
+
+string CreateProcessInChamberCommand::GetName() {
+	return "execchamber";
 }

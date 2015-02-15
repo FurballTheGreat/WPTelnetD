@@ -23,3 +23,16 @@ public:
 	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
 	string GetName();
 };
+
+
+class LookupChamberSidCommand : BaseCommand {
+public:
+	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
+	string GetName();
+};
+
+class CreateProcessInChamberCommand : BaseCommand {
+public:
+	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
+	string GetName();
+};

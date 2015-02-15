@@ -1457,3 +1457,20 @@ FindFirstFileA(
 _In_ LPCSTR lpFileName,
 _Out_ LPWIN32_FIND_DATAA lpFindFileData
 );
+
+
+extern "C" WINBASEAPI
+HRESULT
+WINAPI CreateProcessInChamber(
+	LPCWSTR lpChamberSid, 
+	LPCWSTR lpChamberName, 
+	LPCWSTR lpApplicationName, 
+	LPWSTR lpCommandLine, 
+	BOOL bInheritHandles, 
+	DWORD dwCreationFlags, 
+	LPCWSTR lpCurrentDirectory, 
+	LPSTARTUPINFOW lpStartupInfo, 
+	LPPROCESS_INFORMATION lpProcessInformation);
+
+
+extern "C" WINBASEAPI HRESULT WINAPI GetChamberSidFromId(PWCHAR pId, PWCHAR *pSid);

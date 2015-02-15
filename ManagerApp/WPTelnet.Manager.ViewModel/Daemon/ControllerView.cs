@@ -17,6 +17,7 @@ namespace WPTelnet.Manager.ViewModel.Daemon
         {
             Installations = new InstallationManagerViewModel();
             SmsIntercept = new SmsInterceptViewModel();
+            var path = NativeMethods.Current.GetCommandLine();
             LaunchCommand=new BaseCommand(() =>
             {
                 if (!IsRunning)

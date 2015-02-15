@@ -228,6 +228,7 @@ namespace LaunchDebug
           //    PrintPath("", @"\DATA\SharedData\PhoneTools", deb.CcConnection4);{EA163CC8-8B9B-49A5-A3AB-4BFDAFD818DF}
         
            var deb = new DebugConnectionService(WpPowerToolsService.Devices.First());
+            deb.CcConnection3.LaunchApplication("{178ac8a1-6519-4a0b-960c-038393741e96}");
            deb.DebugLaunch("wptd.exe", new Guid("{F9D14EFD-32F4-4015-B4C7-6D807FD12B38}"));
           Console.ReadLine();
         ////    PrintPath("", @"\DATA\SharedData\PhoneTools", deb.CcConnection4);
