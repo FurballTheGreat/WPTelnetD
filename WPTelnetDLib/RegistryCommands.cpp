@@ -4,9 +4,8 @@
 
 
 
-
 RegCommand::RegCommand() {
-
+	
 }
 
 HKEY ParseKey(const char *pStrKey) {
@@ -83,28 +82,30 @@ void ProcessChangeRegPath(RegContext* pContext, Connection *pConnection,string p
 }
 
 
-class RegPathParam
-{
-private:
-	RegContext *_context;
-	HKEY _root;
-	string _valueName;
-	bool _closeKey;
-public:
-	RegPathParam(RegContext*pContext, string pValue, bool pIncludeValue) {
+
+	RegPathParam::RegPathParam(RegContext*pContext, string pValue, bool pIncludeValue, bool pOpen) {
 		_context = pContext;
 		_closeKey = false;
 		if (pValue.find_first_of('\\') == std::string::npos) {
-
-			_root = _context->currentKey;
+			_root = _context->rootKey;
+			_path = wstring(_context->regPath.begin(), _context->regPath.end());
+			_key = _context->currentKey;
 			_valueName = pValue;
 			return;
 		}
 
+		if (pValue.find_first_of('###') == 0) {
+			_root = _context->rootKey;
+			_path = wstring(_context->regPath.begin(), _context->regPath.end());
+			_key = _context->currentKey;
+			_valueName = pValue.substr(3, string::npos);;
+			return;
+		}
+
 		string rootName = pValue.substr(0, pValue.find_first_of('\\'));
-		HKEY root = ParseKey(rootName.c_str());
+		_root = ParseKey(rootName.c_str());
 		pValue = pValue.substr(pValue.find_first_of('\\') + 1, string::npos);
-		if (root == NULL) {
+		if (_root == NULL) {
 			throw invalid_argument(rootName + " is not a valid root");
 		}
 		string path;
@@ -118,63 +119,76 @@ public:
 		else
 			path = pValue;
 
-		DWORD error = RegOpenKeyExA(root, path.c_str(), NULL, KEY_WRITE | KEY_READ, &_root);
-		if (error == ERROR_SUCCESS){
+		_path = wstring(path.begin(), path.end());
+		if (pOpen) {
+			DWORD error = RegOpenKeyExA(_root, path.c_str(), NULL, KEY_WRITE | KEY_READ, &_key);
+			if (error == ERROR_SUCCESS){
+				_closeKey = true;
+				return;
+			}
+			error = RegOpenKeyExA(_root, path.c_str(), NULL, KEY_READ, &_key);
+			if (error != ERROR_SUCCESS) {
+				throw invalid_argument(string("Error opening key ") + to_string(error));
+			}
 			_closeKey = true;
-			return;
 		}
-		error = RegOpenKeyExA(root, path.c_str(), NULL,  KEY_READ, &_root);
-		if (error != ERROR_SUCCESS) {
-			throw invalid_argument(string("Error opening key ") + to_string(error));
-		}
-		_closeKey = true;
 	}
 
-	~RegPathParam() {
+	RegPathParam::~RegPathParam() {
 		if (_closeKey){
-			RegCloseKey(_root);
+			RegCloseKey(_key);
 		}
 	}
 
-	HKEY GetRoot() {
+	HKEY RegPathParam::GetKey() {
+		return _key;
+	}
+
+	HKEY RegPathParam::GetRoot() {
 		return _root;
 	}
 
-	void SetValue(
+	wstring RegPathParam::GetPath() {
+		return _path;
+	}
+	wstring RegPathParam::GetValName() {
+		return wstring(_valueName.begin(), _valueName.end());
+	}
+	void RegPathParam::SetValue(
 		_In_ DWORD dwType,
 		_In_reads_bytes_opt_(cbData) CONST BYTE * lpData,
 		_In_ DWORD cbData
 		){
-		LSTATUS result = RegSetValueExA(_root, _valueName.c_str(), NULL, dwType, lpData, cbData);
+		LSTATUS result = RegSetValueExA(_key, _valueName.c_str(), NULL, dwType, lpData, cbData);
 		if (result != ERROR_SUCCESS)
 			throw invalid_argument("Error calling RegSetValueExA " + to_string(result));
 	}
 
-	void DeleteValue() {
-		LSTATUS result = RegDeleteValueA(_root, _valueName.c_str());
+	void RegPathParam::DeleteValue() {
+		LSTATUS result = RegDeleteValueA(_key, _valueName.c_str());
 		if (result != ERROR_SUCCESS)
 			throw invalid_argument("Error calling RegDeleteValueA " + to_string(result));
 	}
 
-	void CreateKey() {
+	void RegPathParam::CreateKey() {
 		HKEY resultKey;
-		DWORD result = RegCreateKeyExA(_root, _valueName.c_str(), 0, NULL, 0, NULL, NULL, &resultKey, NULL);
+		DWORD result = RegCreateKeyExA(_key, _valueName.c_str(), 0, NULL, 0, NULL, NULL, &resultKey, NULL);
 		RegCloseKey(resultKey);
 		if (result != ERROR_SUCCESS)
 			throw invalid_argument("Error calling RegCreateKeyExA " + to_string(result));
 	}
 
-	void DeleteKey() {
+	void RegPathParam::DeleteKey() {
 		string keyName = _valueName;
 		wstring wideName = wstring(keyName.begin(), keyName.end());
 		
-		DWORD result= RegDeleteKeyExW(_root, wideName.c_str(), 0, NULL);
+		DWORD result= RegDeleteKeyExW(_key, wideName.c_str(), 0, NULL);
 	
 		if (result != ERROR_SUCCESS)
 			throw invalid_argument("Error calling RegDeleteKeyExW " + to_string(result));
 	}
 
-	void DeleteTree() {
+	void RegPathParam::DeleteTree() {
 		string keyName = _valueName;
 		wstring wideName = wstring(keyName.begin(), keyName.end());
 		DWORD result = RegDeleteTreeW(_context->currentKey, wideName.c_str());
@@ -182,23 +196,23 @@ public:
 			throw invalid_argument("Error calling RegDeleteTreeW " + to_string(result));
 	}
 
-	void GetKeySecurity(
+	void RegPathParam::GetKeySecurity(
 		_In_ SECURITY_INFORMATION SecurityInformation,
 		_Out_writes_bytes_opt_(*lpcbSecurityDescriptor) PSECURITY_DESCRIPTOR pSecurityDescriptor,
 		_Inout_ LPDWORD lpcbSecurityDescriptor
 		) {
 		bool sizeCheck = *lpcbSecurityDescriptor;
-		LSTATUS result = RegGetKeySecurity(_root, SecurityInformation, pSecurityDescriptor, lpcbSecurityDescriptor);
+		LSTATUS result = RegGetKeySecurity(_key, SecurityInformation, pSecurityDescriptor, lpcbSecurityDescriptor);
 		if (result != ERROR_SUCCESS && sizeCheck)
 			throw invalid_argument("Error calling RegGetKeySecurity " + to_string(result));
 	}
 
-	bool EnumKey(
+	bool RegPathParam::EnumKey(
 		_In_ DWORD dwIndex,
 		_Out_writes_to_opt_(*lpcchName, *lpcchName + 1) LPSTR lpName,
 		_Inout_ LPDWORD lpcchName
 		) {
-		LSTATUS result = RegEnumKeyExA(_root, dwIndex, lpName, lpcchName, 0, NULL, NULL, NULL);
+		LSTATUS result = RegEnumKeyExA(_key, dwIndex, lpName, lpcchName, 0, NULL, NULL, NULL);
 		if (result == ERROR_NO_MORE_ITEMS)
 			return false;
 		if (result == ERROR_SUCCESS)
@@ -206,7 +220,7 @@ public:
 		throw invalid_argument("Error calling RegEnumKeyExA " + to_string(result));
 	}
 
-	bool EnumValue(
+	bool RegPathParam::EnumValue(
 		_In_ DWORD dwIndex,
 		_Out_writes_to_opt_(*lpcchValueName, *lpcchValueName + 1) LPSTR lpValueName,
 		_Inout_ LPDWORD lpcchValueName,
@@ -215,14 +229,14 @@ public:
 		_Out_writes_bytes_to_opt_(*lpcbData, *lpcbData) __out_data_source(REGISTRY) LPBYTE lpData,
 		_Inout_opt_ LPDWORD lpcbData
 		) {
-		LSTATUS result = RegEnumValueA(_root,dwIndex,lpValueName, lpcchValueName, 0,lpType,lpData, lpcbData);
+		LSTATUS result = RegEnumValueA(_key,dwIndex,lpValueName, lpcchValueName, 0,lpType,lpData, lpcbData);
 		if (result == ERROR_NO_MORE_ITEMS)
 			return false;
 		if (result == ERROR_SUCCESS)
 			return true;
 		throw invalid_argument("Error calling RegEnumValueA " + to_string(result));
 	}
-};
+
 
 
 class RecursiveRegOperation
@@ -236,7 +250,7 @@ private:
 		bool isMatch = false;
 		HKEY key;
 	
-		DWORD error = RegOpenKeyExA(_path->GetRoot(), pSubKey.length() ? pSubKey.c_str() : NULL, 0, KEY_READ, &key);
+		DWORD error = RegOpenKeyExA(_path->GetKey(), pSubKey.length() ? pSubKey.c_str() : NULL, 0, KEY_READ, &key);
 
 		if (error != ERROR_SUCCESS){
 			return;
@@ -307,7 +321,6 @@ void RegCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmd
 	commands.push_back((BaseCommand*)new RegExportCommand(context));
 	commands.push_back((BaseCommand*)new RegImportCommand(context));
 	commands.push_back((BaseCommand*)new RegAclCommand(context));
-	
 	if (pCmdLine->GetArgs().size() == 1) {
 		CommandProcessor processor = CommandProcessor(&commands, pConnection);
 		pConnection->WriteLine("Registry Editor - Type HELP for assistance.");
@@ -384,6 +397,58 @@ void PrintRegValueLine(Connection* pConnection, string pValueName,DWORD pValType
 	pConnection->WriteLine("");
 }
 
+void PrintRegValueLineW(Connection* pConnection, wstring pValueName, DWORD pValType, BYTE *pValBuf, DWORD pValSize) {
+	string valname = string(pValueName.begin(), pValueName.end());
+	pConnection->Write(string("  ")+valname);
+	int i = 0;
+	wstring linkW;
+	string linkA;
+	const wchar_t *valPtr = (const wchar_t*)pValBuf;
+	switch (pValType){
+	case REG_BINARY:
+		pConnection->Write(" binary ");
+		for (int i = 0; i < pValSize; i++)
+			pConnection->Write("%02x", pValBuf[i]);
+		break;
+	case REG_DWORD:
+		pConnection->Write(" dword %.8x", *(DWORD*)pValBuf);
+		break;
+	case REG_EXPAND_SZ:
+		linkW = wstring((wchar_t*)pValBuf);
+		linkA = string(linkW.begin(), linkW.end());
+		pConnection->Write(" expand '%s'", linkA.c_str());
+		break;
+	case REG_LINK:
+		linkW = wstring((wchar_t*)pValBuf);
+		linkA = string(linkW.begin(), linkW.end());
+
+		pConnection->Write(" link '%s'", linkA.c_str());
+		break;
+	case REG_MULTI_SZ:
+		pConnection->Write(" multi");
+
+
+		while (wcslen(valPtr) > 0) {
+			linkW = wstring((wchar_t*)valPtr);
+			linkA = string(linkW.begin(), linkW.end());
+			pConnection->Write("  \"%s\"", linkA.c_str());
+			valPtr += wcslen((const wchar_t*)valPtr);
+			valPtr++;
+		}
+
+		break;
+	case REG_QWORD:
+		pConnection->Write(" qword %llx", *(long long*)pValBuf);
+		break;
+	case REG_SZ:
+		linkW = wstring((wchar_t*)pValBuf);
+		linkA = string(linkW.begin(), linkW.end());
+		pConnection->Write(" string '%s'", linkA.c_str());
+		break;
+	}
+	pConnection->WriteLine("");
+}
+
 BYTE *valBuf = NULL;
 
 RegListCommand::RegListCommand(RegContext *pContext) {
@@ -393,7 +458,7 @@ RegListCommand::RegListCommand(RegContext *pContext) {
 
 void RegListCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
 	try {
-		RegPathParam path(_context, pCmdLine->GetArgs().size() == 1 ? "" : pCmdLine->GetArgs().at(1), false);
+		RegPathParam path(_context, pCmdLine->GetArgs().size() == 1 ? "" : pCmdLine->GetArgs().at(1), false,true);
 		int index = 0;
 		char Temp[1024];
 		DWORD TMP;
@@ -564,8 +629,8 @@ void FindRegCommand::ProcessLevel(Connection *pConnection,const char *pSubKey, c
 		if (RC == ERROR_SUCCESS && strcontains(Temp, pKeyword)) {
 			isMatch = true;
 		}
-
-		subKeys.push_back(basePath + Temp);
+		if (strlen(Temp)>0)
+			subKeys.push_back(basePath + Temp);
 		index++;
 	}
 
@@ -697,8 +762,8 @@ void FindRegWriteableCommand::ProcessLevel(Connection *pConnection, const char *
 		RC = RegEnumKeyExA(key, index, Temp, &TMP, 0, NULL, NULL, NULL);
 		TMP = sizeof(Temp);
 		
-
-		subKeys.push_back(basePath + Temp);
+		if (strlen(Temp)>0)
+			subKeys.push_back(basePath + Temp);
 		index++;
 	}
 	RegCloseKey(key);
@@ -719,8 +784,8 @@ void FindRegWriteableCommand::ProcessLevel(Connection *pConnection, const char *
 	subKeys.unique();
 	for each (string sub in subKeys)
 	{
-
-		ProcessLevel(pConnection, sub.c_str());
+		if (sub.length()>0)
+			ProcessLevel(pConnection, sub.c_str());
 	}
 }
 
@@ -783,7 +848,7 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 	string valueName = pCmdLine->GetArgs().at(1);
 	RegPathParam *path;
 	try {
-		path = new RegPathParam(_context, valueName, true);
+		path = new RegPathParam(_context, valueName, true,true);
 	}
 	catch (invalid_argument pE){
 		pConnection->WriteLine(string("ERROR: ") + pE.what());
@@ -908,7 +973,7 @@ void RegDelValCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 	
 
 	try {
-		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true);
+		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true,true);
 		
 		path.DeleteValue();
 	}
@@ -934,7 +999,7 @@ void RegCreateKeyCommand::ProcessCommand(Connection *pConnection, ParsedCommandL
 	}
 
 	try {
-		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true);
+		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true,true);
 
 		path.CreateKey();
 	}
@@ -960,7 +1025,7 @@ void RegDeleteKeyCommand::ProcessCommand(Connection *pConnection, ParsedCommandL
 		return;
 	}
 	try {
-		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true);
+		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true,true);
 
 		path.DeleteKey();
 	}
@@ -989,7 +1054,7 @@ void RegDeleteTreeCommand::ProcessCommand(Connection *pConnection, ParsedCommand
 	}
 
 	try {
-		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true);
+		RegPathParam path(_context, pCmdLine->GetArgs().at(1), true,true);
 
 		path.DeleteTree();
 	}
@@ -1064,7 +1129,7 @@ void RegAclCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 	}
 
 	try {
-		RegPathParam path(_context, pCmdLine->GetArgs().size() == 1 ? "":pCmdLine->GetArgs().at(1), false);
+		RegPathParam path(_context, pCmdLine->GetArgs().size() == 1 ? "":pCmdLine->GetArgs().at(1), false,true);
 		PSECURITY_DESCRIPTOR securityDescriptor = NULL;
 		PSECURITY_DESCRIPTOR ownerSecurityDescriptor = NULL;
 		DWORD descriptorSize = 0;
