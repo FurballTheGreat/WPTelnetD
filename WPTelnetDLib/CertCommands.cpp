@@ -20,6 +20,7 @@ void CertsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pC
 		PCertOpenStore CertOpenStore = (PCertOpenStore)GetProcAddress(lib, "CertOpenStore");
 		PCertEnumCertificatesInStore CertEnumCertificatesInStore = (PCertEnumCertificatesInStore)GetProcAddress(lib, "CertEnumCertificatesInStore");
 		PCertGetNameStringA CertGetNameStringA = (PCertGetNameStringA)GetProcAddress(lib, "CertGetNameStringA");
+		PCertNameToStrA CertNameToStrA = (PCertNameToStrA)GetProcAddress(lib, "CertNameToStrA");
 		PCertCloseStore CertCloseStore = (PCertCloseStore)GetProcAddress(lib, "CertCloseStore");
 		if (CertOpenStore == NULL){
 			pConnection->WriteLine("Failed to call GetProcAddress on CertOpenStore");
@@ -84,7 +85,7 @@ void CertsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pC
 			pCertContext))
 		{
 			char buf[1000];
-			(*CertGetNameStringA)(pCertContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0, NULL, buf, sizeof(buf));
+			(*CertNameToStrA)(1, &pCertContext->pCertInfo->Subject, 2, buf, sizeof(buf));
 			pConnection->WriteLine("Found %s", buf);
 		}
 
