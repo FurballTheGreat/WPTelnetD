@@ -272,6 +272,22 @@ CreateFileW(
 extern "C" WINBASEAPI
 BOOL
 WINAPI
+ReadDirectoryChangesW(
+_In_        HANDLE hDirectory,
+_Out_writes_bytes_to_(nBufferLength, *lpBytesReturned) LPVOID lpBuffer,
+_In_        DWORD nBufferLength,
+_In_        BOOL bWatchSubtree,
+_In_        DWORD dwNotifyFilter,
+_Out_opt_   LPDWORD lpBytesReturned,
+_Inout_opt_ LPOVERLAPPED lpOverlapped,
+_In_opt_    LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
+);
+
+
+
+extern "C" WINBASEAPI
+BOOL
+WINAPI
 WaitNamedPipeW(
     _In_ LPCWSTR lpNamedPipeName,
     _In_ DWORD nTimeOut
@@ -1184,6 +1200,14 @@ typedef DWORD (WINAPI *PCertGetNameStringA)(
 	_Out_writes_to_opt_(cchNameString, return) LPSTR,
 	_In_ DWORD cchNameString);
 
+typedef  DWORD (WINAPI *PCertNameToStrA)(
+	_In_   DWORD dwCertEncodingType,
+	_In_   PCERT_NAME_BLOB pName,
+	_In_   DWORD dwStrType,
+	_Out_  LPTSTR psz,
+	_In_   DWORD csz
+	);
+
 extern "C" WINCRYPT32API
 DWORD
 WINAPI
@@ -1474,3 +1498,45 @@ WINAPI CreateProcessInChamber(
 
 
 extern "C" WINBASEAPI HRESULT WINAPI GetChamberSidFromId(PWCHAR pId, PWCHAR *pSid);
+
+
+extern "C" WINADVAPI
+DWORD
+APIENTRY
+InitiateShutdownW(
+_In_opt_ LPWSTR lpMachineName,
+_In_opt_ LPWSTR lpMessage,
+_In_     DWORD dwGracePeriod,
+_In_     DWORD dwShutdownFlags,
+_In_     DWORD dwReason
+);
+
+extern "C" WINBASEAPI
+DWORD
+WINAPI
+WaitForSingleObject(
+_In_ HANDLE hHandle,
+_In_ DWORD dwMilliseconds
+);
+
+extern "C" WINADVAPI
+LSTATUS
+APIENTRY
+RegNotifyChangeKeyValue(
+_In_ HKEY hKey,
+_In_ BOOL bWatchSubtree,
+_In_ DWORD dwNotifyFilter,
+_In_opt_ HANDLE hEvent,
+_In_ BOOL fAsynchronous
+);
+
+
+extern "C" WINBASEAPI
+_Ret_maybenull_
+HANDLE WINAPI
+CreateEventW(
+_In_opt_ LPSECURITY_ATTRIBUTES lpEventAttributes,
+_In_ BOOL bManualReset,
+_In_ BOOL bInitialState,
+_In_opt_ LPCWSTR lpName
+);
