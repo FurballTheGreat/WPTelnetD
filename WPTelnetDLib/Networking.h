@@ -6,8 +6,8 @@
 class Connection {
 private:
 	SOCKET _socket;
-	char _buf[4096];
-	char _lineBuf[4096];
+	char _buf[10000];
+	char _lineBuf[10000];
 	int _used;
 public:
 	Connection(SOCKET pSocket);
