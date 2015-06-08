@@ -124,7 +124,7 @@ bool TextReader::ReadLine(std::string &pLine){
 			if ((ptr - _buf) == sizeof(_buf))
 				_used = 0;
 		}
-		read = Read(_buf, sizeof(_buf)); 
+		read = Read(_buf+_used, sizeof(_buf)-_used); 
 		
 		if (!read)
 			break;
