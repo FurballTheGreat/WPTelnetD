@@ -1,11 +1,11 @@
 #include "pch.h"
 #include<string>
-#include "Networking.h"
+#include "Connection.h"
 #include "CommandProcessor.h"
 #include<vector>
 
-class CertsCommand : BaseCommand {
+class CertsCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };

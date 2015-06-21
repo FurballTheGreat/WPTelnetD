@@ -75,6 +75,10 @@
     <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\WPTelnetDLib;$(SolutionDir)Lib\arm;$(WP80ToolSetPath)lib\arm;$(WindowsSDK_LibraryPath_ARM)</LibraryPath>
     <TargetName>HTCDebugLogWinPRT</TargetName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <IncludePath>$(SolutionDir)WPTelnetDLib;$(SolutionDir)Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)LIB\ARM;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>_WINRT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -118,7 +122,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <AdditionalDependencies>ntmarta.lib;WS2_32.lib;iphlpapi.lib;wininet.lib;Kernel32Legacy.lib;kernelbase.lib;WindowsPhoneCore.lib;RuntimeObject.lib;PhoneAppModelHost.lib;minuser.lib;rpcrt4.lib;advapi32Legacy.lib;ShellChromeAPI.LIB;crypt32.lib;DMProcessConfigXMLFiltered.lib;CommsAPIs.lib;netutils.lib;samcli.lib;secruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ntmarta.lib;WS2_32.lib;iphlpapi.lib;wininet.lib;Kernel32Legacy.lib;kernelbase.lib;WindowsPhoneCore.lib;RuntimeObject.lib;PhoneAppModelHost.lib;minuser.lib;rpcrt4.lib;advapi32Legacy.lib;ShellChromeAPI.LIB;crypt32.lib;DMProcessConfigXMLFiltered.lib;CommsAPIs.lib;netutils.lib;samcli.lib;secruntime.lib;ndtkclient.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>ole32.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateWindowsMetadata>true</GenerateWindowsMetadata>
       <WindowsMetadataFile>HTCDebugLogWinPRT.winmd</WindowsMetadataFile>
@@ -126,8 +130,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
-      <PreprocessorDefinitions>_WINRT_DLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PreprocessorDefinitions>_WINRT_DLL;NDEBUG;PHONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalUsingDirectories>$(WindowsSDK_MetadataPath);$(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <CompileAsWinRT>true</CompileAsWinRT>
@@ -135,9 +139,10 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <AdditionalDependencies>d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>WS2_32.lib;iphlpapi.lib;wininet.lib;Kernel32Legacy.lib;kernelbase.lib;WindowsPhoneCore.lib;RuntimeObject.lib;PhoneAppModelHost.lib;minuser.lib;rpcrt4.lib;advapi32Legacy.lib;ShellChromeAPI.LIB;DMProcessConfigXMLFiltered.lib;CommsAPIs.lib;ntmarta.lib;netutils.lib;ndtkclient.lib;samcli.lib;secruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>ole32.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateWindowsMetadata>true</GenerateWindowsMetadata>
+      <WindowsMetadataFile>HTCDebugLogWinPRT.winmd</WindowsMetadataFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

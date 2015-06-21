@@ -1,13 +1,12 @@
 #pragma once
 
-#include "pch.h"
+#include "stdafx.h"
 #include<string>
-#include "Networking.h"
+#include "Console.h"
 #include<vector>
 
-using namespace std;
 
-typedef void (*PPRINT_PROMPT)(Connection*, LPVOID);
+using namespace std;
 
 
 class IExecutionContext
@@ -34,22 +33,35 @@ public:
 	ParsedCommandLine GetParametersAsLine();
 };
 
+class CommandInfo
+{
+private:
+	string _name;
+	string _params;
+	string _description;
+public:
+	CommandInfo(string pName, string pParams, string pDescription);
+
+	string GetName();
+	string GetParams();
+	string GetDescription();
+};
 
 
-class BaseCommand 
+class Command 
 {
 public:
-	BaseCommand();
-	virtual void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCommandLine) = 0;
-	virtual string GetName() = 0;
+	Command();
+	virtual void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCommandLine) = 0;
+	virtual CommandInfo GetInfo() = 0;
 };
 
 class CommandProcessor 
 {
 private:
-	vector<BaseCommand *> *_commands;
-	Connection *_connection;
+	vector<Command *> *_commands;
+	
 public:
-	CommandProcessor(vector<BaseCommand *> *pCommands,Connection *pConnection);
-	bool ProcessCommandLine(ParsedCommandLine *pLine);
+	CommandProcessor(vector<Command *> *pCommands);
+	bool ProcessCommandLine(IConsole *_console, ParsedCommandLine *pLine);
 };

@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "stdafx.h"
 #include "CommandProcessor.h"
-#include "Networking.h"
+#include "Console.h"
 
 #include<vector>
 using namespace std;
@@ -15,26 +15,23 @@ ParsedCommandLine::ParsedCommandLine(string pCommandLine, IExecutionContext *pHo
 		if (pCommandLine.find_first_of('%', pos) == string::npos){			
 			break;
 		}
-		else {
-			int start = pCommandLine.find_first_of('%', pos) + 1;
-			if (pCommandLine.find_first_of('%', start) == string::npos){
-				_originalLine += "%";
-				pos = start;
-				continue;
-			}
-			int end = pCommandLine.find_first_of('%', start)-1;
-			
-			if (end<start)
-
-				_originalLine += "%";
-			else{
-				string varName = pCommandLine.substr(start, end-start+1);
-				_originalLine += pHost->GetVariable(varName);
-			}
-			
-			pos = end + 2;
-
+		int start = pCommandLine.find_first_of('%', pos) + 1;
+		if (pCommandLine.find_first_of('%', start) == string::npos){
+			_originalLine += "%";
+			pos = start;
+			continue;
 		}
+		int end = pCommandLine.find_first_of('%', start)-1;
+			
+		if (end<start)
+
+			_originalLine += "%";
+		else {
+			string varName = pCommandLine.substr(start, end-start+1);
+			_originalLine += pHost->GetVariable(varName);
+		}
+			
+		pos = end + 2;
 	}
 
 	pos = 0;
@@ -58,11 +55,10 @@ ParsedCommandLine::ParsedCommandLine(string pCommandLine, IExecutionContext *pHo
 					}
 					skip = true;
 					break;
-				} else {
-					string expr(pCommandLine.substr(pos+1, nextq-pos-1));
-					_arguments.push_back(expr);
-					pos = nextq+1;
-				}			
+				}
+				auto expr(pCommandLine.substr(pos+1, nextq-pos-1));
+				_arguments.push_back(expr);
+				pos = nextq+1;
 				skip = true;
 			}				
 		} 
@@ -76,11 +72,10 @@ ParsedCommandLine::ParsedCommandLine(string pCommandLine, IExecutionContext *pHo
 					_arguments.push_back(expr);
 				}
 				break;
-			} else {
-				string expr(pCommandLine.substr(pos, next-pos));
-				_arguments.push_back(expr);
-				pos = next+1;
 			}
+			string expr(pCommandLine.substr(pos, next-pos));
+			_arguments.push_back(expr);
+			pos = next+1;
 		}
 	}
 	if(_arguments.size()>0) 
@@ -110,28 +105,46 @@ IExecutionContext *ParsedCommandLine::GetHost(){
 	return _host;
 }
 
-BaseCommand::BaseCommand() {
+Command::Command() {
 }
 
-CommandProcessor::CommandProcessor(vector<BaseCommand *> *pCommands, Connection *pConnection) {
+CommandProcessor::CommandProcessor(vector<Command *> *pCommands) {
 	_commands = pCommands;
-	_connection = pConnection;
+
 }
 
 
 
-bool CommandProcessor::ProcessCommandLine(ParsedCommandLine *pLine) {
+bool CommandProcessor::ProcessCommandLine(IConsole *pConsole,ParsedCommandLine *pLine) {
 	string cmd = pLine->GetName();
 	bool done = false;
-	for (std::vector<BaseCommand *>::iterator it = _commands->begin() ; it != _commands->end(); ++it)
-		if((*it)->GetName() == cmd) {
-			(*it)->ProcessCommand(_connection,pLine);
+	for (auto it = _commands->begin() ; it != _commands->end(); ++it)
+		if((*it)->GetInfo().GetName() == cmd) {
+			(*it)->ProcessCommand(pConsole,pLine);
 			done = true;
 			break;
 		}				  
-	
-	
-	
 	return done;
+}
+
+
+CommandInfo::CommandInfo(string pName, string pParams, string pDescription)
+{
+	_name = pName;
+	_params = pParams;
+	_description = pDescription;
+}
+
+string CommandInfo::GetName()
+{
+	return _name;
+}
+string CommandInfo::GetParams()
+{
+	return _params;
+}
+string CommandInfo::GetDescription()
+{
+	return _description;
 }
 

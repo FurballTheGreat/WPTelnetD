@@ -7,10 +7,10 @@
 #include<string>
 #include<vector>
 
-void NetstatCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void NetstatCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	try {
 		TcpConnectionTable table = TcpConnectionTable();
-		pConnection->WriteLine("%-14s%14s   %-24s %6s %-15s %15s %s", "Protocol", "Local", "Remote", "PID", "State", "Owner", "Owner Path");
+		pConsole->WriteLine("%-14s%14s   %-24s %6s %-15s %15s %s", "Protocol", "Local", "Remote", "PID", "State", "Owner", "Owner Path");
 		for (std::vector<TcpConnectionEntry, std::allocator<TcpConnectionEntry>>::iterator it = table.begin(); it != table.end(); ++it)
 		{
 			char remote[100];
@@ -18,7 +18,7 @@ void NetstatCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 			sprintf_s(local, "%s:%d", (*it).GetLocalHost().data(), (*it).GetLocalPort());
 			sprintf_s(remote, "%s:%d", (*it).GetRemoteHost().data(), (*it).GetRemotePort());
 
-			pConnection->WriteLine("%-4s%24s<->%-24s %6u %-15s %15s %s", "TCP",
+			pConsole->WriteLine("%-4s%24s<->%-24s %6u %-15s %15s %s", "TCP",
 				local,
 				remote,
 				(*it).GetOwnerPID(),
@@ -29,7 +29,7 @@ void NetstatCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 	}
 	catch (runtime_error *re) {
 
-		pConnection->WriteLine(string("ERROR: ") + string(re->what()));
+		pConsole->WriteLine(string("ERROR: ") + string(re->what()));
 	}
 	try {
 		UdpConnectionTable table2 = UdpConnectionTable();
@@ -39,7 +39,7 @@ void NetstatCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 
 			char local[100];
 			sprintf_s(local, "%s:%d", (*it).GetLocalHost().data(), (*it).GetLocalPort());
-			pConnection->WriteLine("%-4s%24s   %-24s %6u %-15s %15s %s", "UDP",
+			pConsole->WriteLine("%-4s%24s   %-24s %6u %-15s %15s %s", "UDP",
 				local,
 				"",
 				(*it).GetOwnerPID(),
@@ -50,19 +50,19 @@ void NetstatCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 	}
 	catch (runtime_error *re) {
 		
-		pConnection->WriteLine(string("ERROR: ")+string(re->what()));
+		pConsole->WriteLine(string("ERROR: ")+string(re->what()));
 	}
 
 }
 
-string NetstatCommand::GetName() {
-	return "netstat";
+CommandInfo NetstatCommand::GetInfo() {
+	return CommandInfo("netstat", "", "List all active IP connections.");
 }
 
 
-void DownloadCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void DownloadCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size()<3)
-		pConnection->WriteLine("ERROR: You must specify a URL and save name");
+		pConsole->WriteLine("ERROR: You must specify a URL and save name");
 	else {
 		HINTERNET handle = InternetOpenA("Microsoft Internet Explorer",
 			PRE_CONFIG_INTERNET_ACCESS,
@@ -81,7 +81,7 @@ void DownloadCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine 
 			headerStr,
 			strlen(headerStr), INTERNET_FLAG_DONT_CACHE | INTERNET_FLAG_PRAGMA_NOCACHE | INTERNET_FLAG_RELOAD, 0)))
 		{
-			pConnection->WriteLine("Error Failed to download");
+			pConsole->WriteLine("Error Failed to download");
 			return;
 		}
 		DWORD dwByteToRead = 0;
@@ -99,20 +99,20 @@ void DownloadCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine 
 			return;
 		}
 		size = 1;
-		pConnection->Write("Downloading.. ");
+		pConsole->Write("Downloading.. ");
 		while (InternetReadFile(connectHanlde, tempStr, 16384, &size) && size != 0) {
-			pConnection->Write(" %d ", size);
+			pConsole->Write(" %d ", size);
 			fwrite(tempStr, sizeof(char), size, fileHandle);
 		}
-		pConnection->WriteLine(". Downloaded!");
+		pConsole->WriteLine(". Downloaded!");
 
 		fclose(fileHandle);
 
 	}
 }
 
-string DownloadCommand::GetName() {
-	return "down";
+CommandInfo DownloadCommand::GetInfo() {
+	return CommandInfo("down", "<url> <file>", "Download a file and save a file from a URL.");
 }
 
 RunFromCommand::RunFromCommand(IExecutionContext *pExecutionContext, CommandProcessor *pProcessor) {
@@ -120,11 +120,11 @@ RunFromCommand::RunFromCommand(IExecutionContext *pExecutionContext, CommandProc
 	_processor = pProcessor;
 }
 
-bool ProcessLine(Connection *pConnection, IExecutionContext *pExecutionContext, CommandProcessor *pProcessor, string pLine);
+bool ProcessLine(IConsole *pConsole, IExecutionContext *pExecutionContext, CommandProcessor *pProcessor, string pLine);
 
-void RunFromCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RunFromCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size()<2)
-		pConnection->WriteLine("ERROR: You must specify a URL and save name");
+		pConsole->WriteLine("ERROR: You must specify a URL and save name");
 	else {
 		std::vector<std::string> lines;
 		try {
@@ -135,15 +135,15 @@ void RunFromCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 			}
 		}
 		catch (std::string msg) {
-			pConnection->WriteLine(string("ERROR: ") + msg);
+			pConsole->WriteLine(string("ERROR: ") + msg);
 		}
 		for (int i = 0; i < lines.size(); i++)
-			ProcessLine(pConnection, _executionContext, _processor, lines.at(i));
+			ProcessLine(pConsole, _executionContext, _processor, lines.at(i));
 
 
 	}
 }
 
-string RunFromCommand::GetName() {
-	return "runfrom";
+CommandInfo RunFromCommand::GetInfo() {
+	return CommandInfo("runfrom", "<url>", "Download a script file from URL and run its contents.");
 }

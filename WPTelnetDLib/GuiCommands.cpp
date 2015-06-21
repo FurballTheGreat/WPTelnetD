@@ -3,10 +3,10 @@
 
 #ifdef PHONE
 #define STRSIZE 1024
-void ToastCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void ToastCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<2)
-		pConnection->WriteLine("SYNTAX: Toast url [title] [content] [guid]");
+		pConsole->WriteLine("SYNTAX: Toast url [title] [content] [guid]");
 	else {
 
 		CLSID cguid;
@@ -51,24 +51,24 @@ void ToastCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pC
 		tm.lpType = L"Default";
 
 		HRESULT result = Shell_PostMessageToast(&tm);
-		pConnection->WriteLine("Result from Shell_PostMessageToast: %d", result);
+		pConsole->WriteLine("Result from Shell_PostMessageToast: %d", result);
 	}
 }
 
-string ToastCommand::GetName() {
-	return "toast";
+CommandInfo ToastCommand::GetInfo() {
+	return CommandInfo("toast", "<url> [title] [content] [guid]", "Shows a system toast message.");
 }
 #endif
 
 
-Connection *_cmdCon;
+IConsole *_cmdCon;
 
 void printWindow(char*prefix, HWND hwnd) {
 	wchar_t class_name[80];
 	wchar_t title[80];
-	if (!GetClassNameW(hwnd, class_name, sizeof(class_name)))
+	if (!GetClassNameW(hwnd, class_name, sizeof(class_name) / sizeof(wchar_t)))
 		wcscpy_s(class_name, L"*Unknown Class*");
-	if (!GetWindowTextW(hwnd, title, sizeof(title)))
+	if (!GetWindowTextW(hwnd, title, sizeof(title)/sizeof(wchar_t)))
 		wcscpy_s(title, L"*Untitled*");
 	DWORD processId = 0;
 	DWORD threadId = GetWindowThreadProcessId(hwnd, &processId);
@@ -97,22 +97,22 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 }
 
 
-void EnumWindowsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
-	pConnection->WriteLine("************");
-	_cmdCon = pConnection;
+void EnumWindowsCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
+	pConsole->WriteLine("************");
+	_cmdCon = pConsole;
 	EnumWindows(EnumWindowsProc, NULL);
 
 }
 
-string EnumWindowsCommand::GetName() {
-	return "ewin";
+CommandInfo EnumWindowsCommand::GetInfo() {
+	return CommandInfo("ewin", "", "Enumerates all windows.");
 }
 
-void PostMessageCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
-	pConnection->WriteLine("************");
+void PostMessageCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
+	pConsole->WriteLine("************");
 	if (pCmdLine->GetArgs().size() < 5)
 	{
-		pConnection->WriteLine("SYNTAX: POST hwnd msgnum wparam lparam");
+		pConsole->WriteLine("SYNTAX: POST hwnd msgnum wparam lparam");
 		return;
 	}
 
@@ -123,14 +123,14 @@ void PostMessageCommand::ProcessCommand(Connection *pConnection, ParsedCommandLi
 
 
 	if (!PostMessageW(hwnd, msg, wparam, lparam)) {
-		pConnection->WriteLine("Failed to post message %d", GetLastError());
+		pConsole->WriteLine("Failed to post message %d", GetLastError());
 	}
 	else
-		pConnection->WriteLine("Successfully posted message");
+		pConsole->WriteLine("Successfully posted message");
 
 }
 
-string PostMessageCommand::GetName() {
-	return "post";
+CommandInfo PostMessageCommand::GetInfo() {
+	return CommandInfo("post", "<hwnd> <msg> <wparam> <lparam>", "Posts a message to a HWND.");
 }
 

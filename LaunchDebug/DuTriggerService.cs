@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using Microsoft.SmartDevice.Connectivity;
 using Microsoft.SmartDevice.MultiTargeting.Connectivity;
 
 namespace LaunchDebug
@@ -7,7 +8,7 @@ namespace LaunchDebug
     public class DuTriggerService : CcConnectionDeviceService
     {
         public DuTriggerService(
-            ConnectableDevice pDeviceToConnect) : base(
+            Device pDeviceToConnect) : base(
             pDeviceToConnect,
             new Guid("769BAC05-0F89-4DE3-9D48-3280FFF185AE"),
             new Guid("5B2263FC-7CEA-44B4-B43B-1ACD5EB5D931"))

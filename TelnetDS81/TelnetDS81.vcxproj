@@ -72,10 +72,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <IncludePath>C:\personalwork\WPTelnet\gitsvs\WPTelnetD\WPTelnetDLib;$(SolutionDir)Include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\personalwork\WPTelnet\gitsvs\WPTelnetD\WPTelnetDLib;$(SolutionDir)Include;C:\personalwork\WPTelnet\gitsvs\WPTelnetD\LibTelnetD;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Lib\ARM;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <IncludePath>C:\personalwork\WPTelnet\gitsvs\WPTelnetD\WPTelnetDLib;$(SolutionDir)Include;C:\personalwork\WPTelnet\gitsvs\WPTelnetD\LibTelnetD;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Lib\ARM;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -107,7 +109,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <PreprocessorDefinitions>_WINRT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
@@ -117,12 +119,12 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <AdditionalDependencies>ntmarta.lib;WS2_32.lib;iphlpapi.lib;wininet.lib;Kernel32Legacy.lib;kernelbase.lib;WindowsPhoneCore.lib;RuntimeObject.lib;PhoneAppModelHost.lib;minuser.lib;rpcrt4.lib;advapi32Legacy.lib;ShellChromeAPI.LIB;crypt32.lib;DMProcessConfigXMLFiltered.lib;CommsAPIs.lib;netutils.lib;samcli.lib;SecRuntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;crypt32.lib;ntmarta.lib;sspicli.lib;wininet.lib;iphlpapi.lib;kernelbase.lib;kernel32legacy.lib;shellchromeapi.lib;secruntime.lib;advapi32Legacy.lib;MinUser.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <PreprocessorDefinitions>_WINRT_DLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
@@ -132,6 +134,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>ws2_32.lib;crypt32.lib;sechost.lib;ntmarta.lib;sspicli.lib;wininet.lib;iphlpapi.lib;kernelbase.lib;kernel32legacy.lib;shellchromeapi.lib;secruntime.lib;advapi32Legacy.lib;MinUser.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -150,6 +153,11 @@
   <ItemGroup>
     <ProjectReference Include="..\WPTelnetDLib\WPTelnetD81Lib.vcxproj">
       <Project>{85b79795-4870-48b0-99e6-a410ab07cf6f}</Project>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

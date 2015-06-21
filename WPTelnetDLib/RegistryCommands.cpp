@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "RegistryCommands.h"
 #include "AclHelpers.h"
-
+#include "TerminalHelper.h"
+#include "Commands.h"
 
 
 RegCommand::RegCommand() {
@@ -9,9 +10,9 @@ RegCommand::RegCommand() {
 }
 
 HKEY ParseKey(const char *pStrKey) {
-	if (!_strcmpi(pStrKey, "HKLM"))				    return HKEY_LOCAL_MACHINE;
+	if (!_strcmpi(pStrKey, "HKLM"))				     return HKEY_LOCAL_MACHINE;
 	if (!_strcmpi(pStrKey, "HKEY_LOCAL_MACHINE"))    return HKEY_LOCAL_MACHINE;
-	if (!_strcmpi(pStrKey, "HKCR"))				    return HKEY_CLASSES_ROOT;
+	if (!_strcmpi(pStrKey, "HKCR"))				     return HKEY_CLASSES_ROOT;
 	if (!_strcmpi(pStrKey, "HKEY_CLASSES_ROOT"))     return HKEY_CLASSES_ROOT;
 	if (!_strcmpi(pStrKey, "HKCU"))			        return HKEY_CURRENT_USER;
 	if (!_strcmpi(pStrKey, "HKEY_CURRENT_USER"))     return HKEY_CURRENT_USER;
@@ -24,7 +25,7 @@ HKEY ParseKey(const char *pStrKey) {
 	return NULL;
 }
 
-void ProcessChangeRegPath(RegContext* pContext, Connection *pConnection,string pPath){
+void ProcessChangeRegPath(RegContext* pContext, IConsole *pConsole,string pPath){
 	HKEY key = NULL;
 	DWORD error = ERROR_SUCCESS;
 	string newPath = "";
@@ -71,7 +72,7 @@ void ProcessChangeRegPath(RegContext* pContext, Connection *pConnection,string p
 
 
 	if (error != ERROR_SUCCESS){
-		pConnection->WriteLine("Failed to open registry key %d", error);
+		pConsole->WriteLine("Failed to open registry key %d", error);
 		return;
 	}
 
@@ -289,164 +290,166 @@ public:
 };
 
 
-void PrintPrompt(Connection *pConnection, RegContext *pContext) {
+void PrintPrompt(IConsole *pConsole, RegContext *pContext) {
 
-	if (pContext->rootKey == HKEY_LOCAL_MACHINE) pConnection->Write("HKLM\\");
-	else if (pContext->rootKey == HKEY_CLASSES_ROOT) pConnection->Write("HKCR\\");
-	else if (pContext->rootKey == HKEY_CURRENT_USER) pConnection->Write("HKCU\\");
-	else if (pContext->rootKey == HKEY_USERS) pConnection->Write("HKU\\");
-	else if (pContext->rootKey == HKEY_CURRENT_CONFIG) pConnection->Write("HKCC\\");
-	else if (pContext->rootKey == HKEY_PERFORMANCE_DATA) pConnection->Write("HKPD\\");
+	if (pContext->rootKey == HKEY_LOCAL_MACHINE) pConsole->Write("HKLM\\");
+	else if (pContext->rootKey == HKEY_CLASSES_ROOT) pConsole->Write("HKCR\\");
+	else if (pContext->rootKey == HKEY_CURRENT_USER) pConsole->Write("HKCU\\");
+	else if (pContext->rootKey == HKEY_USERS) pConsole->Write("HKU\\");
+	else if (pContext->rootKey == HKEY_CURRENT_CONFIG) pConsole->Write("HKCC\\");
+	else if (pContext->rootKey == HKEY_PERFORMANCE_DATA) pConsole->Write("HKPD\\");
 
-	pConnection->Write("%s>", pContext->regPath.c_str());
+	pConsole->Write("%s>", pContext->regPath.c_str());
 }
 
-void RegCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	RegContext *context = new RegContext();
 	context->rootKey = HKEY_LOCAL_MACHINE;
 	context->currentKey = HKEY_LOCAL_MACHINE;
 	context->regPath = "";
-	vector<BaseCommand *> commands = vector<BaseCommand *>();
-	commands.push_back((BaseCommand*)new RegHelpCommand(context));
-	commands.push_back((BaseCommand*)new RegListCommand(context));
-	commands.push_back((BaseCommand*)new RegOpenCommand(context));
-	commands.push_back((BaseCommand*)new RegRootCommand(context));
-	commands.push_back((BaseCommand*)new FindRegCommand(context));
-	commands.push_back((BaseCommand*)new FindRegWriteableCommand(context));
-	commands.push_back((BaseCommand*)new RegSetCommand(context));
-	commands.push_back((BaseCommand*)new RegDelValCommand(context));
-	commands.push_back((BaseCommand*)new RegDeleteKeyCommand(context));
-	commands.push_back((BaseCommand*)new RegCreateKeyCommand(context));
-	commands.push_back((BaseCommand*)new RegDeleteTreeCommand(context));
-	commands.push_back((BaseCommand*)new RegExportCommand(context));
-	commands.push_back((BaseCommand*)new RegImportCommand(context));
-	commands.push_back((BaseCommand*)new RegAclCommand(context));
+	vector<Command *> commands = vector<Command *>();
+	ExitCommand exit("Exit the registry editor.");
+	commands.push_back((Command*)new HelpCommand("A path can also be opened by just typing it. '..' may be used to goto the parent key and a subkey can be opened by just specifying its name.",
+												 &commands));
+	commands.push_back((Command*)&exit);
+	commands.push_back((Command*)new RegListCommand(context));
+	commands.push_back((Command*)new RegOpenCommand(context));
+	commands.push_back((Command*)new RegRootCommand(context));
+	commands.push_back((Command*)new FindRegCommand(context));
+	commands.push_back((Command*)new FindRegWriteableCommand(context));
+	commands.push_back((Command*)new RegSetCommand(context));
+	commands.push_back((Command*)new RegDelValCommand(context));
+	commands.push_back((Command*)new RegDeleteKeyCommand(context));
+	commands.push_back((Command*)new RegCreateKeyCommand(context));
+	commands.push_back((Command*)new RegDeleteTreeCommand(context));
+	commands.push_back((Command*)new RegExportCommand(context));
+	commands.push_back((Command*)new RegImportCommand(context));
+	commands.push_back((Command*)new RegAclCommand(context));
 	if (pCmdLine->GetArgs().size() == 1) {
-		CommandProcessor processor = CommandProcessor(&commands, pConnection);
-		pConnection->WriteLine("Registry Editor - Type HELP for assistance.");
+		CommandProcessor processor = CommandProcessor(&commands);
+		pConsole->WriteLine("Registry Editor - Type HELP for assistance.");
 		
 
-		PrintPrompt(pConnection, context);
-		const char* line = pConnection->ReadLine();
-
-		while (line != NULL) {
-			ParsedCommandLine commandLine(string(line),pCmdLine->GetHost());
-			if (commandLine.GetName() == "exit") break;
-			if (!processor.ProcessCommandLine(&commandLine)) {
-				ProcessChangeRegPath(context, pConnection, line);
-				
+		while (!exit.IsExiting()) {
+			PrintPrompt(pConsole, context);
+			pConsole->SetForeground(Yellow);
+			pConsole->SetBold(true);
+			std::string line = pConsole->ReadLine();
+			pConsole->ResetStyle();
+			ParsedCommandLine commandLine(line,pCmdLine->GetHost());
+			
+			if (!processor.ProcessCommandLine(pConsole, &commandLine)) {
+				ProcessChangeRegPath(context, pConsole, line);
 			}
-			PrintPrompt(pConnection, context);			
-			line = pConnection->ReadLine();
 		}
 	}
 	else {
-		CommandProcessor processor = CommandProcessor(&commands, pConnection);
+		CommandProcessor processor = CommandProcessor(&commands);
 		ParsedCommandLine line = pCmdLine->GetParametersAsLine();
-		processor.ProcessCommandLine( &line);
+		processor.ProcessCommandLine(pConsole, &line);
 	}
 }
 
-string RegCommand::GetName() {
-	return "reg";
+CommandInfo RegCommand::GetInfo() {
+	return CommandInfo("reg", "", "Open the registry editor.");
 }
 
-void PrintRegValueLine(Connection* pConnection, string pValueName,DWORD pValType, BYTE *pValBuf, DWORD pValSize ) {
+void PrintRegValueLine(IConsole* pConsole, string pValueName,DWORD pValType, BYTE *pValBuf, DWORD pValSize ) {
 
-	pConnection->Write("  %s", pValueName.c_str());
+	pConsole->Write("  %s", pValueName.c_str());
 	int i = 0;
 	wstring linkW;
 	string linkA;
 	const char *valPtr = (const char*)pValBuf;
 	switch (pValType){
 	case REG_BINARY:
-		pConnection->Write(" binary ");
+		pConsole->Write(" binary ");
 		for (int i = 0; i < pValSize; i++)
-			pConnection->Write("%02x", pValBuf[i]);
+			pConsole->Write("%02x", pValBuf[i]);
 		break;
 	case REG_DWORD:
-		pConnection->Write(" dword %.8x", *(DWORD*)pValBuf);
+		pConsole->Write(" dword %.8x", *(DWORD*)pValBuf);
 		break;
 	case REG_EXPAND_SZ:
-		pConnection->Write(" expand '%s'", pValBuf);
+		pConsole->Write(" expand '%s'", pValBuf);
 		break;
 	case REG_LINK:
 		linkW = wstring((wchar_t*)pValBuf);
 		linkA = string(linkW.begin(), linkW.end());
 	
-		pConnection->Write(" link '%s'", linkA.c_str());
+		pConsole->Write(" link '%s'", linkA.c_str());
 		break;
 	case REG_MULTI_SZ:
-		pConnection->Write(" multi");
+		pConsole->Write(" multi");
 
 
 		while (strlen(valPtr) > 0) {
-			pConnection->Write("  \"%s\"", valPtr);
+			pConsole->Write("  \"%s\"", valPtr);
 			valPtr += strlen((const char*)valPtr);
 			valPtr++;
 		}
 		
 		break;
 	case REG_QWORD:
-		pConnection->Write(" qword %llx", *(long long*)pValBuf);
+		pConsole->Write(" qword %llx", *(long long*)pValBuf);
 		break;
 	case REG_SZ:
-		pConnection->Write(" string '%s'", pValBuf);
+		pConsole->Write(" string '%s'", pValBuf);
 		break;
 	}
-	pConnection->WriteLine("");
+	pConsole->WriteLine("");
 }
 
-void PrintRegValueLineW(Connection* pConnection, wstring pValueName, DWORD pValType, BYTE *pValBuf, DWORD pValSize) {
+void PrintRegValueLineW(IConsole* pConsole, wstring pValueName, DWORD pValType, BYTE *pValBuf, DWORD pValSize) {
 	string valname = string(pValueName.begin(), pValueName.end());
-	pConnection->Write(string("  ")+valname);
+	pConsole->Write(string("  ")+valname);
 	int i = 0;
 	wstring linkW;
 	string linkA;
 	const wchar_t *valPtr = (const wchar_t*)pValBuf;
 	switch (pValType){
 	case REG_BINARY:
-		pConnection->Write(" binary ");
+		pConsole->Write(" binary ");
 		for (int i = 0; i < pValSize; i++)
-			pConnection->Write("%02x", pValBuf[i]);
+			pConsole->Write("%02x", pValBuf[i]);
 		break;
 	case REG_DWORD:
-		pConnection->Write(" dword %.8x", *(DWORD*)pValBuf);
+		pConsole->Write(" dword %.8x", *(DWORD*)pValBuf);
 		break;
 	case REG_EXPAND_SZ:
 		linkW = wstring((wchar_t*)pValBuf);
 		linkA = string(linkW.begin(), linkW.end());
-		pConnection->Write(" expand '%s'", linkA.c_str());
+		pConsole->Write(" expand '%s'", linkA.c_str());
 		break;
 	case REG_LINK:
 		linkW = wstring((wchar_t*)pValBuf);
 		linkA = string(linkW.begin(), linkW.end());
 
-		pConnection->Write(" link '%s'", linkA.c_str());
+		pConsole->Write(" link '%s'", linkA.c_str());
 		break;
 	case REG_MULTI_SZ:
-		pConnection->Write(" multi");
+		pConsole->Write(" multi");
 
 
 		while (wcslen(valPtr) > 0) {
-			linkW = wstring((wchar_t*)valPtr);
+			linkW = wstring(const_cast<wchar_t*>(valPtr));
 			linkA = string(linkW.begin(), linkW.end());
-			pConnection->Write("  \"%s\"", linkA.c_str());
-			valPtr += wcslen((const wchar_t*)valPtr);
+			pConsole->Write("  \"%s\"", linkA.c_str());
+			valPtr += wcslen(static_cast<const wchar_t*>(valPtr));
 			valPtr++;
 		}
 
 		break;
 	case REG_QWORD:
-		pConnection->Write(" qword %llx", *(long long*)pValBuf);
+		pConsole->Write(" qword %llx", *(long long*)pValBuf);
 		break;
 	case REG_SZ:
 		linkW = wstring((wchar_t*)pValBuf);
 		linkA = string(linkW.begin(), linkW.end());
-		pConnection->Write(" string '%s'", linkA.c_str());
+		pConsole->Write(" string '%s'", linkA.c_str());
 		break;
 	}
-	pConnection->WriteLine("");
+	pConsole->WriteLine("");
 }
 
 BYTE *valBuf = NULL;
@@ -456,7 +459,7 @@ RegListCommand::RegListCommand(RegContext *pContext) {
 	
 }
 
-void RegListCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegListCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	try {
 		RegPathParam path(_context, pCmdLine->GetArgs().size() == 1 ? "" : pCmdLine->GetArgs().at(1), false,true);
 		int index = 0;
@@ -468,10 +471,10 @@ void RegListCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 		while (path.EnumKey(index, Temp, &TMP)) {	
 			TMP = sizeof(Temp);
 			if (firstSubKey){
-				pConnection->WriteLine("Subkeys");
+				pConsole->WriteLine("Subkeys");
 				firstSubKey = false;
 			}
-			pConnection->WriteLine("  %s", Temp);
+			pConsole->WriteLine("  %s", Temp);
 			index++;
 		}
 
@@ -489,23 +492,23 @@ void RegListCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 			TMP = sizeof(Temp);
 			
 			if (firstValue) {
-				pConnection->WriteLine("");
-				pConnection->WriteLine("Values");
+				pConsole->WriteLine("");
+				pConsole->WriteLine("Values");
 				firstValue = false;
 			}
-			PrintRegValueLine(pConnection, Temp, valType, valBuf, valSize);
+			PrintRegValueLine(pConsole, Temp, valType, valBuf, valSize);
 			valSize = valSizeP;
 			index++;
 		}
 	}
 	catch (invalid_argument pE) {
-		pConnection->WriteLine(string("ERROR: ") + pE.what());
+		pConsole->WriteLine(string("ERROR: ") + pE.what());
 	}
 	
 }
 
-string RegListCommand::GetName() {
-	return "list";
+CommandInfo RegListCommand::GetInfo() {
+	return CommandInfo("list", "[pathtokey]", "Lists values and subkeys of the current or specified path");
 }
 
 
@@ -516,19 +519,19 @@ RegOpenCommand::RegOpenCommand(RegContext *pContext) {
 
 
 
-void RegOpenCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegOpenCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 2)
 	{
-		pConnection->WriteLine("SYNTAX: open path");
+		pConsole->WriteLine("SYNTAX: open path");
 		return;
 	}
 	
 	
-	ProcessChangeRegPath(_context, pConnection, pCmdLine->GetArgs().at(1));
+	ProcessChangeRegPath(_context, pConsole, pCmdLine->GetArgs().at(1));
 }
 
-string RegOpenCommand::GetName() {
-	return "open";
+CommandInfo RegOpenCommand::GetInfo() {
+	return CommandInfo("open", "<path>", "Open the specified path");
 }
 
 
@@ -539,16 +542,16 @@ RegRootCommand::RegRootCommand(RegContext *pContext) {
 }
 
 
-void RegRootCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegRootCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 2)
 	{
-		pConnection->WriteLine("SYNTAX: root HKLM|HKCR|HKCU|HKU|HKCC|HKPD");
+		pConsole->WriteLine("SYNTAX: root HKLM|HKCR|HKCU|HKU|HKCC|HKPD");
 		return;
 	}
 	HKEY key = ParseKey(pCmdLine->GetArgs().at(1).c_str());
 
 	if (key == NULL) {
-		pConnection->WriteLine("Invalid Root");
+		pConsole->WriteLine("Invalid Root");
 		return;
 	}
 
@@ -560,8 +563,8 @@ void RegRootCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *
 	_context->regPath = "";
 }
 
-string RegRootCommand::GetName() {
-	return "root";
+CommandInfo RegRootCommand::GetInfo() {
+	return CommandInfo("root", "<rootkey>", "Sets the root key to HKLM, HKCU, HKU, HKCR, HKCC or HKPD.");
 }
 
 
@@ -569,16 +572,16 @@ FindRegCommand::FindRegCommand(RegContext *pContext) {
 	_context = pContext;
 }
 
-void FindRegCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void FindRegCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 2)
 	{
-		pConnection->WriteLine("SYNTAX: findreg keyword ");
+		pConsole->WriteLine("SYNTAX: findreg keyword ");
 		return;
 	}
 	HKEY key = _context->currentKey;
-	pConnection->WriteLine("Searching... ");
-	ProcessLevel(pConnection, _context->regPath=="" ? NULL : _context->regPath.c_str(), pCmdLine->GetArgs().at(1).c_str());
-	pConnection->WriteLine("Done");
+	pConsole->WriteLine("Searching... ");
+	ProcessLevel(pConsole, _context->regPath=="" ? NULL : _context->regPath.c_str(), pCmdLine->GetArgs().at(1).c_str());
+	pConsole->WriteLine("Done");
 }
 
 bool strcontains(const char *s1, const char *s2)
@@ -606,7 +609,7 @@ bool strcontains(const char *s1, const char *s2)
 	return result;
 }
 
-void FindRegCommand::ProcessLevel(Connection *pConnection,const char *pSubKey, const char *pKeyword) {
+void FindRegCommand::ProcessLevel(IConsole *pConsole,const char *pSubKey, const char *pKeyword) {
 	bool isMatch = false;
 	HKEY key;
 
@@ -700,24 +703,24 @@ void FindRegCommand::ProcessLevel(Connection *pConnection,const char *pSubKey, c
 				break;
 			}
 			if (thisIsMatch)
-				PrintRegValueLine(pConnection, Temp, valType, valBuf, valSize);
+				PrintRegValueLine(pConsole, Temp, valType, valBuf, valSize);
 		}
 		index++;
 	}
 	RegCloseKey(key);
 	
 	if (isMatch)
-		pConnection->WriteLine("Match: %s", pSubKey ? pSubKey : "");
+		pConsole->WriteLine("Match: %s", pSubKey ? pSubKey : "");
 	subKeys.unique();
 	for each (string sub in subKeys)
 	{
 
-		ProcessLevel(pConnection, sub.c_str(), pKeyword);
+		ProcessLevel(pConsole, sub.c_str(), pKeyword);
 	}
 }
 
-string FindRegCommand::GetName() {
-	return "find";
+CommandInfo FindRegCommand::GetInfo() {
+	return CommandInfo("find", "<keyword>", "Searches for a string in the current key and subkeys");
 }
 
 
@@ -727,22 +730,22 @@ FindRegWriteableCommand::FindRegWriteableCommand(RegContext *pContext) {
 
 
 
-void FindRegWriteableCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void FindRegWriteableCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 1)
 	{
-		pConnection->WriteLine("SYNTAX: writeable");
+		pConsole->WriteLine("SYNTAX: writeable");
 		return;
 	}
 
 	HKEY key = _context->currentKey;
-	pConnection->WriteLine("Searching... ");
-	ProcessLevel(pConnection, _context->regPath == "" ? NULL : _context->regPath.c_str());
-	pConnection->WriteLine("Done");
+	pConsole->WriteLine("Searching... ");
+	ProcessLevel(pConsole, _context->regPath == "" ? NULL : _context->regPath.c_str());
+	pConsole->WriteLine("Done");
 
 }
 
 
-void FindRegWriteableCommand::ProcessLevel(Connection *pConnection, const char *pSubKey) {
+void FindRegWriteableCommand::ProcessLevel(IConsole *pConsole, const char *pSubKey) {
 	bool isMatch = false;
 	HKEY key;
 
@@ -769,15 +772,15 @@ void FindRegWriteableCommand::ProcessLevel(Connection *pConnection, const char *
 	RegCloseKey(key);
 	error = RegOpenKeyExA(_context->rootKey, pSubKey, 0, KEY_WRITE, &key);
 	if (error == ERROR_SUCCESS){
-		pConnection->WriteLine("Writable!: %s", pSubKey ? pSubKey : "");
+		pConsole->WriteLine("Writable!: %s", pSubKey ? pSubKey : "");
 		RegCloseKey(key);
 	}
 	else if(RegOpenKeyExA(_context->rootKey, pSubKey, 0, KEY_SET_VALUE, &key) == ERROR_SUCCESS){
-		pConnection->WriteLine("Writable (value only)!: %s", pSubKey ? pSubKey : "");
+		pConsole->WriteLine("Writable (value only)!: %s", pSubKey ? pSubKey : "");
 		RegCloseKey(key);
 	}
 	else if (RegOpenKeyExA(_context->rootKey, pSubKey, 0, KEY_CREATE_SUB_KEY, &key) == ERROR_SUCCESS){
-		pConnection->WriteLine("Writable (subkey only)!: %s", pSubKey ? pSubKey : "");
+		pConsole->WriteLine("Writable (subkey only)!: %s", pSubKey ? pSubKey : "");
 		RegCloseKey(key);
 	}
 	
@@ -785,12 +788,12 @@ void FindRegWriteableCommand::ProcessLevel(Connection *pConnection, const char *
 	for each (string sub in subKeys)
 	{
 		if (sub.length()>0)
-			ProcessLevel(pConnection, sub.c_str());
+			ProcessLevel(pConsole, sub.c_str());
 	}
 }
 
-string FindRegWriteableCommand::GetName() {
-	return "writeable";
+CommandInfo FindRegWriteableCommand::GetInfo() {
+	return CommandInfo("writeable", "", "Lists all writable entries in current key and subkeys");
 }
 
 RegSetCommand::RegSetCommand(RegContext *pContext) {
@@ -806,33 +809,33 @@ typedef struct {
 } RegValueType;
 
 
-void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegSetCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size() < 4)
 	{
-		pConnection->WriteLine("SYNTAX: set <value name> <value type> <value>");
-		pConnection->WriteLine("The following are the value types supported by this command.");
-		pConnection->WriteLine("");
-		pConnection->WriteLine("dword   - A hex or decimal dword value");
-		pConnection->WriteLine("   Example: set testvalue dword  1");
-		pConnection->WriteLine("			set testvalue dword 0xFFAA3311");
-		pConnection->WriteLine("");
-		pConnection->WriteLine("qword   - A hex or decimal qword value");
-		pConnection->WriteLine("   Example: set testvalue qword  1");
-		pConnection->WriteLine("			set testvalue qword 0x12345678FFAA3311");
-		pConnection->WriteLine("");
-		pConnection->WriteLine("string  - A string");
-		pConnection->WriteLine("   Example: set teststr string  \"Hello\"");
-		pConnection->WriteLine("");
-		pConnection->WriteLine("expand  - A string");
-		pConnection->WriteLine("   Example: set testexp expand  \"%%PATH%%;c:\\test\"");
-		pConnection->WriteLine("");
-		pConnection->WriteLine("multi   - One or more string values");
-		pConnection->WriteLine("   Example: set testmulti multi  \"str1\" \"str2\" \"str3\" \"str4\"");
-		pConnection->WriteLine("");
-		pConnection->WriteLine("binary  - The value parameter is a hex or decimal dword value");
-		pConnection->WriteLine("   Example: set testbin binary \"0F A4 5F 12 0A\"");
-		pConnection->WriteLine("");		
+		pConsole->WriteLine("SYNTAX: set <value name> <value type> <value>");
+		pConsole->WriteLine("The following are the value types supported by this command.");
+		pConsole->WriteLine("");
+		pConsole->WriteLine("dword   - A hex or decimal dword value");
+		pConsole->WriteLine("   Example: set testvalue dword  1");
+		pConsole->WriteLine("			set testvalue dword 0xFFAA3311");
+		pConsole->WriteLine("");
+		pConsole->WriteLine("qword   - A hex or decimal qword value");
+		pConsole->WriteLine("   Example: set testvalue qword  1");
+		pConsole->WriteLine("			set testvalue qword 0x12345678FFAA3311");
+		pConsole->WriteLine("");
+		pConsole->WriteLine("string  - A string");
+		pConsole->WriteLine("   Example: set teststr string  \"Hello\"");
+		pConsole->WriteLine("");
+		pConsole->WriteLine("expand  - A string");
+		pConsole->WriteLine("   Example: set testexp expand  \"%%PATH%%;c:\\test\"");
+		pConsole->WriteLine("");
+		pConsole->WriteLine("multi   - One or more string values");
+		pConsole->WriteLine("   Example: set testmulti multi  \"str1\" \"str2\" \"str3\" \"str4\"");
+		pConsole->WriteLine("");
+		pConsole->WriteLine("binary  - The value parameter is a hex or decimal dword value");
+		pConsole->WriteLine("   Example: set testbin binary \"0F A4 5F 12 0A\"");
+		pConsole->WriteLine("");		
 		return;
 	}
 
@@ -851,7 +854,7 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 		path = new RegPathParam(_context, valueName, true,true);
 	}
 	catch (invalid_argument pE){
-		pConnection->WriteLine(string("ERROR: ") + pE.what());
+		pConsole->WriteLine(string("ERROR: ") + pE.what());
 		return;
 	}
 
@@ -866,7 +869,7 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 		}
 	if (valueTypeCode == -1)
 	{
-		pConnection->WriteLine("Invalid Value Type");
+		pConsole->WriteLine("Invalid Value Type");
 		return;
 	}
 	
@@ -923,7 +926,7 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 				switch (i % 3) {
 				case 2:
 					if (src[i] != ' '){
-						pConnection->WriteLine("Incorrect value format");
+						pConsole->WriteLine("Incorrect value format");
 						return;
 					}
 					src[i] = 0;
@@ -932,7 +935,7 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 					valSize++;
 				case 0:
 					if (!((src[i] >= '0' && src[i] <= '9') || (src[i] >= 'A' && src[i] <= 'F') || (src[i] >= 'a' && src[i] <= 'f'))){
-						pConnection->WriteLine("Incorrect value format");
+						pConsole->WriteLine("Incorrect value format");
 						return;
 					}
 					break;
@@ -949,24 +952,24 @@ void RegSetCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 		}
 	}
 	catch (invalid_argument pE){
-		pConnection->WriteLine(string("ERROR: ") + pE.what());
+		pConsole->WriteLine(string("ERROR: ") + pE.what());
 	}
 
 	delete path;
 }
 
-string RegSetCommand::GetName() {
-	return "set";
+CommandInfo RegSetCommand::GetInfo() {
+	return CommandInfo("set", "<name|path\\name> <type> <value>", "Sets a value.");
 }
 
 RegDelValCommand::RegDelValCommand(RegContext *pContext) {
 	_context = pContext;
 }
 
-void RegDelValCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegDelValCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 2)
 	{
-		pConnection->WriteLine("SYNTAX: delval name");
+		pConsole->WriteLine("SYNTAX: delval name");
 		return;
 	}
 
@@ -978,12 +981,12 @@ void RegDelValCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 		path.DeleteValue();
 	}
 	catch (invalid_argument pE) {
-		pConnection->WriteLine(string("ERROR: ")+pE.what());
+		pConsole->WriteLine(string("ERROR: ")+pE.what());
 	}
 }
 
-string RegDelValCommand::GetName() {
-	return "delval";
+CommandInfo RegDelValCommand::GetInfo() {
+	return CommandInfo("delval", "<valuename|valuepath>", "Deletes a value.");
 }
 
 
@@ -991,10 +994,10 @@ RegCreateKeyCommand::RegCreateKeyCommand(RegContext *pContext) {
 	_context = pContext;
 }
 
-void RegCreateKeyCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegCreateKeyCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 2)
 	{
-		pConnection->WriteLine("SYNTAX: mkkey <subkey>");
+		pConsole->WriteLine("SYNTAX: mkkey <subkey>");
 		return;
 	}
 
@@ -1004,13 +1007,13 @@ void RegCreateKeyCommand::ProcessCommand(Connection *pConnection, ParsedCommandL
 		path.CreateKey();
 	}
 	catch (invalid_argument pE) {
-		pConnection->WriteLine(string("ERROR: ") + pE.what());
+		pConsole->WriteLine(string("ERROR: ") + pE.what());
 	}
 	
 }
 
-string RegCreateKeyCommand::GetName() {
-	return "mkkey";
+CommandInfo RegCreateKeyCommand::GetInfo() {
+	return CommandInfo("mkkey", "<keyname|keypath>", "Create a new key.");
 }
 
 
@@ -1018,10 +1021,10 @@ RegDeleteKeyCommand::RegDeleteKeyCommand(RegContext *pContext) {
 	_context = pContext;
 }
 
-void RegDeleteKeyCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegDeleteKeyCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 2)
 	{
-		pConnection->WriteLine("SYNTAX: delkey <subkey>");
+		pConsole->WriteLine("SYNTAX: delkey <subkey>");
 		return;
 	}
 	try {
@@ -1030,13 +1033,13 @@ void RegDeleteKeyCommand::ProcessCommand(Connection *pConnection, ParsedCommandL
 		path.DeleteKey();
 	}
 	catch (invalid_argument pE) {
-		pConnection->WriteLine(string("ERROR: ") + pE.what());
+		pConsole->WriteLine(string("ERROR: ") + pE.what());
 	}
 	
 }
 
-string RegDeleteKeyCommand::GetName() {
-	return "delkey";
+CommandInfo RegDeleteKeyCommand::GetInfo() {
+	return CommandInfo("delkey", "<keyname|keypath>", "Delete a new key.");
 }
 
 
@@ -1046,10 +1049,10 @@ RegDeleteTreeCommand::RegDeleteTreeCommand(RegContext *pContext) {
 	_context = pContext;
 }
 
-void RegDeleteTreeCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegDeleteTreeCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 2)
 	{
-		pConnection->WriteLine("SYNTAX: deltree <subkey>");
+		pConsole->WriteLine("SYNTAX: deltree <subkey>");
 		return;
 	}
 
@@ -1059,23 +1062,23 @@ void RegDeleteTreeCommand::ProcessCommand(Connection *pConnection, ParsedCommand
 		path.DeleteTree();
 	}
 	catch (invalid_argument pE) {
-		pConnection->WriteLine(string("ERROR: ") + pE.what());
+		pConsole->WriteLine(string("ERROR: ") + pE.what());
 	}
 
 }
 
-string RegDeleteTreeCommand::GetName() {
-	return "deltree";
+CommandInfo RegDeleteTreeCommand::GetInfo() {
+	return CommandInfo("deltree", "<vkeyname|keypath>", "Delete a registry tree.");
 }
 
 RegImportCommand::RegImportCommand(RegContext *pContext) {
 	_context = pContext;
 }
 
-void RegImportCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegImportCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 2)
 	{
-		pConnection->WriteLine("SYNTAX: import <file.reg>");
+		pConsole->WriteLine("SYNTAX: import <file.reg>");
 		return;
 	}
 	string keyName = pCmdLine->GetArgs().at(1);
@@ -1084,23 +1087,23 @@ void RegImportCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 	DWORD error = RegDeleteKeyExW(_context->currentKey, wideName.c_str(), 0, NULL);
 
 	if (error != ERROR_SUCCESS){
-		pConnection->WriteLine("Failed to delete key: %d", error);
+		pConsole->WriteLine("Failed to delete key: %d", error);
 		return;
 	}
 }
 
-string RegImportCommand::GetName() {
-	return "import";
+CommandInfo RegImportCommand::GetInfo() {
+	return CommandInfo("import", "<file>", "Import registry values from file.");
 }
 
 RegExportCommand::RegExportCommand(RegContext *pContext) {
 	_context = pContext;
 }
 
-void RegExportCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegExportCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 2)
 	{
-		pConnection->WriteLine("SYNTAX: export <file.reg>");
+		pConsole->WriteLine("SYNTAX: export <file.reg>");
 		return;
 	}
 	string keyName = pCmdLine->GetArgs().at(1);
@@ -1109,22 +1112,22 @@ void RegExportCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 	DWORD error = RegSaveKeyW(_context->currentKey, wideName.c_str(), NULL);
 
 	if (error != ERROR_SUCCESS){
-		pConnection->WriteLine("Failed to export key: %d", error);
+		pConsole->WriteLine("Failed to export key: %d", error);
 		return;
 	}
 }
 
-string RegExportCommand::GetName() {
-	return "export";
+CommandInfo RegExportCommand::GetInfo() {
+	return CommandInfo("export", "<file>", "Export registry values to a file.");
 }
 
 RegAclCommand::RegAclCommand(RegContext *pContext) {
 	_context = pContext;
 }
-void RegAclCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegAclCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	if (pCmdLine->GetArgs().size() < 1)
 	{
-		pConnection->WriteLine("SYNTAX: acl <optional keypath>");
+		pConsole->WriteLine("SYNTAX: acl <optional keypath>");
 		return;
 	}
 
@@ -1146,30 +1149,30 @@ void RegAclCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 		BOOL daclDefaulted;
 		PACL acl;
 		if (!GetSecurityDescriptorDacl(securityDescriptor, &daclPresent, &acl, &daclDefaulted)) {
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 			return;
 		}
 		if (!daclPresent) {
-			pConnection->WriteLine("No ACL present");
+			pConsole->WriteLine("No ACL present");
 			return;
 		}
 
 		if (daclDefaulted)
-			pConnection->WriteLine("ACL is a default");
+			pConsole->WriteLine("ACL is a default");
 
-		PrintOwnerInformation(pConnection, ownerSecurityDescriptor);
-		PrintAclInformation(pConnection, securityDescriptor, acl);
+		PrintOwnerInformation(pConsole, ownerSecurityDescriptor);
+		PrintAclInformation(pConsole, securityDescriptor, acl);
 		free(securityDescriptor);
 		free(ownerSecurityDescriptor);
 	}
 	catch (invalid_argument pE) {
-		pConnection->WriteLine(string("ERROR: ") + pE.what());
+		pConsole->WriteLine(string("ERROR: ") + pE.what());
 	}
 	
 }
 
-string RegAclCommand::GetName() {
-	return "acl";
+CommandInfo RegAclCommand::GetInfo() {
+	return CommandInfo("acl", "[keypath]", "Display ACL for a key.");
 }
 
 
@@ -1179,27 +1182,27 @@ RegHelpCommand::RegHelpCommand(RegContext *pContext) {
 	_context = pContext;
 }
 
-void RegHelpCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RegHelpCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
-	pConnection->WriteLine("help - Shows this screen");
-	pConnection->WriteLine("exit - Exits the registry editor");
-	pConnection->WriteLine("list - Lists values and subkeys of current path");
-	pConnection->WriteLine("open [path] - Opens a registry key");
-	pConnection->WriteLine("root HKLM|HKCU|HKU|HKCR|HKCC|HKPD - Sets the root key");
-	pConnection->WriteLine("find [str] - Finds a string in the current key and subkeys");
-	pConnection->WriteLine("writeable - Lists all writable entries in current key and subkeys");
-	pConnection->WriteLine("set [valuename] [valueType] [value] - Set a value");	
-	pConnection->WriteLine("delval [valuename] - Deletes a value");
-	pConnection->WriteLine("delkey [subkey] - Deletes a subkey");
-	pConnection->WriteLine("deltree [subkey] - Deletes a subkey and all its children");
-	pConnection->WriteLine("mkkey [subkey] - Creates a new subkey");
-	pConnection->WriteLine("acl [key] - Displays the ACL of a key.");
+	pConsole->WriteLine("help - Shows this screen");
+	pConsole->WriteLine("exit - Exits the registry editor");
+	pConsole->WriteLine("list - Lists values and subkeys of current path");
+	pConsole->WriteLine("open [path] - Opens a registry key");
+	pConsole->WriteLine("root HKLM|HKCU|HKU|HKCR|HKCC|HKPD - Sets the root key");
+	pConsole->WriteLine("find [str] - Finds a string in the current key and subkeys");
+	pConsole->WriteLine("writeable - Lists all writable entries in current key and subkeys");
+	pConsole->WriteLine("set [valuename] [valueType] [value] - Set a value");	
+	pConsole->WriteLine("delval [valuename] - Deletes a value");
+	pConsole->WriteLine("delkey [subkey] - Deletes a subkey");
+	pConsole->WriteLine("deltree [subkey] - Deletes a subkey and all its children");
+	pConsole->WriteLine("mkkey [subkey] - Creates a new subkey");
+	pConsole->WriteLine("acl [key] - Displays the ACL of a key.");
 	
-	pConnection->WriteLine("");
-	pConnection->WriteLine("A path can also be opened by just typing it. '..' may be used to goto the parent key and a subkey can be opened by just specifying its name.");
+	pConsole->WriteLine("");
+	pConsole->WriteLine("A path can also be opened by just typing it. '..' may be used to goto the parent key and a subkey can be opened by just specifying its name.");
 	
 }
 
-string RegHelpCommand::GetName() {
-	return "help";
+CommandInfo RegHelpCommand::GetInfo() {
+	return CommandInfo("help", "", "Display this screen");
 }

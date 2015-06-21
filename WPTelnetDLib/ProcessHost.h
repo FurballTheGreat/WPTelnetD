@@ -5,7 +5,7 @@
 
 #include "pch.h"
 #include "ProcessHost.h"
-#include "Networking.h"
+#include "Console.h"
 #ifdef PHONE
 #include<WPKernel.h>
 #endif
@@ -18,12 +18,12 @@ private:
 	HANDLE _childStdOutReadPipe;
 	HANDLE _childStdOutWritePipe;
 	HANDLE _childStdInWritePipe;
-	Connection *_connection;
+	IConsole *_console;
 	char _buf[4096];
-	bool CreateChildProcess(Connection *pConnection,const char *pCommandLine );
-	static void WriteToPipe(Connection *pConnection, HANDLE pHandle);
-	static void ReadFromPipe(Connection *pConnection, HANDLE pHandle);
+	bool CreateChildProcess(IConsole *pConsole,const char *pCommandLine );
+	static void WriteToPipe(IConsole *pConsole, HANDLE pHandle);
+	static void ReadFromPipe(IConsole *pConsole, HANDLE pHandle);
 public:
-	ProcessHost(Connection *pConnection);
-	void ExecuteProcess(Connection *pConnection,const char *pCmdLine) ;
+	ProcessHost(IConsole *pConsole);
+	void ExecuteProcess(IConsole *pConsole,const char *pCmdLine) ;
 };

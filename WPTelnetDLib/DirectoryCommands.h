@@ -3,31 +3,31 @@
 #include "pch.h"
 #include<string>
 #include "CommandProcessor.h"
-#include "Networking.h"
+#include "Console.h"
 
-class CdCommand : BaseCommand {
+class CdCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
 
-class MkdirCommand : BaseCommand {
+class MkdirCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class RmdirCommand : BaseCommand {
+class RmdirCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class DirCommand : BaseCommand {
+class DirCommand : Command {
 private:
 	BOOL GetLastWriteTime(WIN32_FIND_DATAA *data, char *string, DWORD dwSize);
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };

@@ -1,32 +1,33 @@
 #include "pch.h"
 #include "DirectoryCommands.h"
+#include "TerminalHelper.h"
 
-void RmdirCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void RmdirCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<2)
-		pConnection->WriteLine("SYNTAX: rmdir path");
+		pConsole->WriteLine("SYNTAX: rmdir path");
 	else {
 		if (!RemoveDirectoryA(pCmdLine->GetArgs().at(1).c_str()))
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());		
 	}
 }
 
-string RmdirCommand::GetName() {
-	return "rmdir";
+CommandInfo RmdirCommand::GetInfo() {
+	return CommandInfo("rmdir", "<path>", "Remove a directory.");
 }
 
-void MkdirCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void MkdirCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<2)
-		pConnection->WriteLine("SYNTAX: mkdir path");
+		pConsole->WriteLine("SYNTAX: mkdir path");
 	else {
 		if (!CreateDirectoryA(pCmdLine->GetArgs().at(1).c_str(), NULL))
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 	}
 }
 
-string MkdirCommand::GetName() {
-	return "mkdir";
+CommandInfo MkdirCommand::GetInfo() {
+	return CommandInfo("mkdir", "<path>", "Create a directory.");
 }
 
 
@@ -51,7 +52,7 @@ BOOL DirCommand::GetLastWriteTime(WIN32_FIND_DATAA *data, char *string, DWORD dw
 
 }
 
-void DirCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void DirCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	const char *search;
 
 	if (pCmdLine->GetArgs().size()<2)
@@ -82,42 +83,45 @@ void DirCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmd
 
 			if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				pConnection->WriteLine("%14s %-14s %-5s %s", timeStr, "    DIR  ", attrStr, data.cFileName);
+				pConsole->SetForeground(Cyan);
+				pConsole->WriteLine("%14s %-14s %-5s %s", timeStr, "    DIR  ", attrStr, data.cFileName);
 				dirs++;
 			}
 			else {
-
-				pConnection->WriteLine("%14s %14u %-5s %s", timeStr, data.nFileSizeLow, attrStr, data.cFileName);
+				pConsole->SetForeground(Green);
+				pConsole->WriteLine("%14s %14u %-5s %s", timeStr, data.nFileSizeLow, attrStr, data.cFileName);
 				files++;
 				fileTotal += data.nFileSizeLow;
 			}
 
 		} while (FindNextFileA(handle, &data));
-		pConnection->WriteLine("Finished listing %d dirs and %d files totalling %u bytes", dirs, files, fileTotal);
+		pConsole->SetForeground(Yellow);
+		pConsole->WriteLine("%d Dir(s) and %d File(s) %u bytes", dirs, files, fileTotal);
+		pConsole->WriteLine();
 	}
 	else{
-		pConnection->WriteLastError();
+		pConsole->WriteLine(GetLastErrorAsString());
 	}
 
 }
 
-string DirCommand::GetName() {
-	return "dir";
+CommandInfo DirCommand::GetInfo() {
+	return CommandInfo("dir", "[path/wildcard]", "List the contents of a directory.");
 }
 
 
-void CdCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void CdCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<2)
-		pConnection->WriteLine("ERROR: You must specify a path");
+		pConsole->WriteLine("ERROR: You must specify a path");
 	else {
 		if (!SetCurrentDirectoryA(pCmdLine->GetArgs().at(1).c_str()))
 		{
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 		}
 	}
 }
 
-string CdCommand::GetName() {
-	return "cd";
+CommandInfo CdCommand::GetInfo() {
+	return CommandInfo("cd", "<path>", "Change current directory.");
 }

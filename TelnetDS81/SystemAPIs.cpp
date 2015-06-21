@@ -47,7 +47,7 @@ namespace TelnetDS81
 
 	}
 	int DevProgramReg::TelnetListenForOneConnection(int pPort, int* pSocket, int *pWsaError){
-		return ListenForOneConnection(pPort, (SOCKET *)pSocket, pWsaError);
+		return ListenForOneConnection(pPort, (SOCKET *)pSocket, pWsaError,NULL);
 	}
 	int DevProgramReg::TelnetConnectTo(String^ pIpAddress, int pPort, int *pSocket, int *pWsaError){
 		std::wstring fooW(pIpAddress->Begin());

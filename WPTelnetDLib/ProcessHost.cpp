@@ -1,14 +1,15 @@
 #include "pch.h"
 #include "ProcessHost.h"
-#include "Networking.h"
+#include "Console.h"
 #ifdef PHONE
 #include<WPKernel.h>
 #endif
 #include<thread>
 #include "stdlib.h"
+#include "TerminalHelper.h"
 
 
-bool ProcessHost::CreateChildProcess(Connection *pConnection, const char *pCommandLine )
+bool ProcessHost::CreateChildProcess(IConsole *pConsole, const char *pCommandLine )
 { 
 	PROCESS_INFORMATION processInfo; 
 	STARTUPINFOA startInfo;
@@ -24,12 +25,12 @@ bool ProcessHost::CreateChildProcess(Connection *pConnection, const char *pComma
 	startInfo.dwFlags |= STARTF_USESTDHANDLES;
 	
 	if (strlen(pCommandLine) == 0) {
-		pConnection->WriteLine("Not executing nothing");
+		pConsole->WriteLine("Not executing nothing");
 		return false;
 	}
 	
-	pConnection->WriteLine("CMD: %s",pCommandLine);
-	_connection = pConnection;
+	pConsole->WriteLine("CMD: %s",pCommandLine);
+	_console = pConsole;
 	isSuccess = CreateProcessA(
 		NULL,
 		(char*)pCommandLine, 		
@@ -43,13 +44,13 @@ bool ProcessHost::CreateChildProcess(Connection *pConnection, const char *pComma
 		(LPPROCESS_INFORMATION)&processInfo); 
 
 	if (!isSuccess) {
-		pConnection->WriteLastError();
+		pConsole->WriteLine(GetLastErrorAsString());
 		return false;
 	}
 	else 
 	{
-		std::thread writeToPipeThread(WriteToPipe, pConnection,_childStdInWritePipe );
-		std::thread readFromPipeThread(ReadFromPipe, pConnection, _childStdOutReadPipe); 
+		std::thread writeToPipeThread(WriteToPipe, pConsole,_childStdInWritePipe );
+		std::thread readFromPipeThread(ReadFromPipe, pConsole, _childStdOutReadPipe); 
 		WaitForSingleObject(processInfo.hProcess,INFINITE);
 		TerminateThread(writeToPipeThread.native_handle(),0);
 		TerminateThread(readFromPipeThread.native_handle(),0);
@@ -61,27 +62,24 @@ bool ProcessHost::CreateChildProcess(Connection *pConnection, const char *pComma
 	}
 }
 
-void ProcessHost::WriteToPipe(Connection *pConnection, HANDLE pHandle) 
+void ProcessHost::WriteToPipe(IConsole *pConsole, HANDLE pHandle) 
 { 
 	DWORD  bytesWritten; 
 
 	for (bool isSuccess = true;isSuccess;)
 	{ 
-		const char* read = pConnection->ReadLine();
-		char buf[4096];
+		auto read = pConsole->ReadLine()+"\n";
 		
-		if (!read) 
-			break; 
 		
-		sprintf_s(buf, "%s\n", read);
-		isSuccess = WriteFile(pHandle,buf, strlen(buf), &bytesWritten, NULL);
+		
+		isSuccess = WriteFile(pHandle,read.c_str(), read.length(), &bytesWritten, NULL);
 	} 
 
 	if (!CloseHandle(pHandle)) 
-		pConnection->WriteLastError();
+		pConsole->WriteLine(GetLastErrorAsString());
 } 
 
-void ProcessHost::ReadFromPipe(Connection *pConnection, HANDLE pHandle) 
+void ProcessHost::ReadFromPipe(IConsole *pConsole, HANDLE pHandle) 
 { 
 	DWORD bytesRead, bytesWritten; 
 	CHAR characterBuffer[4096]; 
@@ -92,11 +90,11 @@ void ProcessHost::ReadFromPipe(Connection *pConnection, HANDLE pHandle)
 		isSuccess = ReadFile( pHandle, characterBuffer, sizeof(characterBuffer), &bytesRead, NULL);
 		if(!isSuccess || !bytesRead) break; 
 
-		isSuccess = pConnection->Write(bytesRead,characterBuffer);
+		isSuccess = pConsole->Write(bytesRead,(BYTE*)characterBuffer);
 	} 
 } 
 
-ProcessHost::ProcessHost(Connection *pConnection) {
+ProcessHost::ProcessHost(IConsole *pConsole) {
 	SECURITY_ATTRIBUTES saAttr; 
 
 	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES); 
@@ -104,29 +102,29 @@ ProcessHost::ProcessHost(Connection *pConnection) {
 	saAttr.lpSecurityDescriptor = NULL; 
 
 	if ( ! CreatePipe(&_childStdOutReadPipe, &_childStdOutWritePipe, &saAttr, 0) ) {
-		pConnection->WriteLine("Unable to create a pipe for the child process's STDOUT"); 
+		pConsole->WriteLine("Unable to create a pipe for the child process's STDOUT"); 
 		return;
 	}
 
 	if ( ! SetHandleInformation(_childStdOutReadPipe, HANDLE_FLAG_INHERIT, 0) ) {
-		pConnection->WriteLine("Failed to call SetHandleInformation when ensuring read handle for STDOUT pipe is not inherited.");
+		pConsole->WriteLine("Failed to call SetHandleInformation when ensuring read handle for STDOUT pipe is not inherited.");
 		return;
 	}
 
 	if (! CreatePipe(&_childStdInReadPipe, &_childStdInWritePipe, &saAttr, 0)) {
-		pConnection->WriteLine("Unable to create a pipe for the child process's STDIN");
+		pConsole->WriteLine("Unable to create a pipe for the child process's STDIN");
 		return;
 	}
 
 	if ( ! SetHandleInformation(_childStdInWritePipe, HANDLE_FLAG_INHERIT, 0) ){
-		pConnection->WriteLine("Failed to call SetHandleInformation when ensuring write handle for STDIN pipe is not inherited.");
+		pConsole->WriteLine("Failed to call SetHandleInformation when ensuring write handle for STDIN pipe is not inherited.");
 		return;
 	}
 }
 
-void ProcessHost::ExecuteProcess(Connection *pConnection, const char *pCmdLine) 
+void ProcessHost::ExecuteProcess(IConsole *pConsole, const char *pCmdLine) 
 {
-	CreateChildProcess(pConnection,pCmdLine);
-	pConnection->WriteLine( "End of parent execution.");
+	CreateChildProcess(pConsole,pCmdLine);
+	pConsole->WriteLine( "End of parent execution.");
 }
 

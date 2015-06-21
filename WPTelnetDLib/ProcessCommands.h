@@ -3,36 +3,36 @@
 #include "pch.h"
 #include<string>
 #include "CommandProcessor.h"
-#include "Networking.h"
+#include "Console.h"
 
-class KillCommand : BaseCommand {
+class KillCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
 
-class PsCommand : BaseCommand {
+class PsCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class WhoAmICommand : BaseCommand {
+class WhoAmICommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
 
-class LookupChamberSidCommand : BaseCommand {
+class LookupChamberSidCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class CreateProcessInChamberCommand : BaseCommand {
+class CreateProcessInChamberCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };

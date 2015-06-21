@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "FileCommands.h"
 #include "AclHelpers.h"
+#include "TerminalHelper.h"
 
-void TypeCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void TypeCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<2)
-		pConnection->WriteLine("ERROR: You must specify a file");
+		pConsole->WriteLine("ERROR: You must specify a file");
 	else {
 
 		HANDLE hFile = CreateFileA(pCmdLine->GetArgs().at(1).c_str(),  
@@ -17,7 +18,7 @@ void TypeCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCm
 			NULL);                 
 
 		if (hFile == (HANDLE)-1) {
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 			return;
 		}
 
@@ -28,59 +29,59 @@ void TypeCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCm
 			ok = ReadFile(hFile, readBuffer, sizeof(readBuffer) - 1, &read, NULL);
 			if (!ok)
 			{
-				pConnection->WriteLastError();
+				pConsole->WriteLine(GetLastErrorAsString());
 			}
 			else if (read > 0){
-				pConnection->Write(read, readBuffer);
+				pConsole->Write(read, (BYTE*)readBuffer);
 			}
 			else
 				break;
 		};
 		if (!CloseHandle(hFile)) {
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 		}
 
 	}
 }
 
-string TypeCommand::GetName() {
-	return "type";
+CommandInfo TypeCommand::GetInfo() {
+	return CommandInfo("type", "<filename>", "Print file contents");
 }
 
-void CopyCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void CopyCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<3)
-		pConnection->WriteLine("SYNTAX: copy src dst");
+		pConsole->WriteLine("SYNTAX: copy src dst");
 	else {
 		if (!CopyFileA(pCmdLine->GetArgs().at(1).c_str(), pCmdLine->GetArgs().at(2).c_str(), TRUE))
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 	}
 }
 
-string CopyCommand::GetName() {
-	return "copy";
+CommandInfo CopyCommand::GetInfo() {
+	return CommandInfo("copy", "<src> <dst>", "Copy a file.");
 }
 
 
-void MoveCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void MoveCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<3)
-		pConnection->WriteLine("SYNTAX: move src dst");
+		pConsole->WriteLine("SYNTAX: move src dst");
 	else {
 		if (!MoveFileA(pCmdLine->GetArgs().at(1).c_str(), pCmdLine->GetArgs().at(2).c_str()))
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 	}
 }
 
-string MoveCommand::GetName() {
-	return "move";
+CommandInfo MoveCommand::GetInfo() {
+	return CommandInfo("move", "<src> <dst>", "Move a file.");
 }
 
 
-void AttribCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void AttribCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<3)
-		pConnection->WriteLine("SYNTAX: attrib file [+|-]arsh");
+		pConsole->WriteLine("SYNTAX: attrib file [+|-]arsh");
 	else {
 		char src[1024];
 		strcpy_s(src, pCmdLine->GetArgs().at(1).c_str());
@@ -89,7 +90,7 @@ void AttribCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 		DWORD attribs = GetFileAttributesA(src);
 		bool set = true;
 		char *attribstr = attribss;
-		pConnection->WriteLine("%s current has %x attributes", src, attribs);
+		pConsole->WriteLine("%s current has %x attributes", src, attribs);
 		while (*attribstr) {
 			switch (*attribstr) {
 			case '+':
@@ -125,16 +126,16 @@ void AttribCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *p
 			}
 			attribstr++;
 		}
-		pConnection->WriteLine("Setting attributes to %x", attribs);
+		pConsole->WriteLine("Setting attributes to %x", attribs);
 		if (SetFileAttributesA(src, attribs))
-			pConnection->WriteLine("Succeeded");
+			pConsole->WriteLine("Succeeded");
 		else
-			pConnection->WriteLine("Failed %x", GetLastError());
+			pConsole->WriteLine("Failed %x", GetLastError());
 	}
 }
 
-string AttribCommand::GetName() {
-	return "attrib";
+CommandInfo AttribCommand::GetInfo() {
+	return CommandInfo("attrib", "<path> <+/-attribs>", "Set file attribute(s).");
 }
 
 
@@ -142,18 +143,20 @@ BaseFileCommand::BaseFileCommand() {
 
 }
 
-void BaseFileCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
-	if (!ProcessCommandLine(pConnection, pCmdLine))
-		PrintSyntax(pConnection);
+void BaseFileCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
+	if (!ProcessCommandLine(pConsole, pCmdLine))
+		PrintSyntax(pConsole);
 
-	if (pCmdLine->GetArgs().size() < 2)
-		PrintSyntax(pConnection);
+	if (pCmdLine->GetArgs().size() < 2){
+		PrintSyntax(pConsole);
+		return;
+	}
 
 	WIN32_FIND_DATAA data;
 	string path = pCmdLine->GetArgs().at(1);
 	HANDLE handle = FindFirstFileExA(path.c_str(), FindExInfoBasic, &data, FindExSearchNameMatch, NULL, 0);
 	if (INVALID_HANDLE_VALUE == handle) {
-		pConnection->WriteLastError();
+		pConsole->WriteLine(GetLastErrorAsString());
 		return;
 	}
 	if (path.find_last_of('\\') != string::npos) {
@@ -170,7 +173,7 @@ void BaseFileCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine 
 		if (strcmp(data.cFileName, ".") == 0 || strcmp(data.cFileName, "..") == 0)
 			continue;
 		
-		ProcessFile(pConnection, data, filePath);
+		ProcessFile(pConsole, data, filePath);
 
 	} while (FindNextFileA(handle, &data));
 
@@ -178,15 +181,15 @@ void BaseFileCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine 
 }
 
 
-void DeleteFiles(Connection *pConnection, char *pPath) {
+void DeleteFiles(IConsole *pConsole, char *pPath) {
 	WIN32_FIND_DATAA data;
 	HANDLE handle = FindFirstFileExA(pPath, FindExInfoBasic, &data, FindExSearchNameMatch, NULL, 0);
 
 
-	pConnection->WriteLine("DELETING Files in: %s", pPath);
+	pConsole->WriteLine("DELETING Files in: %s", pPath);
 	if (INVALID_HANDLE_VALUE != handle) {
 		do {
-			pConnection->WriteLine("FOUND  %s", data.cFileName);
+			pConsole->WriteLine("FOUND  %s", data.cFileName);
 			char pathBuf[1024];
 			strcpy_s(pathBuf, pPath);
 			for (int i = strlen(pathBuf) - 1; i >= 0; i--)
@@ -206,14 +209,14 @@ void DeleteFiles(Connection *pConnection, char *pPath) {
 
 				strcat_s(pathBuf, "\\*.*");
 
-				DeleteFiles(pConnection, pathBuf);
+				DeleteFiles(pConsole, pathBuf);
 				RemoveDirectoryA(path);
 				free(path);
 			}
 			else {
-				pConnection->WriteLine("DELETING  %s", pathBuf);
+				pConsole->WriteLine("DELETING  %s", pathBuf);
 				if (!DeleteFileA(pathBuf))
-					pConnection->WriteLastError();
+					pConsole->WriteLine(GetLastErrorAsString());
 
 			}
 
@@ -221,36 +224,35 @@ void DeleteFiles(Connection *pConnection, char *pPath) {
 		FindClose(handle);
 	}
 	else{
-		pConnection->WriteLastError();
+		pConsole->WriteLine(GetLastErrorAsString());
 	}
 }
 
-void DeleteCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void DeleteCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<2)
-		pConnection->WriteLine("SYNTAX: del path");
+		pConsole->WriteLine("SYNTAX: del path");
 	else {
-		DeleteFiles(pConnection, _strdup(pCmdLine->GetArgs().at(1).c_str()));
+		DeleteFiles(pConsole, _strdup(pCmdLine->GetArgs().at(1).c_str()));
 	}
 }
 
-string DeleteCommand::GetName() {
-	return "del";
+CommandInfo DeleteCommand::GetInfo() {
+	return CommandInfo("del", "<path>", "Delete file(s).");
 }
 
 
 
 
 
-void ListAclsCommand::ProcessFile(Connection *pConnection, WIN32_FIND_DATAA pFileInfo, string pFileName) {
-	HMODULE lib = LoadLibraryA("ntmarta.dll");
-	if (lib == NULL){
-		pConnection->WriteLine("Failed Load Lib");
-		pConnection->WriteLastError();
-		return;
-	}
+void ListAclsCommand::ProcessFile(IConsole *pConsole, WIN32_FIND_DATAA pFileInfo, string pFileName) {
+	//HMODULE lib = LoadLibraryA("ntmarta.dll");
+	//if (lib == NULL){
+	//	pConsole->WriteLine("Failed Load Lib");
+	//	pConsole->WriteLine(GetLastErrorAsString());
+	//	return;
+	//}
 
-	PGetNamedSecurityInfoW GetNamedSecurityInfoW = (PGetNamedSecurityInfoW)GetProcAddress(lib, "GetNamedSecurityInfoW");
 	//setup security code
 	PSECURITY_DESCRIPTOR securityDescriptor, ownerDescriptor;
 	PACL dacl;
@@ -262,28 +264,28 @@ void ListAclsCommand::ProcessFile(Connection *pConnection, WIN32_FIND_DATAA pFil
 		&dacl, NULL, &ownerDescriptor);
 
 	if (ownerresult == ERROR_SUCCESS)
-		PrintOwnerInformation(pConnection, ownerDescriptor);
+		PrintOwnerInformation(pConsole, ownerDescriptor);
 
 	if (result == 2) {
-		pConnection->WriteLine("Not found");
+		pConsole->WriteLine("Not found");
 		return;
 	}
 	if (result != ERROR_SUCCESS){ 
-		pConnection->WriteLine("Error occured %d", result);
+		pConsole->WriteLine("Error occured %d", result);
 		return; 
 	}
-	PrintAclInformation(pConnection, &securityDescriptor, dacl);
+	PrintAclInformation(pConsole, &securityDescriptor, dacl);
 }
 
-bool ListAclsCommand::ProcessCommandLine(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+bool ListAclsCommand::ProcessCommandLine(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	return true;
 }
 
-bool ListAclsCommand::PrintSyntax(Connection *pConnection){
-	pConnection->WriteLine("lacl <wildcard>");
+bool ListAclsCommand::PrintSyntax(IConsole *pConsole){
+	pConsole->WriteLine("lacl <wildcard>");
 	return true;
 }
 
-string ListAclsCommand::GetName(){
-	return "lacl";
+CommandInfo ListAclsCommand::GetInfo(){
+	return CommandInfo("lacl", "<path/wildcard>", "List acls on file(s).");
 }

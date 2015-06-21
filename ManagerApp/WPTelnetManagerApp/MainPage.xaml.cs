@@ -1,4 +1,5 @@
-﻿using Microsoft.Phone.Controls;
+﻿using Windows.Storage.Pickers;
+using Microsoft.Phone.Controls;
 
 using WPTelnet.Manager.ViewModel.Daemon;
 
@@ -12,6 +13,7 @@ namespace WPTelnetManager
         {
             InitializeComponent();
             DataContext = new ControllerView();
+
         }
 
         

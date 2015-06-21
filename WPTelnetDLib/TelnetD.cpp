@@ -10,8 +10,10 @@
 #include<vector>
 
 #include "TelnetD.h"
-#include "Networking.h"
+#include "Connection.h"
+#include "ListenSocket.h"
 #include "CommandProcessor.h"
+
 #include "Commands.h"
 #include "CertCommands.h"
 #include "RegistryCommands.h"
@@ -24,11 +26,13 @@
 #include "Commands.h"
 #include "ProcessHost.h"
 #include "FileHelpers.h"
+#include "ServiceCommands.h"
+
 #ifdef PHONE
 #include<WPKernel.h>
 #endif
-
-
+#include <TelnetSession.h>
+#include <StringConsole.h>
 
 
 class ExecutionContext : public IExecutionContext
@@ -45,119 +49,143 @@ public:
 	};
 };
 
-void PrintPrompt(Connection *pConnection) {
+void PrintPrompt(IConsole *pConsole) {
 	char buf[1024];
 	GetCurrentDirectoryA(sizeof(buf), buf);
-	pConnection->Write("%s>", buf);
+	pConsole->ResetStyle();
+	
+	pConsole->Write("%s>", buf);
+	
 }
 
-CommandProcessor* CreateProcessor(Connection *pConnection, IExecutionContext *pExecutionContext) {
-	vector<BaseCommand *> *commands = new vector<BaseCommand *>();
-	commands->push_back((BaseCommand*)new HelpCommand());
-#ifdef PHONE
-	commands->push_back((BaseCommand*)new ToastCommand());
-#endif
-	commands->push_back((BaseCommand*)new CdCommand());
-	commands->push_back((BaseCommand*)new TypeCommand());
-	commands->push_back((BaseCommand*)new DirCommand());
-	commands->push_back((BaseCommand*)new MkdirCommand());
-	commands->push_back((BaseCommand*)new RmdirCommand());
-	commands->push_back((BaseCommand*)new CopyCommand());
-	commands->push_back((BaseCommand*)new DeleteCommand());
-	commands->push_back((BaseCommand*)new MoveCommand());
-	commands->push_back((BaseCommand*)new EnvCommand());
-	commands->push_back((BaseCommand*)new DownloadCommand());
-	commands->push_back((BaseCommand*)new PsCommand());
-	commands->push_back((BaseCommand*)new KillCommand());
-	commands->push_back((BaseCommand*)new NetstatCommand());
-	commands->push_back((BaseCommand*)new PostMessageCommand());
-	commands->push_back((BaseCommand*)new EnumWindowsCommand());
-	commands->push_back((BaseCommand*)new ListPrivsCommand());
-	commands->push_back((BaseCommand*)new RegCommand());
-	commands->push_back((BaseCommand*)new EchoCommand());
-	commands->push_back((BaseCommand*)new ProvXmlCommand());
-
-
-	commands->push_back((BaseCommand*)new AttribCommand());
-	commands->push_back((BaseCommand*)new CertsCommand());
-	commands->push_back((BaseCommand*)new ListAclsCommand());
-	commands->push_back((BaseCommand*)new WhoAmICommand());
-	commands->push_back((BaseCommand*)new LookupChamberSidCommand());
-	commands->push_back((BaseCommand*)new CreateProcessInChamberCommand());
-	commands->push_back((BaseCommand*)new TestCommand());
-	commands->push_back((BaseCommand*)new TestCommand2());
+CommandProcessor* CreateProcessor(IExecutionContext *pExecutionContext, ExitCommand *pExit) {
+	vector<Command *> *commands = new vector<Command *>();
 	
-	CommandProcessor *processor = new CommandProcessor(commands, pConnection);
-	commands->push_back((BaseCommand*)new RunFromCommand(pExecutionContext, processor));
+	commands->push_back((Command*)new HelpCommand("",commands));
+	commands->push_back((Command*)pExit);
+#ifdef PHONE
+	commands->push_back((Command*)new ToastCommand());
+#endif
+	commands->push_back((Command*)new CdCommand());
+	commands->push_back((Command*)new TypeCommand());
+	commands->push_back((Command*)new DirCommand());
+	commands->push_back((Command*)new MkdirCommand());
+	commands->push_back((Command*)new RmdirCommand());
+	commands->push_back((Command*)new CopyCommand());
+	commands->push_back((Command*)new DeleteCommand());
+	commands->push_back((Command*)new MoveCommand());
+	commands->push_back((Command*)new EnvCommand());
+	commands->push_back((Command*)new DownloadCommand());
+	commands->push_back((Command*)new PsCommand());
+	commands->push_back((Command*)new KillCommand());
+	commands->push_back((Command*)new NetstatCommand());
+	commands->push_back((Command*)new PostMessageCommand());
+	commands->push_back((Command*)new EnumWindowsCommand());
+	commands->push_back((Command*)new ListPrivsCommand());
+	commands->push_back((Command*)new RegCommand());
+	commands->push_back((Command*)new ScCommand());
+	commands->push_back((Command*)new EchoCommand());
+	commands->push_back((Command*)new ProvXmlCommand());
+
+
+	commands->push_back((Command*)new AttribCommand());
+	commands->push_back((Command*)new CertsCommand());
+	commands->push_back((Command*)new ListAclsCommand());
+	commands->push_back((Command*)new WhoAmICommand());
+	commands->push_back((Command*)new LookupChamberSidCommand());
+	commands->push_back((Command*)new CreateProcessInChamberCommand());
+	commands->push_back((Command*)new TestCommand());
+	commands->push_back((Command*)new TestCommand2());
+	
+	CommandProcessor *processor = new CommandProcessor(commands);
+	commands->push_back((Command*)new RunFromCommand(pExecutionContext, processor));
 	return processor;
 	
 }
 
-bool ProcessLine(Connection *pConnection, IExecutionContext *pExecutionContext, CommandProcessor *pProcessor,  string pLine) {
+bool ProcessLine(IConsole *pConsole, IExecutionContext *pExecutionContext, CommandProcessor *pProcessor,  string pLine) {
 	ParsedCommandLine cmdLine = ParsedCommandLine(pLine, pExecutionContext);
-	if (cmdLine.GetName() == "exit"){
-		pConnection->WriteLine("Shutting Down");
-		return true;
-	}
+	
 	bool result = false;
-	if (!pProcessor->ProcessCommandLine(&cmdLine)) {
+	if (!pProcessor->ProcessCommandLine(pConsole,&cmdLine)) {
 		string batName = GetCurrentDirectory() + "\\" + cmdLine.GetName() + ".bat";
 		if (FileExists(batName)){
 			TextFileReader *reader = new TextFileReader(batName);
 			string batLine;
 			while (reader->ReadLine(batLine)) {
 				ParsedCommandLine batCmdLine = ParsedCommandLine(batLine, pExecutionContext);
-				result = ProcessLine(pConnection, pExecutionContext, pProcessor, batLine);
+				result = ProcessLine(pConsole, pExecutionContext, pProcessor, batLine);
 				if (result)
 					return result;
 			}
 		}
 		else {
-			ProcessHost host(pConnection);
-			host.ExecuteProcess(pConnection, pLine.c_str());
+			ProcessHost host(pConsole);
+			host.ExecuteProcess(pConsole, pLine.c_str());
 		}
 	}
 	return result;
 }
 
 bool ExecuteCommand(char *pCommandLine){
-	Connection connection(0);
+	StringConsole console;
 	ExecutionContext context;
-	CommandProcessor*processor = CreateProcessor(&connection, &context);
-	ProcessLine(&connection, &context, processor, pCommandLine);
+	ExitCommand exit("Exit this instance of WPTelnetD");
+	CommandProcessor*processor = CreateProcessor(&context, &exit);
+	ProcessLine(&console, &context, processor, pCommandLine);
 	return true;
 }
 
 bool ProcessConnection(SOCKET pSocket, char *pWelcomeInfo) {
 	Connection *connection = new Connection(pSocket);
-	connection->WriteLine("******************************************");
-	connection->WriteLine("*    Welcome to the WP8 Telnet Server -  *");
-	connection->WriteLine("******************************************");
-	connection->WriteLine(pWelcomeInfo);
-	connection->WriteLine("");
-	
-	Sleep(100);
-	//LaunchAnotherInstance(connection);
+	TelnetSession session(connection);
+	TelnetConsole console(&session);
+	console.SendRenditionParam(SecondaryFont1);
+	console.SetForeground(White);
+	console.SetBackground(Blue);
+	IConsole *con = &console;
+	   con->WriteLine(L"┌────────────────────────────────────────┐");
+	con->Write(L"│    ");
+	con->Write(L"Welcome to the WP8 Telnet Server");
+	con->WriteLine(L"    │");
+	console.WriteLine(L"└────────────────────────────────────────┘");
+	con->ResetStyle();
+	console.WriteLine(pWelcomeInfo);
+	console.WriteLine("");
+
+
 	
 	ExecutionContext context;
+	ExitCommand exit("Exit this instance of WPTelnetD");
+	CommandProcessor*processor = CreateProcessor(&context, &exit);
+	PrintPrompt(&console);
 
-	CommandProcessor*processor = CreateProcessor(connection, &context);
-	PrintPrompt(connection);
-	const char* line = connection->ReadLine();
-	
-	while (line!=NULL) {
-		if (ProcessLine(connection, &context, processor, line))
-		{
-			break;
+	try {
+		console.SetBold(true);
+		console.SetForeground(Yellow);
+		auto line = console.ReadLine();
+		console.ResetStyle();
+		while (!exit.IsExiting()) {
+			if (ProcessLine(&console, &context, processor, line))
+			{
+				
+			}
+			PrintPrompt(&console);
+			console.SetBold(true);
+			console.SetForeground(Yellow);
+			line = console.ReadLine();
+			console.ResetStyle();
 		}
-		PrintPrompt(connection);
-		line = connection->ReadLine();
-	}
+	} catch (int error)
+	{
+		
+	}	
+	
 	delete processor;
 	return true;
 }
 
-int ListenForOneConnection(int pPort, SOCKET *pSocket, int *pWsaError) {
+int ListenForOneConnection(int pPort, SOCKET *pSocket, int *pWsaError, timeval *pTimeout) {
 	ListenSocket *listener = new ListenSocket(pPort);
 
 	if (!listener->Start()){
@@ -165,7 +193,7 @@ int ListenForOneConnection(int pPort, SOCKET *pSocket, int *pWsaError) {
 		return 1;
 	}
 
-	SOCKET socket = listener->Accept();
+	auto socket = listener->Accept(pTimeout);
 	listener->Stop();
 	delete listener;
 

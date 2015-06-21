@@ -120,6 +120,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Nokia.DeviceToolkit.WinPRT">
+      <HintPath>..\..\..\..\apps\Nokia.DeviceToolkit.WinPRT.winmd</HintPath>
+    </Reference>
     <Reference Include="PhoneInternal.CorePlat">
       <HintPath>..\..\ThirdParty\PhoneInternal.CorePlat.winmd</HintPath>
     </Reference>

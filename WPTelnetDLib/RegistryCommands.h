@@ -3,7 +3,7 @@
 #include "pch.h"
 #include<string>
 #include "CommandProcessor.h"
-#include "Networking.h"
+#include "Console.h"
 class RegContext {
 public:
 	HKEY rootKey;
@@ -67,145 +67,145 @@ public:
 		);
 };
 
-class RegCommand : BaseCommand {
+class RegCommand : Command {
 public:
 	RegCommand();
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 
 };
 
-void PrintRegValueLine(Connection* pConnection, string pValueName, DWORD pValType, BYTE *pValBuf, DWORD pValSize);
-void PrintRegValueLineW(Connection* pConnection, wstring pValueName, DWORD pValType, BYTE *pValBuf, DWORD pValSize);
+void PrintRegValueLine(IConsole *pConsole, string pValueName, DWORD pValType, BYTE *pValBuf, DWORD pValSize);
+void PrintRegValueLineW(IConsole *pConsole, wstring pValueName, DWORD pValType, BYTE *pValBuf, DWORD pValSize);
 
 
-class RegListCommand : BaseCommand {
+class RegListCommand : Command {
 private:
 	RegContext *_context;
 public:
 	RegListCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class RegAclCommand : BaseCommand {
+class RegAclCommand : Command {
 private:
 	RegContext *_context;
 public:
 	RegAclCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class RegOpenCommand : BaseCommand {
+class RegOpenCommand : Command {
 private:
 	RegContext *_context;
 public:
 	RegOpenCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class RegRootCommand : BaseCommand {
+class RegRootCommand : Command {
 private:
 	RegContext *_context;
 public:
 	RegRootCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class RegDelValCommand : BaseCommand {
+class RegDelValCommand : Command {
 private:
 	RegContext *_context;
 public:
 	RegDelValCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class RegHelpCommand : BaseCommand {
+class RegHelpCommand : Command {
 private:
 	RegContext *_context;
 public:
 	RegHelpCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class FindRegCommand : BaseCommand {
+class FindRegCommand : Command {
 public:
 	FindRegCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 private:
-	void ProcessLevel(Connection *pConnection, const char *pSubKey, const char *keyword);
+	void ProcessLevel(IConsole *pConsole, const char *pSubKey, const char *keyword);
 	RegContext *_context;
 };
 
-class FindRegWriteableCommand : BaseCommand {
+class FindRegWriteableCommand : Command {
 public:
 	FindRegWriteableCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 private:
-	void ProcessLevel(Connection *pConnection, const char *pSubKey);
+	void ProcessLevel(IConsole *pConsole, const char *pSubKey);
 	RegContext *_context;
 };
 
 
 
 
-class RegSetCommand : BaseCommand {
+class RegSetCommand : Command {
 public:
 	RegSetCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 private:
 	RegContext *_context;
 };
 
-class RegCreateKeyCommand : BaseCommand {
+class RegCreateKeyCommand : Command {
 public:
 	RegCreateKeyCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 private:
 	RegContext *_context;
 };
 
-class RegDeleteKeyCommand : BaseCommand {
+class RegDeleteKeyCommand : Command {
 public:
 	RegDeleteKeyCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 private:
 	RegContext *_context;
 };
 
-class RegDeleteTreeCommand : BaseCommand {
+class RegDeleteTreeCommand : Command {
 public:
 	RegDeleteTreeCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 private:
 	RegContext *_context;
 };
 
-class RegImportCommand : BaseCommand {
+class RegImportCommand : Command {
 public:
 	RegImportCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 private:
 	RegContext *_context;
 };
 
-class RegExportCommand : BaseCommand {
+class RegExportCommand : Command {
 public:
 	RegExportCommand(RegContext *pContext);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 private:
 	RegContext *_context;
 };

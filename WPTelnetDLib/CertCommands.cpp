@@ -1,51 +1,16 @@
 #include "pch.h"
 #include "CertCommands.h"
-#include "Networking.h"
+#include "Console.h"
 #include "ProcessHost.h"
 #include<vector>
+#include "TerminalHelper.h"
 using namespace std;
 
-void CertsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void CertsCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<2)
-		pConnection->WriteLine("SYNTAX: certs storename");
+		pConsole->WriteLine("SYNTAX: certs storename");
 	else {
-		HMODULE lib = LoadLibraryA("crypt32.dll");
-		if (lib == NULL){
-			pConnection->WriteLine("Failed Load Lib");
-			pConnection->WriteLastError();
-			return;
-		}
-
-		PCertOpenStore CertOpenStore = (PCertOpenStore)GetProcAddress(lib, "CertOpenStore");
-		PCertEnumCertificatesInStore CertEnumCertificatesInStore = (PCertEnumCertificatesInStore)GetProcAddress(lib, "CertEnumCertificatesInStore");
-		PCertGetNameStringA CertGetNameStringA = (PCertGetNameStringA)GetProcAddress(lib, "CertGetNameStringA");
-		PCertNameToStrA CertNameToStrA = (PCertNameToStrA)GetProcAddress(lib, "CertNameToStrA");
-		PCertCloseStore CertCloseStore = (PCertCloseStore)GetProcAddress(lib, "CertCloseStore");
-		if (CertOpenStore == NULL){
-			pConnection->WriteLine("Failed to call GetProcAddress on CertOpenStore");
-			pConnection->WriteLastError();
-			return;
-		}
-		if (CertEnumCertificatesInStore == NULL){
-			pConnection->WriteLine("Failed to call GetProcAddress on CertEnumCertificatesInStore");
-			pConnection->WriteLastError();
-			return;
-		}
-
-		if (CertGetNameStringA == NULL){
-			pConnection->WriteLine("Failed to call GetProcAddress on CertGetNameStringA");
-			pConnection->WriteLastError();
-			return;
-		}
-
-		if (CertCloseStore == NULL){
-			pConnection->WriteLine("Failed to call GetProcAddress on CertCloseStore");
-			pConnection->WriteLastError();
-			return;
-		}
-
-
 
 
 		// Convert char* string to a wchar_t* string.
@@ -55,7 +20,7 @@ void CertsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pC
 		HANDLE          hStoreHandle = NULL;
 		PCCERT_CONTEXT  pCertContext = NULL;
 		char * pszStoreName = "CA";
-		pConnection->WriteLine("Listing certs");
+		pConsole->WriteLine("Listing certs");
 		//--------------------------------------------------------------------
 		// Open a system certificate store.
 		if (hStoreHandle = (*CertOpenStore)(CERT_STORE_PROV_SYSTEM_W,          // The store provider type
@@ -68,25 +33,25 @@ void CertsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pC
 			// string
 			))
 		{
-			pConnection->WriteLine("Opened certificate store");
+			pConsole->WriteLine("Opened certificate store");
 
 		}
 		else
 		{
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 
 
 			return;
 		}
 
 
-		while (pCertContext = (*CertEnumCertificatesInStore)(
+		while (pCertContext = CertEnumCertificatesInStore(
 			hStoreHandle,
 			pCertContext))
 		{
 			char buf[1000];
-			(*CertNameToStrA)(1, &pCertContext->pCertInfo->Subject, 2, buf, sizeof(buf));
-			pConnection->WriteLine("Found %s", buf);
+			(*CertNameToStrA)(1, &pCertContext->pCertInfo->Subject, 2, (char *)buf, sizeof(buf));
+			pConsole->WriteLine("Found %s", buf);
 		}
 
 		//--------------------------------------------------------------------
@@ -95,13 +60,13 @@ void CertsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pC
 			hStoreHandle,
 			0))
 		{
-			pConnection->WriteLine("Failed CertCloseStore");
+			pConsole->WriteLine("Failed CertCloseStore");
 
 		}
 
 	}
 }
 
-string CertsCommand::GetName() {
-	return "certs";
+CommandInfo CertsCommand::GetInfo() {
+	return CommandInfo("certs", "", "Certificate Manager");
 }

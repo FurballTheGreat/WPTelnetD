@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Messaging;
@@ -19,20 +20,19 @@ namespace LaunchDebug
     }
     public class CcConnectionDeviceService : IDisposable
     {
-        private static readonly MultiTargetingConnectivity Targetting;
+      
 
         static CcConnectionDeviceService()
         {
-            Targetting = new MultiTargetingConnectivity(6153);
-            
+         
         }
 
-        public static IEnumerable<ConnectableDevice> Devices
+        public static IEnumerable<Device> Devices
         {
-            get { return Targetting.GetConnectableDevices(); }
+            get { return (from x in ConnectivityWrapper12.GetDevices(CultureInfo.CreateSpecificCulture("en-us").LCID) where !x.IsEmulator() select x).ToArray(); ; }
         } 
 
-        private readonly ConnectableDevice _deviceToConnect;
+        private readonly Device _deviceToConnect;
         private readonly Guid _remoteAgentId;
         private readonly Guid _packetStreamId;
         private IRemoteAgent _agent;
@@ -42,7 +42,7 @@ namespace LaunchDebug
         private IFileDeployer _fileDeployer;
         private ConManServer _conmanServer;
 
-        protected CcConnectionDeviceService(ConnectableDevice pDeviceToConnect, Guid pRemoteAgentId, Guid pPacketStreamId)
+        protected CcConnectionDeviceService(Device pDeviceToConnect, Guid pRemoteAgentId, Guid pPacketStreamId)
         {
             _deviceToConnect = pDeviceToConnect;
             _remoteAgentId = pRemoteAgentId;
@@ -79,7 +79,7 @@ namespace LaunchDebug
 
         protected void Connect(string pArgs)
         {
-            _device = _deviceToConnect.Connect(true);
+            _device = ConnectivityWrapper12.CreateConnectedDeviceInstance(_deviceToConnect);
            
             SetupCcConManServer();
 
@@ -123,6 +123,11 @@ namespace LaunchDebug
         public void SendFile(string pLocalFile, string pRemoteFile)
         {
             _fileDeployer.SendFile(pLocalFile,pRemoteFile,true,false);
+        }
+
+        public void DeleteFile(string pCWindowsWptdExe)
+        {
+            CcConnection.RemoveFile(pCWindowsWptdExe);
         }
 
         public void RetrieveFile(string pRemoteFile,string pLocalFile)

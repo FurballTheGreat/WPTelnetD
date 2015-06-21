@@ -193,3 +193,7 @@ LaunchDebug/wptd.exe
 AppRepurposer/New/wptd.exe
 AppRepurposer/New/wptd.exe
 AppRepurposer/New/wptd.exe
+/WPTelnetD
+/WatchForChanges
+/Lib/ARM
+/LaunchDebug

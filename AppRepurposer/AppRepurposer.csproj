@@ -206,6 +206,12 @@
     <Content Include="Existing\ETWLogger.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="msvsmon.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NdtkClient.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="New\DeviceUpdateUtils.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -2,10 +2,10 @@
 #include "ProcessCommands.h"
 #include "TerminalHelper.h"
 
-void KillCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void KillCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<2)
-		pConnection->WriteLine("SYNTAX: kill PID [exit code]");
+		pConsole->WriteLine("SYNTAX: kill PID [exit code]");
 	else {
 		int num = atoi(pCmdLine->GetArgs().at(1).c_str());
 		int exitCode = pCmdLine->GetArgs().size() > 2 ? atoi(pCmdLine->GetArgs().at(2).c_str()) : 0;
@@ -13,26 +13,27 @@ void KillCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCm
 
 
 		if (process == (HANDLE)-1) {
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 			return;
 		}
 
 		if (!TerminateProcess(process, exitCode))
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 	}
 }
 
-string KillCommand::GetName() {
-	return "kill";
+CommandInfo KillCommand::GetInfo() {
+	return CommandInfo("kill", "<pid>", "Kills a process.");
+
 }
 
-void PsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void PsCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	HANDLE _handle = ::CreateToolhelp32Snapshot(0x2, 0);
 
 
 	if (_handle == 0 || _handle == INVALID_HANDLE_VALUE)
 	{
-		pConnection->WriteLine("ERROR: Failed to create snapshot");
+		pConsole->WriteLine("ERROR: Failed to create snapshot");
 	}
 	else {
 		PROCESSENTRY32W _process;
@@ -43,115 +44,104 @@ void PsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdL
 		MEMORYSTATUSEX memStatus = { sizeof(MEMORYSTATUSEX) };
 		
 		if (GlobalMemoryStatusEx(&memStatus)){
-			pConnection->WriteLine("Physical memory available %dmb out of %dmb (%d%% load).", (DWORD)(memStatus.ullAvailPhys / (1024 * 1024)), (DWORD)(memStatus.ullTotalPhys / (1024 * 1024)), memStatus.dwMemoryLoad);
-			pConnection->WriteLine("Virtual memory available %dmb out of %dmb.", (DWORD)(memStatus.ullAvailVirtual / (1024 * 1024)), (DWORD)(memStatus.ullTotalVirtual / (1024 * 1024)));
-			pConnection->WriteLine("Pagefile available %dmb out of %dmb.", (DWORD)(memStatus.ullAvailPageFile / (1024 * 1024)), (DWORD)(memStatus.ullTotalPageFile / (1024 * 1024)));
-			pConnection->WriteLine("");
+			pConsole->WriteLine("Physical memory available %dmb out of %dmb (%d%% load).", (DWORD)(memStatus.ullAvailPhys / (1024 * 1024)), (DWORD)(memStatus.ullTotalPhys / (1024 * 1024)), memStatus.dwMemoryLoad);
+			pConsole->WriteLine("Virtual memory available %dmb out of %dmb.", (DWORD)(memStatus.ullAvailVirtual / (1024 * 1024)), (DWORD)(memStatus.ullTotalVirtual / (1024 * 1024)));
+			pConsole->WriteLine("Pagefile available %dmb out of %dmb.", (DWORD)(memStatus.ullAvailPageFile / (1024 * 1024)), (DWORD)(memStatus.ullTotalPageFile / (1024 * 1024)));
+			pConsole->WriteLine("");
 				
 		}
 		else
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 
 		if (!result) {
-			pConnection->WriteLine("ERROR: Got false from Process32First: %d %d %d %d %d", GetLastError(), _handle, sizeof(_process), _process.dwSize, old);
+			pConsole->WriteLine("ERROR: Got false from Process32First: %d %d %d %d %d", GetLastError(), _handle, sizeof(_process), _process.dwSize, old);
 		}
 		else {
 
 
-			pConnection->WriteLine("************");
-			pConnection->WriteLine("Process List");
-			pConnection->WriteLine("************");
-			pConnection->WriteLine("");
+			pConsole->WriteLine("************");
+			pConsole->WriteLine("Process List");
+			pConsole->WriteLine("************");
+			pConsole->WriteLine("");
 			char exeFile[1024];
 			size_t outnum;
 			wcstombs_s(&outnum, exeFile, _process.szExeFile, sizeof(exeFile));
-			pConnection->WriteLine("%s (%d,%d,%d)", exeFile, _process.th32ProcessID, _process.th32ParentProcessID, _process.th32ModuleID);
-
+			pConsole->WriteLine("%s (%d,%d,%d)", exeFile, _process.th32ProcessID, _process.th32ParentProcessID, _process.th32ModuleID);
+			
 			bool result = true;
 			while (result) {
 				result = Process32NextW(_handle, &_process);
 				if (result) {
 					wcstombs_s(&outnum, exeFile, _process.szExeFile, sizeof(exeFile));
-					pConnection->WriteLine("%s (%d,%d,%d)", exeFile, _process.th32ProcessID, _process.th32ParentProcessID, _process.th32ModuleID);
+					pConsole->WriteLine("%s (%d,%d,%d)", exeFile, _process.th32ProcessID, _process.th32ParentProcessID, _process.th32ModuleID);
 				}
 			}
-			pConnection->WriteLine("");
+			pConsole->WriteLine("");
 		}
 
 	}
 }
 
-string PsCommand::GetName() {
-	return "ps";
+CommandInfo PsCommand::GetInfo() {
+	return CommandInfo("ps", "", "List all running processes.");
 }
 
 
-void WhoAmICommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void WhoAmICommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<1)
-		pConnection->WriteLine("SYNTAX: whoami");
+		pConsole->WriteLine("SYNTAX: whoami");
 	else {
-		HMODULE lib = LoadLibraryA("SSPICLI.dll");
-		if (lib == NULL){
-			pConnection->WriteLine("Failed Load Lib");
-			pConnection->WriteLastError();
-			return;
-		}
-
-		PGetUserNameExA GetUserNameExA = (PGetUserNameExA)GetProcAddress(lib, "GetUserNameExA");
-		if (GetUserNameExA == NULL)
-		{
-			pConnection->WriteLine("Failed to locate GetUserNameExA");
-			return;
-		}
+		
 
 		char buf[1024];
 		ULONG size = sizeof(buf);
 		if (!GetUserNameExA(NameSamCompatible, buf, &size)) {
-			pConnection->WriteLastError();
+			pConsole->WriteLine(GetLastErrorAsString());
 		}
 		else
-			pConnection->WriteLine("You are '%s'", buf);
+			pConsole->WriteLine("You are '%s'", buf);
 
 
 	}
 }
 
-string WhoAmICommand::GetName() {
-	return "whoami";
+CommandInfo WhoAmICommand::GetInfo() {
+	return CommandInfo("whoami", "", "Query which user this process is running as.");
 }
 
-void LookupChamberSidCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
-
+void LookupChamberSidCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
+#ifdef PHONE
 	if (pCmdLine->GetArgs().size()<2)
-		pConnection->WriteLine("SYNTAX: lookupchamber {id}");
+		pConsole->WriteLine("SYNTAX: lookupchamber {id}");
 	else {
 		LPWSTR sid = nullptr;
 		string idA = pCmdLine->GetArgs().at(1);
 		wstring idW = wstring(idA.begin(), idA.end());
 		HRESULT ret = ::GetChamberSidFromId((PWCHAR)idW.c_str(), &sid);
 		if (ret!=0)
-			pConnection->WriteLine("ERROR: HResult = %d", ret);
+			pConsole->WriteLine("ERROR: HResult = %d", ret);
 
 		if (sid) {
-			pConnection->Write("SID: ");
-			pConnection->WriteLine(sid);
+			pConsole->Write("SID: ");
+			pConsole->WriteLine(sid);
 
 			LocalFree(sid);
 		}
 	}
+#endif
 }
 
-string LookupChamberSidCommand::GetName() {
-	return "lookupchamber";
+CommandInfo LookupChamberSidCommand::GetInfo() {
+	return CommandInfo("lookchamber", "<chamberId>", "Query the SID associated with a chamber.");
 }
 
 
 
-void CreateProcessInChamberCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void CreateProcessInChamberCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	if (pCmdLine->GetArgs().size()<4)
-		pConnection->WriteLine("SYNTAX: execchamber sid|app {id} {exe} {params}");
+		pConsole->WriteLine("SYNTAX: execchamber sid|app {id} {exe} {params}");
 	else {
 		STARTUPINFOW si;
 		memset(&si, 0, sizeof(si));
@@ -178,7 +168,7 @@ void CreateProcessInChamberCommand::ProcessCommand(Connection *pConnection, Pars
 			string commandLineA = pCmdLine->GetArgs().at(4);
 			commandLine = wstring(commandLineA.begin(), commandLineA.end());
 		}
-
+#ifdef PHONE
 		HRESULT ret = CreateProcessInChamber(
 			chamberSid,
 			appId,
@@ -189,13 +179,16 @@ void CreateProcessInChamberCommand::ProcessCommand(Connection *pConnection, Pars
 			nullptr,
 			&si,
 			&pi);
+
+
 		if (ret == 0)
-			pConnection->WriteLine("ProcessID: %d, HProcess: %d, ThreadID: %d, HThread %d", pi.dwProcessId, pi.hProcess, pi.dwThreadId, pi.hThread);
+			pConsole->WriteLine("ProcessID: %d, HProcess: %d, ThreadID: %d, HThread %d", pi.dwProcessId, pi.hProcess, pi.dwThreadId, pi.hThread);
 		else
-			pConnection->WriteLine(GetErrorAsString(ret));
+			pConsole->WriteLine(GetErrorAsString(ret));
+#endif
 	}
 }
 
-string CreateProcessInChamberCommand::GetName() {
-	return "execchamber";
+CommandInfo CreateProcessInChamberCommand::GetInfo() {
+	return CommandInfo("execchamber", "<sid|app> <id> <exe> [params]", "Execute process in chamber.");
 }

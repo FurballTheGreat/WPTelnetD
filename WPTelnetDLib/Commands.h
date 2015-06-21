@@ -3,32 +3,45 @@
 #include "pch.h"
 #include<string>
 #include "CommandProcessor.h"
-#include "Networking.h"
+#include "Console.h"
 
 
 using namespace std;
-class HelpCommand : BaseCommand {
+class HelpCommand : public Command {
+	vector<Command*> *_commands;
+	string _intro;
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	HelpCommand(string pIntro, vector<Command*> *pCommands);
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class EnvCommand : BaseCommand {
+class EnvCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
-class EchoCommand : BaseCommand {
+class ExitCommand : public Command {
+	bool _exiting;
+	string _description;
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	ExitCommand(string pDescription);
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
+	bool IsExiting();
 };
 
-class ListPrivsCommand : BaseCommand {
+class EchoCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
+};
+
+class ListPrivsCommand : Command {
+public:
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
 

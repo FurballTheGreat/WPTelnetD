@@ -2,41 +2,39 @@
 #include "pch.h"
 #include "Commands.h"
 #include "CommandProcessor.h"
-#include "Networking.h"
+#include "Console.h"
 
 
 using namespace std;
 
-void HelpCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
-	pConnection->WriteLine("help - Shows this screen.");
-	pConnection->WriteLine("ps - Shows a list of processes.");
-	pConnection->WriteLine("kill - Kills a process.");
-	pConnection->WriteLine("exit - Exits THIS process");
-	pConnection->WriteLine("whoami - Displays who this process is running as.");
-	pConnection->WriteLine("netstat - Shows a list ip connections.");
-	pConnection->WriteLine("env - Shows a list of environment variables.");
-	pConnection->WriteLine("down <url> <saveasfile> - Downloads a file.");
-	pConnection->WriteLine("cd <path> - Change directory/drive.");
-	pConnection->WriteLine("attrib <path> <attributes> - Change directory/file attributes.");
-	pConnection->WriteLine("type <path> - Prints contents of file to console.");
-	pConnection->WriteLine("lacl <file> - Prints the access control list for a path/file.");
-	pConnection->WriteLine("del <path> - Deletes a file.");
-	pConnection->WriteLine("move <oldname> <newname> - Move/rename a file.");
-	pConnection->WriteLine("copy <oldname> <newname> - Rename a file.");
-	pConnection->WriteLine("mkdir <path> - Create a directory.");
-	pConnection->WriteLine("rmdir <path> - Remove a directory.");
-	pConnection->WriteLine("dir [filter] - List Directory.");
-	pConnection->WriteLine("ewin - Enumerates windows visible to this process.");
-	pConnection->WriteLine("postmessage - Posts a message using PostMessageW.");
-	pConnection->WriteLine("listprivs - Posts a message using PostMessageW");
-	pConnection->WriteLine("reg - Open the WPTD registry editor.");
-	pConnection->WriteLine("toast - Open the WPTD registry editor.");
-	pConnection->WriteLine("echo - Open the WPTD registry editor.");
-	pConnection->WriteLine("provxml - Open the WPTD registry editor.");
+HelpCommand::HelpCommand(string pIntro, vector<Command*> *pCommands)
+{
+	_intro = pIntro;
+	_commands = pCommands;
 }
 
-string HelpCommand::GetName() {
-	return "help";
+void HelpCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
+	pConsole->ResetStyle();
+	pConsole->SetForeground(Yellow);
+	pConsole->SetBold(true);
+	pConsole->WriteLine("%-12s %-32s %s", "Command", "Parameters", "Description");
+	pConsole->ResetStyle();
+	for (auto it = _commands->begin(); it != _commands->end(); ++it)
+	{
+		auto info = (*it)->GetInfo();
+		auto name = info.GetName();
+		auto params = info.GetParams();
+		pConsole->SetForeground(Cyan);
+		pConsole->Write("%-12s ",name.c_str());
+		pConsole->SetForeground(Green);
+		pConsole->Write("%-32s ", params.c_str());
+		pConsole->SetForeground(White);
+		pConsole->WriteLine(info.GetDescription());
+	}
+}
+
+CommandInfo HelpCommand::GetInfo() {
+	return CommandInfo("help", "", "Shows this screen"); 
 }
 
 #undef GetEnvironmentStrings
@@ -48,32 +46,32 @@ GetEnvironmentStrings(
 VOID
 );
 
-void EnvCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void EnvCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	LPCH env;	
 	env = GetEnvironmentStrings();
-	pConnection->WriteLine("Environment Strings");
+	pConsole->WriteLine("Environment Strings");
 	while(*env) {
-		pConnection->WriteLine("%s", env);
+		pConsole->WriteLine("%s", env);
 		env = env+strlen(env)+1;			
 	}
 
 }
 
-string EnvCommand::GetName() {
-	return "env";
+CommandInfo EnvCommand::GetInfo() {
+	return CommandInfo("env", "", "List all environment variables.");
 }
 
-void EchoCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void EchoCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 	string text = pCmdLine->GetParametersAsLine().GetRaw();
-	pConnection->WriteLine(text);
+	pConsole->WriteLine(text);
 }
 
-string EchoCommand::GetName() {
-	return "echo";
+CommandInfo EchoCommand::GetInfo() {
+	return CommandInfo("echo", "<string>", "Echo a string to console.");
 }
 
 
-void ListPrivsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine) {
+void ListPrivsCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine) {
 
 	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, TRUE, GetCurrentProcessId());
 	HANDLE hToken;
@@ -82,7 +80,7 @@ void ListPrivsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 		TOKEN_QUERY,
 		&hToken) == 0)
 	{
-		pConnection->WriteLine("I was unable to execute OpenProcessToken\r\nErrorCode: %d", GetLastError());
+		pConsole->WriteLine("I was unable to execute OpenProcessToken\r\nErrorCode: %d", GetLastError());
 		return ;
 	}
 
@@ -92,8 +90,8 @@ void ListPrivsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 	// Pass NULL pointer to return the size needed
 	if (!GetTokenInformation(hToken, TokenPrivileges, NULL, SizeReturned, &SizeReturned))
 	{
-		pConnection->WriteLine("1 GetTokenInformation failed. We needed a buffer this big: %d.", SizeReturned);
-		pConnection->WriteLine("Error Code: %d\r\n", GetLastError());
+		pConsole->WriteLine("1 GetTokenInformation failed. We needed a buffer this big: %d.", SizeReturned);
+		pConsole->WriteLine("Error Code: %d\r\n", GetLastError());
 	
 	}
 
@@ -101,24 +99,24 @@ void ListPrivsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 
 	if (!GetTokenInformation(hToken, TokenPrivileges, TokenPrivilegesType, SizeReturned, &SizeReturned))
 	{
-		pConnection->WriteLine("2 GetTokenInformation failed. We needed a buffer this big: %d. But ours was this big: %d", SizeReturned, sizeof(TokenPrivilegesType));
-		pConnection->WriteLine("Error Code: %d", GetLastError());
+		pConsole->WriteLine("2 GetTokenInformation failed. We needed a buffer this big: %d. But ours was this big: %d", SizeReturned, sizeof(TokenPrivilegesType));
+		pConsole->WriteLine("Error Code: %d", GetLastError());
 		return;
 	}
-	pConnection->WriteLine("Privilages (%d)",  TokenPrivilegesType->PrivilegeCount);
+	pConsole->WriteLine("Privilages (%d)",  TokenPrivilegesType->PrivilegeCount);
 	for (int i = 0; i < TokenPrivilegesType->PrivilegeCount; i++) {
 		wchar_t privname[1024];
 		
 		DWORD privlen = 1024;
 	
 		if (!LookupPrivilegeNameW(NULL, &TokenPrivilegesType->Privileges[i].Luid, privname, &privlen)) {
-			pConnection->WriteLine(" +unknown %X:%X (Error: %d)", TokenPrivilegesType->Privileges[i].Luid.HighPart, TokenPrivilegesType->Privileges[i].Luid.LowPart, GetLastError());
+			pConsole->WriteLine(" +unknown %X:%X (Error: %d)", TokenPrivilegesType->Privileges[i].Luid.HighPart, TokenPrivilegesType->Privileges[i].Luid.LowPart, GetLastError());
 		}
 		else {
 			wstring privNameW(privname);
 			string privNameA(privNameW.begin(), privNameW.end());
 		
-			pConnection->WriteLine(" +%s", privNameA.c_str());
+			pConsole->WriteLine(" +%s", privNameA.c_str());
 		}
 	}
 	free(TokenPrivilegesType);
@@ -127,19 +125,19 @@ void ListPrivsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 	SizeReturned = 0;
 	if (!GetTokenInformation(hToken, TokenGroups, NULL, SizeReturned, &SizeReturned))
 	{
-		pConnection->WriteLine("1 GetTokenInformation failed. We needed a buffer this big: %d.", SizeReturned);
-		pConnection->WriteLine("Error Code: %d\r\n", GetLastError());
+		pConsole->WriteLine("1 GetTokenInformation failed. We needed a buffer this big: %d.", SizeReturned);
+		pConsole->WriteLine("Error Code: %d\r\n", GetLastError());
 
 	}
 	TOKEN_GROUPS* groups = (TOKEN_GROUPS *)malloc(SizeReturned);
 	if (!GetTokenInformation(hToken, TokenGroups, groups, SizeReturned, &SizeReturned))
 	{
-		pConnection->WriteLine("2 GetTokenInformation failed. We needed a buffer this big: %d. But ours was this big: %d", SizeReturned, sizeof(TokenPrivilegesType));
-		pConnection->WriteLine("Error Code: %d", GetLastError());
+		pConsole->WriteLine("2 GetTokenInformation failed. We needed a buffer this big: %d. But ours was this big: %d", SizeReturned, sizeof(TokenPrivilegesType));
+		pConsole->WriteLine("Error Code: %d", GetLastError());
 		return;
 	}
 
-	pConnection->WriteLine("Capabilities");
+	pConsole->WriteLine("Capabilities");
 	for (int i = 0; i < groups->GroupCount; i++) {
 		wchar_t privname[1024];
 		wchar_t donname[1024];
@@ -148,11 +146,11 @@ void ListPrivsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 		DWORD domlen = 1024;
 		SID_NAME_USE use;
 		if (!LookupAccountSidW(NULL, groups->Groups[i].Sid, privname, &privlen,donname,&domlen,&use )) {
-			pConnection->WriteLine(" +unknown %X (Error: %d)", groups->Groups[i].Sid, GetLastError());
+			pConsole->WriteLine(" +unknown %X (Error: %d)", groups->Groups[i].Sid, GetLastError());
 		}
 		else {
 			wcstombs(privnameA, privname, sizeof(privnameA));
-			pConnection->WriteLine(" +%s", privnameA);
+			pConsole->WriteLine(" +%s", privnameA);
 		}
 	}
 	free(groups);
@@ -160,10 +158,30 @@ void ListPrivsCommand::ProcessCommand(Connection *pConnection, ParsedCommandLine
 
 }
 
-string ListPrivsCommand::GetName() {
-	return "listprivs";
+CommandInfo ListPrivsCommand::GetInfo() {
+	return CommandInfo("listprivs", "", "List all privileges assigned to current security token.");
 }
 
+ExitCommand::ExitCommand(string pDescription)
+{
+	_description = pDescription;
+	_exiting = false;
+}
+
+void ExitCommand::ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine)
+{
+	_exiting = true;
+}
+
+CommandInfo  ExitCommand::GetInfo()
+{
+	return CommandInfo("exit", "", _description);
+}
+
+bool ExitCommand::IsExiting()
+{
+	return _exiting;
+}
 
 
 

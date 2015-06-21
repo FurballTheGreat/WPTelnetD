@@ -8,7 +8,8 @@ namespace WPTelnet.Manager.ViewModel.Common
 {
     public class InstallationManagerViewModel : BaseView, IEnumerable<PackageViewModel>
     {
-        
+        public string FromPath { get; set; }
+        public string ToPath { get; set; }
 
         public InstallationManagerViewModel()
         {
@@ -17,7 +18,8 @@ namespace WPTelnet.Manager.ViewModel.Common
             {
                 try
                 {
-                   
+                    var toolkit = new Nokia.DeviceToolkit.WinPRT.DeviceToolkitClient();
+                    toolkit.SystemReboot();
                 }
                 catch (Exception e)
                 {

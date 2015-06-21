@@ -3,31 +3,31 @@
 #include "pch.h"
 #include<string>
 #include "CommandProcessor.h"
-#include "Networking.h"
+#include "Console.h"
 
-class NetstatCommand : BaseCommand {
+class NetstatCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
 
-class DownloadCommand : BaseCommand {
+class DownloadCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
 
-	string GetName();
+	CommandInfo GetInfo();
 };
 
 
-class RunFromCommand : BaseCommand {
+class RunFromCommand : Command {
 private:
 	IExecutionContext *_executionContext;
 	CommandProcessor *_processor;
 public:
 	RunFromCommand(IExecutionContext *pExecutionContext, CommandProcessor *pProcessor);
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
 
-	string GetName();
+	CommandInfo GetInfo();
 };
 

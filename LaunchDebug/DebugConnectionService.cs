@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.SmartDevice.Connectivity;
 using Microsoft.SmartDevice.MultiTargeting.Connectivity;
 
 namespace LaunchDebug
@@ -7,7 +8,9 @@ namespace LaunchDebug
     {
         private const string PhoneMsvsmonPath =
             @"\DATA\SharedData\PhoneTools\11.0\Debugger\bin\RemoteDebugger\msvsmon.exe";
-        public DebugConnectionService(ConnectableDevice pDeviceToConnect)
+        private const string PhoneNdtkClientPath =
+           @"\DATA\SharedData\PhoneTools\11.0\Debugger\bin\RemoteDebugger\ndtkclient.dll";
+        public DebugConnectionService(Device pDeviceToConnect)
             : base(pDeviceToConnect,
                 new Guid("88B0B986-543F-4F04-8E5F-A80A7E189F11"),
                 new Guid("8995B972-A375-4B6D-90A5-A778CD43FCB1"))
@@ -25,6 +28,8 @@ namespace LaunchDebug
         {
 
             SendFile(pExeToLaunch,PhoneMsvsmonPath);
+
+            SendFile("ndtkclient.dll", PhoneNdtkClientPath);
 
             // This is the only debug command ID I have seen so far, launch msvsmon. Their may be more....
             SendPacket(pPacket => pPacket.WriteInt32(1));
@@ -60,5 +65,7 @@ namespace LaunchDebug
               Guid.NewGuid(),
               "256", null, pXap);
         }
+
+     
     }
 }

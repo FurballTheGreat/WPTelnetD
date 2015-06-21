@@ -1157,12 +1157,18 @@ typedef PCCERT_CONTEXT(WINAPI *PCertEnumCertificatesInStore)(
 //_In_opt_ const void *pvPara
 //);
 #define CERT_STORE_PROV_SYSTEM_A            ((LPCSTR) 9)
-typedef HCERTSTORE(WINAPI *PCertOpenStore)(
-	_In_ LPCSTR,
-	_In_ DWORD,
-	_In_opt_ DWORD* ,
-	_In_ DWORD ,
-	_In_opt_ const void *);
+typedef ULONG_PTR HCRYPTPROV_LEGACY;
+extern "C" WINCRYPT32API
+_Must_inspect_result_
+HCERTSTORE
+WINAPI
+CertOpenStore(
+_In_ LPCSTR lpszStoreProvider,
+_In_ DWORD dwEncodingType,
+_In_opt_ HCRYPTPROV_LEGACY hCryptProv,
+_In_ DWORD dwFlags,
+_In_opt_ const void *pvPara
+);
 
 
 typedef HCERTSTORE (WINAPI *PCertOpenSystemStoreA)(
@@ -1200,13 +1206,16 @@ typedef DWORD (WINAPI *PCertGetNameStringA)(
 	_Out_writes_to_opt_(cchNameString, return) LPSTR,
 	_In_ DWORD cchNameString);
 
-typedef  DWORD (WINAPI *PCertNameToStrA)(
-	_In_   DWORD dwCertEncodingType,
-	_In_   PCERT_NAME_BLOB pName,
-	_In_   DWORD dwStrType,
-	_Out_  LPTSTR psz,
-	_In_   DWORD csz
-	);
+extern "C"  WINCRYPT32API
+DWORD
+WINAPI
+CertNameToStrA(
+_In_ DWORD dwCertEncodingType,
+_In_ PCERT_NAME_BLOB pName,
+_In_ DWORD dwStrType,
+_Out_writes_to_opt_(csz, return) LPSTR psz,
+_In_ DWORD csz
+);
 
 extern "C" WINCRYPT32API
 DWORD
@@ -1291,17 +1300,19 @@ typedef enum _SE_OBJECT_TYPE
 	SE_WMIGUID_OBJECT,
 	SE_REGISTRY_WOW64_32KEY,
 } SE_OBJECT_TYPE;
-
-typedef HRESULT(WINAPI *PGetNamedSecurityInfoW)(
-	_In_  LPCWSTR               pObjectName,
-	_In_  SE_OBJECT_TYPE         ObjectType,
-	_In_  SECURITY_INFORMATION   SecurityInfo,
-	_Out_opt_       PSID         * ppsidOwner,
-	_Out_opt_       PSID         * ppsidGroup,
-	_Out_opt_       PACL         * ppDacl,
-	_Out_opt_       PACL         * ppSacl,
-	_Out_ PSECURITY_DESCRIPTOR   * ppSecurityDescriptor
-	);
+extern "C" WINADVAPI
+DWORD
+WINAPI
+GetNamedSecurityInfoW(
+_In_  LPCWSTR               pObjectName,
+_In_  SE_OBJECT_TYPE         ObjectType,
+_In_  SECURITY_INFORMATION   SecurityInfo,
+_Out_opt_       PSID         * ppsidOwner,
+_Out_opt_       PSID         * ppsidGroup,
+_Out_opt_       PACL         * ppDacl,
+_Out_opt_       PACL         * ppSacl,
+_Out_ PSECURITY_DESCRIPTOR   * ppSecurityDescriptor
+);
 
 typedef HRESULT(WINAPI *PGetSecurityInfo)(
 	_In_  HANDLE                 handle,
@@ -1343,6 +1354,7 @@ _In_ PSECURITY_DESCRIPTOR pSecurityDescriptor,
 _Outptr_ PSID * pOwner,
 _Out_ LPBOOL lpbOwnerDefaulted
 );
+
 
 
 extern "C" WINADVAPI
@@ -1409,11 +1421,14 @@ typedef enum
 	NameSurname = 14
 } EXTENDED_NAME_FORMAT, *PEXTENDED_NAME_FORMAT;
 
-typedef BOOLEAN(WINAPI *PGetUserNameExA)(
-	_In_ EXTENDED_NAME_FORMAT  NameFormat,
-	_Out_writes_to_opt_(*nSize, *nSize) LPSTR lpNameBuffer,
-	_Inout_ PULONG nSize
-	);
+
+extern "C" _Success_(return != 0)
+BOOLEAN WINAPI
+GetUserNameExA(
+_In_ EXTENDED_NAME_FORMAT  NameFormat,
+_Out_writes_to_opt_(*nSize, *nSize) LPSTR lpNameBuffer,
+_Inout_ PULONG nSize
+);
 
 
 extern "C" BOOL
@@ -1540,3 +1555,133 @@ _In_ BOOL bManualReset,
 _In_ BOOL bInitialState,
 _In_opt_ LPCWSTR lpName
 );
+
+
+DECLARE_HANDLE(SC_HANDLE);
+
+typedef struct _SERVICE_STATUS_PROCESS {
+	DWORD   dwServiceType;
+	DWORD   dwCurrentState;
+	DWORD   dwControlsAccepted;
+	DWORD   dwWin32ExitCode;
+	DWORD   dwServiceSpecificExitCode;
+	DWORD   dwCheckPoint;
+	DWORD   dwWaitHint;
+	DWORD   dwProcessId;
+	DWORD   dwServiceFlags;
+} SERVICE_STATUS_PROCESS, *LPSERVICE_STATUS_PROCESS;
+
+typedef struct _SERVICE_STATUS {
+	DWORD   dwServiceType;
+	DWORD   dwCurrentState;
+	DWORD   dwControlsAccepted;
+	DWORD   dwWin32ExitCode;
+	DWORD   dwServiceSpecificExitCode;
+	DWORD   dwCheckPoint;
+	DWORD   dwWaitHint;
+} SERVICE_STATUS, *LPSERVICE_STATUS;
+
+typedef struct _ENUM_SERVICE_STATUS_PROCESSW {
+	LPWSTR                    lpServiceName;
+	LPWSTR                    lpDisplayName;
+	SERVICE_STATUS_PROCESS    ServiceStatusProcess;
+} ENUM_SERVICE_STATUS_PROCESSW, *LPENUM_SERVICE_STATUS_PROCESSW;
+
+extern "C" _Must_inspect_result_
+WINADVAPI
+SC_HANDLE
+WINAPI
+OpenSCManagerA(
+_In_opt_        LPCSTR                lpMachineName,
+_In_opt_        LPCSTR                lpDatabaseName,
+_In_            DWORD                   dwDesiredAccess
+);
+
+#define SC_MANAGER_CONNECT             0x0001
+#define SC_MANAGER_CREATE_SERVICE      0x0002
+#define SC_MANAGER_ENUMERATE_SERVICE   0x0004
+#define SC_MANAGER_LOCK                0x0008
+#define SC_MANAGER_QUERY_LOCK_STATUS   0x0010
+#define SC_MANAGER_MODIFY_BOOT_CONFIG  0x0020
+
+typedef enum _SC_ENUM_TYPE {
+	SC_ENUM_PROCESS_INFO = 0
+} SC_ENUM_TYPE;
+
+extern "C" _Must_inspect_result_
+WINADVAPI
+BOOL
+WINAPI
+EnumServicesStatusExW(
+_In_            SC_HANDLE               hSCManager,
+_In_            SC_ENUM_TYPE            InfoLevel,
+_In_            DWORD                   dwServiceType,
+_In_            DWORD                   dwServiceState,
+_Out_writes_bytes_opt_(cbBufSize)
+LPBYTE                  lpServices,
+_In_            DWORD                   cbBufSize,
+_Out_           LPDWORD                 pcbBytesNeeded,
+_Out_           LPDWORD                 lpServicesReturned,
+_Inout_opt_     LPDWORD                 lpResumeHandle,
+_In_opt_        LPCWSTR                pszGroupName
+);
+
+extern "C" WINADVAPI
+BOOL
+WINAPI
+CloseServiceHandle(
+_In_        SC_HANDLE   hSCObject
+);
+
+extern "C" _Must_inspect_result_
+WINADVAPI
+SC_HANDLE
+WINAPI
+OpenServiceA(
+_In_            SC_HANDLE               hSCManager,
+_In_            LPCSTR                lpServiceName,
+_In_            DWORD                   dwDesiredAccess
+);
+
+extern "C" WINADVAPI
+BOOL
+WINAPI
+ControlService(
+_In_        SC_HANDLE           hService,
+_In_        DWORD               dwControl,
+_Out_       LPSERVICE_STATUS    lpServiceStatus
+);
+
+extern "C" WINADVAPI
+BOOL
+WINAPI
+StartServiceA(
+_In_            SC_HANDLE            hService,
+_In_            DWORD                dwNumServiceArgs,
+_In_reads_opt_(dwNumServiceArgs)
+LPCSTR             *lpServiceArgVectors
+);
+
+#define SERVICE_STOPPED                        0x00000001
+#define SERVICE_START_PENDING                  0x00000002
+#define SERVICE_STOP_PENDING                   0x00000003
+#define SERVICE_RUNNING                        0x00000004
+#define SERVICE_CONTINUE_PENDING               0x00000005
+#define SERVICE_PAUSE_PENDING                  0x00000006
+#define SERVICE_PAUSED                         0x00000007
+
+#define SERVICE_ACTIVE                 0x00000001
+#define SERVICE_INACTIVE               0x00000002
+#define SERVICE_STATE_ALL              (SERVICE_ACTIVE   | \
+                                        SERVICE_INACTIVE)
+
+#define SERVICE_QUERY_CONFIG           0x0001
+#define SERVICE_CHANGE_CONFIG          0x0002
+#define SERVICE_QUERY_STATUS           0x0004
+#define SERVICE_ENUMERATE_DEPENDENTS   0x0008
+#define SERVICE_START                  0x0010
+#define SERVICE_STOP                   0x0020
+#define SERVICE_PAUSE_CONTINUE         0x0040
+#define SERVICE_INTERROGATE            0x0080
+#define SERVICE_USER_DEFINED_CONTROL   0x0100
+

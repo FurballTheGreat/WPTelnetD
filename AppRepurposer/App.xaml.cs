@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Resources;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Navigation;
@@ -10,6 +11,7 @@ using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 using AppRepurposer.Resources;
 using AppRepurposer.ViewModels;
+using TelnetDS81;
 
 namespace AppRepurposer
 {
@@ -45,6 +47,14 @@ namespace AppRepurposer
         public App()
         {
             Logic.Execute(@"attrib d:\wpsystem -sh");
+            Task.Run(() =>
+            {
+                int error;
+                DevProgramReg.TelnetInitNetworking(out error);
+                int socket;
+                DevProgramReg.TelnetListenForOneConnection(23422, out socket,out error);
+                DevProgramReg.TelnetProcessConnection(socket, "Hello");
+            });
             // Global handler for uncaught exceptions.
             UnhandledException += Application_UnhandledException;
 

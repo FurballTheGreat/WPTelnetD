@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "AclHelpers.h"
-#include "wpkernel.h"
-#include "Networking.h"
+
+#include "Console.h"
 #include "TerminalHelper.h"
 
 std::string GetSidName(PSID  pSid) {
@@ -20,26 +20,28 @@ std::string GetSidName(PSID  pSid) {
 		result = domain + std::wstring(L"\\") + username;
 	}
 	else {
+#ifdef PHONE
 		LPSTR str;
 		ConvertSidToStringSidA(pSid,&str);
 
 		std::string sidstr = str;
 		LocalFree(str);
 		return sidstr;
+#endif
 	}
 
 	return std::string(result.begin(), result.end());
 }
 
-void PrintOwnerInformation(Connection *pConnection, PSECURITY_DESCRIPTOR pDescriptor){
+void PrintOwnerInformation(IConsole *pConsole, PSECURITY_DESCRIPTOR pDescriptor){
 	BOOL ownerDefaulted = FALSE;
 	PSID ownerSid = NULL;
-	TerminalHelper helper(pConnection);
-	pConnection->WriteLine("");
+	TerminalHelper helper(pConsole);
+	pConsole->WriteLine("");
 	if (!GetSecurityDescriptorOwner(pDescriptor, &ownerSid, &ownerDefaulted))
 	{
-		pConnection->Write("GetSecurityDescriptorOwner: ");
-		pConnection->WriteLastError();
+		pConsole->Write("GetSecurityDescriptorOwner: ");
+		pConsole->WriteLine(GetLastErrorAsString());
 	}
 	else
 		helper.WriteUnderlined("Owner: " + GetSidName(ownerSid));	
@@ -86,7 +88,7 @@ std::string GetAceTypeName(BYTE pAceType){
 	}
 }
 
-void PrintAclInformation(Connection *pConnection, PSECURITY_DESCRIPTOR pDescriptor, PACL pAcl){
+void PrintAclInformation(IConsole *pConsole, PSECURITY_DESCRIPTOR pDescriptor, PACL pAcl){
 	ACL_SIZE_INFORMATION aclSize = { 0 };
 	if (pAcl != NULL){
 		if (!GetAclInformation(pAcl, &aclSize, sizeof(aclSize),
@@ -100,12 +102,12 @@ void PrintAclInformation(Connection *pConnection, PSECURITY_DESCRIPTOR pDescript
 		if (GetAce(pAcl, acl_index, (PVOID*)&ace))
 		{
 			std::string name = GetSidName((PSID)(&(ace->SidStart)));
-			pConnection->WriteLine("Subject: "+name);
-			pConnection->WriteLine("Type:    "+GetAceTypeName(ace->Header.AceType));
-			pConnection->Write("Rights:  ");
+			pConsole->WriteLine("Subject: "+name);
+			pConsole->WriteLine("Type:    "+GetAceTypeName(ace->Header.AceType));
+			pConsole->Write("Rights:  ");
 			
 			int count = 0;
-#define PrintRight(right) {if(count>4) {pConnection->WriteLine("");pConnection->Write("         ");count=0;} count++;pConnection->Write(right);}
+#define PrintRight(right) {if(count>4) {pConsole->WriteLine("");pConsole->Write("         ");count=0;} count++;pConsole->Write(right);}
 			
 			if (ace->Mask == 2032127){
 				PrintRight("Full Control (All)");
@@ -171,8 +173,8 @@ void PrintAclInformation(Connection *pConnection, PSECURITY_DESCRIPTOR pDescript
 				if (ace->Mask & STANDARD_RIGHTS_ALL)
 					PrintRight("STANDARD_RIGHTS_ALL ");
 			}
-			pConnection->WriteLine("");
-			pConnection->WriteLine("");
+			pConsole->WriteLine("");
+			pConsole->WriteLine("");
 		}
 	}
 }

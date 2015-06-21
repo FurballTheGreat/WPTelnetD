@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management.Instrumentation;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Microsoft.SmartDevice.Connectivity;
+using Microsoft.SmartDevice.Connectivity.Wrapper;
 using Microsoft.SmartDevice.MultiTargeting.Connectivity;
 using Microsoft.VisualStudio.DeviceConnectivity.Interop;
 
@@ -39,7 +42,7 @@ namespace LaunchDebug
 //B2FC26AB-D6EC-4426-91FA-9E039F92A639  // SLProfiler
         public class TestServiceConnection : CcConnectionDeviceService
         {
-            public TestServiceConnection(ConnectableDevice pDeviceToConnect, Guid pProductId) :
+            public TestServiceConnection(Device pDeviceToConnect, Guid pProductId) :
                 base(
                 pDeviceToConnect,                 
                 new Guid("88B0B986-543F-4F04-8E5F-A80A7E189F11"),
@@ -209,6 +212,7 @@ namespace LaunchDebug
 
         private static void Main(string[] args)
         {
+            //var deviceds = ConnectivityWrapper12.GetDevices(CultureInfo.CreateSpecificCulture("en-us").LCID).ToArray();
             //var ss = new WpPowerToolsService(WpPowerToolsService.Devices.First());
             //ss.StartWAppVerifier("blah");
             //Console.ReadLine();
@@ -228,7 +232,8 @@ namespace LaunchDebug
           //    PrintPath("", @"\DATA\SharedData\PhoneTools", deb.CcConnection4);{EA163CC8-8B9B-49A5-A3AB-4BFDAFD818DF}
         
            var deb = new DebugConnectionService(WpPowerToolsService.Devices.First());
-            deb.CcConnection3.LaunchApplication("{178ac8a1-6519-4a0b-960c-038393741e96}");
+            deb.DeleteFile(@"c:\windows\wptd.exe");
+            // deb.CcConnection3.LaunchApplication("{178ac8a1-6519-4a0b-960c-038393741e96}");
            deb.DebugLaunch("wptd.exe", new Guid("{F9D14EFD-32F4-4015-B4C7-6D807FD12B38}"));
           Console.ReadLine();
         ////    PrintPath("", @"\DATA\SharedData\PhoneTools", deb.CcConnection4);

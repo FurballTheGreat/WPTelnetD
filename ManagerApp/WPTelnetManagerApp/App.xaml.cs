@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Windows.Storage.Pickers;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 
@@ -63,6 +64,7 @@ namespace WPTelnetManager
         // This code will not execute when the application is reactivated
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
+       
         }
 
         // Code to execute when the application is activated (brought to foreground)

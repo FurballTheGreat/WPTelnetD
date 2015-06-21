@@ -29,10 +29,22 @@
 #include <list>
 
 
-
+#ifdef PHONE
 #include<WPKernel.h>
 #include<WPInetAPI.h>
 #include<WPShellChromeAPI.h>
 #include<WPIPHldAPI.h>
+#endif
+
+#ifndef PHONE
+#define SECURITY_WIN32 
+#include "Wininet.h"
+#include "Iphlpapi.h"
+#include "WTypes.h"
+#include "TlHelp32.h"
+#include "Wincrypt.h"
+#include "Aclapi.h"
+#include "Security.h"
+#endif
 
 #include<vector>

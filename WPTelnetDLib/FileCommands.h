@@ -3,61 +3,61 @@
 #include "pch.h"
 #include<string>
 #include "CommandProcessor.h"
-#include "Networking.h"
+#include "Console.h"
 
 
-class BaseFileCommand : BaseCommand {
+class BaseFileCommand : Command {
 protected:
-	virtual void ProcessFile(Connection *pConnection, WIN32_FIND_DATAA pFileInfo, string pFileName) = 0;
-	virtual bool ProcessCommandLine(Connection *pConnection, ParsedCommandLine *pCmdLine) = 0;
-	virtual bool PrintSyntax(Connection *pConnection) = 0;
+	virtual void ProcessFile(IConsole *pConsole, WIN32_FIND_DATAA pFileInfo, string pFileName) = 0;
+	virtual bool ProcessCommandLine(IConsole *pConsole, ParsedCommandLine *pCmdLine) = 0;
+	virtual bool PrintSyntax(IConsole *pConsole) = 0;
 public:
 	BaseFileCommand();
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	virtual string GetName() = 0;
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	virtual CommandInfo GetInfo() = 0;
 };
 
 class ListAclsCommand : BaseFileCommand {
 protected:
-	void ProcessFile(Connection *pConnection, WIN32_FIND_DATAA pFileInfo, string pFileName);
-	bool ProcessCommandLine(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	bool PrintSyntax(Connection *pConnection);
+	void ProcessFile(IConsole *pConsole, WIN32_FIND_DATAA pFileInfo, string pFileName);
+	bool ProcessCommandLine(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	bool PrintSyntax(IConsole *pConsole);
 public:
-	string GetName();
+	CommandInfo GetInfo();
 };
 
-class TypeCommand : BaseCommand {
+class TypeCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
-};
-
-
-
-class CopyCommand : BaseCommand {
-public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
-};
-
-
-class DeleteCommand : BaseCommand {
-public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
 
 
-class MoveCommand : BaseCommand {
+class CopyCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };
 
 
-class AttribCommand : BaseCommand {
+class DeleteCommand : Command {
 public:
-	void ProcessCommand(Connection *pConnection, ParsedCommandLine *pCmdLine);
-	string GetName();
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
+};
+
+
+
+class MoveCommand : Command {
+public:
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
+};
+
+
+class AttribCommand : Command {
+public:
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
 };

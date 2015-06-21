@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using Microsoft.SmartDevice.Connectivity;
 using Microsoft.SmartDevice.MultiTargeting.Connectivity;
 
 namespace LaunchDebug
@@ -8,7 +9,7 @@ namespace LaunchDebug
     public class WpPowerToolsService : CcConnectionDeviceService
     {
         public WpPowerToolsService(
-            ConnectableDevice pDeviceToConnect) : base(
+            Device pDeviceToConnect) : base(
             pDeviceToConnect,
             new Guid("280D7035-D88D-47CF-A90C-2B19717B5C34"), 
             new Guid("C48B1B43-A833-41F7-9E76-47AC1513E7F6"))

@@ -142,6 +142,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="NdtkClient.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SplashScreenImage.jpg" />
     <Content Include="Assets\AlignmentGrid.png" />
     <Content Include="Assets\ApplicationIcon.png">

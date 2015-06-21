@@ -11,7 +11,7 @@
 #include<vector>
 #include<string>
 #include "TelnetD.h"
-#include "Networking.h"
+#include "Connection.h"
 #include "CommandProcessor.h"
 #include "Commands.h"
 
@@ -29,7 +29,7 @@ int main(int args, char *argv[]){
 
 	SOCKET socket;
 
-	if (ListenForOneConnection(27249, &socket, &wsaError)){
+	if (ListenForOneConnection(27248, &socket, &wsaError,NULL)){
 		printf("Failed to to accept connection (WSAError: %d)", wsaError);
 		ShutDownNetworking();
 		return 1;
@@ -37,13 +37,12 @@ int main(int args, char *argv[]){
 
 	string str = "Arguments:\n";
 	for (int i = 0; i < args; i++){
-		char buf[1024];
-		sprintf_s(buf, "%s ", argv[i]);
-		str = str + buf;
+		str += string(argv[i]) + " ";
+		
 	}
-	char *msg = strdup(str.c_str());
-	ProcessConnection(socket,msg );
-	free(msg);
+	
+	ProcessConnection(socket,(char*)str.c_str());
+	;
 
 	ShutDownNetworking();	
 }
