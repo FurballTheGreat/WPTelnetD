@@ -36,3 +36,10 @@ public:
 	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
 	CommandInfo GetInfo();
 };
+
+
+class BackgroundCommand : Command {
+public:
+	void ProcessCommand(IConsole *pConsole, ParsedCommandLine *pCmdLine);
+	CommandInfo GetInfo();
+};

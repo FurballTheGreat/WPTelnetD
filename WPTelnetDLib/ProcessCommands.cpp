@@ -192,3 +192,52 @@ void CreateProcessInChamberCommand::ProcessCommand(IConsole *pConsole, ParsedCom
 CommandInfo CreateProcessInChamberCommand::GetInfo() {
 	return CommandInfo("execchamber", "<sid|app> <id> <exe> [params]", "Execute process in chamber.");
 }
+
+void BackgroundCommand::ProcessCommand(IConsole * pConsole, ParsedCommandLine * pCmdLine)
+{
+
+	if (pCmdLine->GetArgs().size() < 2)
+	{
+		pConsole->WriteLine("Must at least specify a path to a binary.");
+		return;
+	}
+
+	auto line = pCmdLine->GetParametersAsLine();
+	auto lin = line.GetRaw();
+
+	PROCESS_INFORMATION processInfo;
+	STARTUPINFOA startInfo;
+	BOOL isSuccess = FALSE;
+
+	ZeroMemory(&processInfo, sizeof(PROCESS_INFORMATION));
+	ZeroMemory(&startInfo, sizeof(STARTUPINFOA));
+
+	startInfo.cb = sizeof(STARTUPINFOA);
+
+	
+	isSuccess = CreateProcessA(
+		NULL,
+		(char*)lin.c_str(),
+		NULL,
+		NULL,
+		TRUE,
+		0x00000010,
+		NULL,
+		NULL,
+		(LPSTARTUPINFOA)&startInfo,
+		(LPPROCESS_INFORMATION)&processInfo);
+
+	if (!isSuccess) {
+		pConsole->WriteLine(GetLastErrorAsString());
+		
+	}
+	else
+	{
+		pConsole->WriteLine("PID = %d", processInfo.dwProcessId);
+	}
+}
+
+CommandInfo BackgroundCommand::GetInfo()
+{
+	return CommandInfo("bg", "<commandpath> [param1] [param2] ...", "Runs a process in the background.");
+}

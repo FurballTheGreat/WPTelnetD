@@ -6,6 +6,8 @@
 
 #include<thread>
 #include "TelnetD.h"
+#include "ListenSocket.h"
+#include "FileHelpers.h"
 
 
 using namespace std;
@@ -189,8 +191,10 @@ void ProcessConnectionThread(SOCKET pClient)
 	ProcessConnection(pClient, (char*)"Welcome!");
 }
 
+
 DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
 {
+	//ExecuteCommand("runfrom file://c:\\autoexec.bat");
 	int wsaError;
 	if (!InitNetworking(&wsaError)) {
 		printf("Failed to initialise networking (WSAError: %d)", wsaError);
@@ -201,27 +205,23 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
 	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
 	//  Periodically check if the service has been requested to stop
+	ListenSocket *listener = new ListenSocket(27247);
+
+	if (!listener->Start()) {
+		printf("Failed to listen\n");
+		return 1;
+	}
+
 	while (WaitForSingleObject(g_ServiceStopEvent, 0) != WAIT_OBJECT_0)
 	{
-
-
-		SOCKET socket;
-
-		switch(ListenForOneConnection(27247, &socket, &wsaError, &timeout)){
-		case ERROR_SUCCESS:
-			if (socket != INVALID_SOCKET)
-				thread *processThread = new thread(ProcessConnectionThread, socket);
-			break;
-		case 2:
-			break;
-		default:
-			printf("Failed to to accept connection (WSAError: %d)", wsaError);
-			ShutDownNetworking();
-			return 1;
-		}
-
-		
+		auto socket = listener->Accept(&timeout);
+		if (socket != INVALID_SOCKET) {
+			thread *processThread = new thread(ProcessConnectionThread, socket);
+		}						
 	}
+
+	listener->Stop();
+	delete listener;
 	ShutDownNetworking();
 	return ERROR_SUCCESS;
 }

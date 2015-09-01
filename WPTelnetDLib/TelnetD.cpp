@@ -78,6 +78,7 @@ CommandProcessor* CreateProcessor(IExecutionContext *pExecutionContext, ExitComm
 	commands->push_back((Command*)new DownloadCommand());
 	commands->push_back((Command*)new PsCommand());
 	commands->push_back((Command*)new KillCommand());
+	commands->push_back((Command*)new BackgroundCommand());
 	commands->push_back((Command*)new NetstatCommand());
 	commands->push_back((Command*)new PostMessageCommand());
 	commands->push_back((Command*)new EnumWindowsCommand());

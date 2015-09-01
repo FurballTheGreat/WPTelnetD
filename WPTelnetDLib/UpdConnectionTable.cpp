@@ -20,12 +20,12 @@ UdpConnectionEntry::UdpConnectionEntry(PMIB_UDPROW_OWNER_MODULE pUdpRow) {
 	char szRemoteAddr[128];
 
 	struct in_addr IpAddr;
-	IpAddr.S_un.S_addr = (u_long) pUdpRow->dwLocalAddr;
+	IpAddr.S_un.S_addr = static_cast<u_long>(pUdpRow->dwLocalAddr);
 	strcpy_s(szLocalAddr, sizeof (szLocalAddr), inet_ntoa(IpAddr));
-	_localPort = ntohs((u_short)pUdpRow->dwLocalPort);
+	_localPort = ntohs(static_cast<u_short>(pUdpRow->dwLocalPort));
 	_localHost = szLocalAddr;
 	_ownerPID = pUdpRow->dwOwningPid;
-	PTCPIP_OWNER_MODULE_BASIC_INFO  info = (PTCPIP_OWNER_MODULE_BASIC_INFO)malloc(1000);
+	PTCPIP_OWNER_MODULE_BASIC_INFO  info = static_cast<PTCPIP_OWNER_MODULE_BASIC_INFO>(malloc(1000));
 	 DWORD size = 1000;
 	 memset(info,0, 1000);
 	DWORD err= GetOwnerModuleFromUdpEntry(pUdpRow,  TCPIP_OWNER_MODULE_INFO_BASIC,info, &size);

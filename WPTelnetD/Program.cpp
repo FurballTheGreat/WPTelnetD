@@ -29,7 +29,7 @@ int main(int args, char *argv[]){
 
 	SOCKET socket;
 
-	if (ListenForOneConnection(27248, &socket, &wsaError,NULL)){
+	if (ListenForOneConnection(27249, &socket, &wsaError,NULL)){
 		printf("Failed to to accept connection (WSAError: %d)", wsaError);
 		ShutDownNetworking();
 		return 1;

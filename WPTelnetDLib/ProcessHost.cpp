@@ -68,11 +68,15 @@ void ProcessHost::WriteToPipe(IConsole *pConsole, HANDLE pHandle)
 
 	for (bool isSuccess = true;isSuccess;)
 	{ 
-		auto read = pConsole->ReadLine()+"\n";
+		try {
+			auto read = pConsole->ReadLine() + "\n";
+			isSuccess = WriteFile(pHandle, read.c_str(), read.length(), &bytesWritten, NULL);
+		}
+		catch (DWORD err) {
+			break;
+		}
 		
 		
-		
-		isSuccess = WriteFile(pHandle,read.c_str(), read.length(), &bytesWritten, NULL);
 	} 
 
 	if (!CloseHandle(pHandle)) 
@@ -87,10 +91,15 @@ void ProcessHost::ReadFromPipe(IConsole *pConsole, HANDLE pHandle)
 
 	for (bool isSuccess = true; isSuccess;)
 	{ 
-		isSuccess = ReadFile( pHandle, characterBuffer, sizeof(characterBuffer), &bytesRead, NULL);
-		if(!isSuccess || !bytesRead) break; 
+		try {
+			isSuccess = ReadFile( pHandle, characterBuffer, sizeof(characterBuffer), &bytesRead, NULL);
+			if(!isSuccess || !bytesRead) break; 
 
-		isSuccess = pConsole->Write(bytesRead,(BYTE*)characterBuffer);
+			isSuccess = pConsole->Write(bytesRead,(BYTE*)characterBuffer);
+		}
+		catch (DWORD err) {
+			break;
+		}
 	} 
 } 
 

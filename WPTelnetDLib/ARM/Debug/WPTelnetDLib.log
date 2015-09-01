@@ -1,48 +1,81 @@
-﻿  UpdConnectionTable.cpp
-C:\personalwork\WpTelnetDVCS\WPTelnetD\Include\WPKernel.h(480): warning C4141: 'dllimport' : used more than once
-C:\personalwork\WpTelnetDVCS\WPTelnetD\Include\WPKernel.h(500): warning C4141: 'dllimport' : used more than once
-UpdConnectionTable.cpp(20): warning C4101: 'szRemoteAddr' : unreferenced local variable
-  TelnetD.cpp
-TelnetD.cpp(179): warning C4101: 'error' : unreferenced local variable
-  TcpConnectionTable.cpp
-  ServiceControl.cpp
-  ServiceCommands.cpp
-  RegistryCommands.cpp
-RegistryCommands.cpp(98): warning C4305: 'argument' : truncation from 'int' to 'char'
-RegistryCommands.cpp(98): warning C4309: 'argument' : truncation of constant value
-RegistryCommands.cpp(115): warning C4129: 'P' : unrecognized character escape sequence
-RegistryCommands.cpp(115): warning C4129: 'V' : unrecognized character escape sequence
-RegistryCommands.cpp(205): warning C4800: 'DWORD' : forcing value to bool 'true' or 'false' (performance warning)
-RegistryCommands.cpp(367): warning C4018: '<' : signed/unsigned mismatch
-RegistryCommands.cpp(413): warning C4018: '<' : signed/unsigned mismatch
-RegistryCommands.cpp(589): warning C4101: 'u' : unreferenced local variable
-RegistryCommands.cpp(903): warning C4018: '<' : signed/unsigned mismatch
-RegistryCommands.cpp(909): warning C4018: '<' : signed/unsigned mismatch
-RegistryCommands.cpp(925): warning C4018: '<' : signed/unsigned mismatch
-RegistryCommands.cpp(945): warning C4018: '<' : signed/unsigned mismatch
-  ProcessHost.cpp
-ProcessHost.cpp(75): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-ProcessHost.cpp(90): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-ProcessHost.cpp(84): warning C4101: 'bytesWritten' : unreferenced local variable
-c:\personalwork\wptelnetdvcs\wptelnetd\wptelnetdlib\processhost.cpp(63): warning C4715: 'ProcessHost::CreateChildProcess' : not all control paths return a value
-  ProcessCommands.cpp
-ProcessCommands.cpp(42): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-ProcessCommands.cpp(73): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-  pch.cpp
-  NetworkCommands.cpp
-NetworkCommands.cpp(140): warning C4018: '<' : signed/unsigned mismatch
-  GuiCommands.cpp
-  FileHelpers.cpp
-FileHelpers.cpp(61): warning C4101: 'size' : unreferenced local variable
-  FileCommands.cpp
-  ExperimentalCommands.cpp
-  DirectoryCommands.cpp
-  Commands.cpp
-Commands.cpp(107): warning C4018: '<' : signed/unsigned mismatch
-Commands.cpp(141): warning C4018: '<' : signed/unsigned mismatch
-  CertCommands.cpp
-CertCommands.cpp(17): warning C4102: 'std' : unreferenced label
-  AclHelpers.cpp
-c:\personalwork\wptelnetdvcs\wptelnetd\wptelnetdlib\aclhelpers.cpp(89): warning C4715: 'GetAceTypeName' : not all control paths return a value
-pch.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
-  WPTelnetDLib.vcxproj -> C:\personalwork\WpTelnetDVCS\WPTelnetD\ARM\Debug\WPTelnetDLib\WPTelnetDLib.lib
+﻿Build started 14/08/2015 00:59:22.
+     1>Project "C:\personalwork\WpTelnetDVCS\WPTelnetD\WPTelnetDLib\WPTelnetDLib.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\CL.exe /c /Zi /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D PHONE /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /D WINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"pch.h" /Fp"ARM\Debug\WPTelnetDLib.pch" /Fo"ARM\Debug\\" /Fd"ARM\Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt AclHelpers.cpp CertCommands.cpp Commands.cpp DirectoryCommands.cpp ExperimentalCommands.cpp FileCommands.cpp FileHelpers.cpp GuiCommands.cpp NetworkCommands.cpp ProcessCommands.cpp ProcessHost.cpp Registry.cpp RegistryCommands.cpp ServiceCommands.cpp ServiceControl.cpp TcpConnectionTable.cpp TelnetD.cpp UpdConnectionTable.cpp pch.cpp
+         pch.cpp
+     1>C:\personalwork\WpTelnetDVCS\WPTelnetD\Include\WPKernel.h(480): warning C4141: 'dllimport' : used more than once
+     1>C:\personalwork\WpTelnetDVCS\WPTelnetD\Include\WPKernel.h(500): warning C4141: 'dllimport' : used more than once
+         UpdConnectionTable.cpp
+     1>UpdConnectionTable.cpp(20): warning C4101: 'szRemoteAddr' : unreferenced local variable
+         TelnetD.cpp
+     1>TelnetD.cpp(180): warning C4101: 'error' : unreferenced local variable
+         TcpConnectionTable.cpp
+         ServiceControl.cpp
+         ServiceCommands.cpp
+         RegistryCommands.cpp
+     1>RegistryCommands.cpp(98): warning C4305: 'argument' : truncation from 'int' to 'char'
+     1>RegistryCommands.cpp(98): warning C4309: 'argument' : truncation of constant value
+     1>RegistryCommands.cpp(115): warning C4129: 'P' : unrecognized character escape sequence
+     1>RegistryCommands.cpp(115): warning C4129: 'V' : unrecognized character escape sequence
+     1>RegistryCommands.cpp(205): warning C4800: 'DWORD' : forcing value to bool 'true' or 'false' (performance warning)
+     1>RegistryCommands.cpp(367): warning C4018: '<' : signed/unsigned mismatch
+     1>RegistryCommands.cpp(413): warning C4018: '<' : signed/unsigned mismatch
+     1>RegistryCommands.cpp(589): warning C4101: 'u' : unreferenced local variable
+     1>RegistryCommands.cpp(903): warning C4018: '<' : signed/unsigned mismatch
+     1>RegistryCommands.cpp(909): warning C4018: '<' : signed/unsigned mismatch
+     1>RegistryCommands.cpp(925): warning C4018: '<' : signed/unsigned mismatch
+     1>RegistryCommands.cpp(945): warning C4018: '<' : signed/unsigned mismatch
+         Registry.cpp
+         ProcessHost.cpp
+     1>ProcessHost.cpp(73): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+     1>ProcessHost.cpp(75): warning C4101: 'err' : unreferenced local variable
+     1>ProcessHost.cpp(95): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+     1>ProcessHost.cpp(88): warning C4101: 'bytesWritten' : unreferenced local variable
+     1>ProcessHost.cpp(100): warning C4101: 'err' : unreferenced local variable
+     1>c:\personalwork\wptelnetdvcs\wptelnetd\wptelnetdlib\processhost.cpp(63): warning C4715: 'ProcessHost::CreateChildProcess' : not all control paths return a value
+         ProcessCommands.cpp
+     1>ProcessCommands.cpp(42): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+     1>ProcessCommands.cpp(73): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+         NetworkCommands.cpp
+     1>NetworkCommands.cpp(140): warning C4018: '<' : signed/unsigned mismatch
+         GuiCommands.cpp
+         FileHelpers.cpp
+     1>FileHelpers.cpp(61): warning C4101: 'size' : unreferenced local variable
+         FileCommands.cpp
+         ExperimentalCommands.cpp
+         DirectoryCommands.cpp
+         Commands.cpp
+     1>Commands.cpp(107): warning C4018: '<' : signed/unsigned mismatch
+     1>Commands.cpp(141): warning C4018: '<' : signed/unsigned mismatch
+         CertCommands.cpp
+     1>CertCommands.cpp(17): warning C4102: 'std' : unreferenced label
+         AclHelpers.cpp
+     1>c:\personalwork\wptelnetdvcs\wptelnetd\wptelnetdlib\aclhelpers.cpp(89): warning C4715: 'GetAceTypeName' : not all control paths return a value
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\WPSDK\WP80\bin\x86_arm\Lib.exe /OUT:"C:\personalwork\WpTelnetDVCS\WPTelnetD\ARM\Debug\WPTelnetDLib\WPTelnetDLib.lib" /NOLOGO /MACHINE:ARM ARM\Debug\AclHelpers.obj
+         ARM\Debug\CertCommands.obj
+         ARM\Debug\Commands.obj
+         ARM\Debug\DirectoryCommands.obj
+         ARM\Debug\ExperimentalCommands.obj
+         ARM\Debug\FileCommands.obj
+         ARM\Debug\FileHelpers.obj
+         ARM\Debug\GuiCommands.obj
+         ARM\Debug\NetworkCommands.obj
+         ARM\Debug\pch.obj
+         ARM\Debug\ProcessCommands.obj
+         ARM\Debug\ProcessHost.obj
+         ARM\Debug\Registry.obj
+         ARM\Debug\RegistryCommands.obj
+         ARM\Debug\ServiceCommands.obj
+         ARM\Debug\ServiceControl.obj
+         ARM\Debug\TcpConnectionTable.obj
+         ARM\Debug\TelnetD.obj
+         ARM\Debug\UpdConnectionTable.obj
+     1>Registry.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+     1>pch.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+         WPTelnetDLib.vcxproj -> C:\personalwork\WpTelnetDVCS\WPTelnetD\ARM\Debug\WPTelnetDLib\WPTelnetDLib.lib
+     1>Done Building Project "C:\personalwork\WpTelnetDVCS\WPTelnetD\WPTelnetDLib\WPTelnetDLib.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.12

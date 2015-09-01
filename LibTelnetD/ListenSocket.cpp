@@ -56,7 +56,7 @@ SOCKET ListenSocket::Accept(timeval *pTimeout) {
 	{
 		int fromlen = sizeof(from);
 		client = accept(_socket,
-			(struct sockaddr*)&from, &fromlen);
+			reinterpret_cast<struct sockaddr*>(&from), &fromlen);
 		return client;
 	}
 	return INVALID_SOCKET;

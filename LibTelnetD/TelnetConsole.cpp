@@ -9,8 +9,7 @@ TelnetConsole::TelnetConsole(TelnetSession  *pSession)
 	Init();
 	pSession->SetSizeChangedHandler([&](int pWidth, int pHeight) {
 		SetSize(pWidth,pHeight);
-	});
-	
+	});	
 }
 
 void TelnetConsole::Init()

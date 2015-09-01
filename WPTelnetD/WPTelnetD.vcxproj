@@ -177,8 +177,8 @@ copy "$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)\wptd.exe"
       <AdditionalDependencies>ws2_32.lib;sechost.lib;crypt32.lib;ntmarta.lib;sspicli.lib;wininet.lib;iphlpapi.lib;kernelbase.lib;kernel32legacy.lib;shellchromeapi.lib;secruntime.lib;advapi32Legacy.lib;MinUser.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>Signtool sign /ph /fd sha256 /v /s MY /n "XDA" /t http://timestamp.verisign.com/scripts/timstamp.dll "$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)\wptd.exe"
-copy "$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)\wptd.exe" $(SolutionDir)wptd.exe</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
